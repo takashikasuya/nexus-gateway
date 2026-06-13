@@ -15,6 +15,11 @@ public record Config(
     double pollInterval,
     double writeTimeout
 ) {
+    public Config {
+        if (pollInterval <= 0)  throw new IllegalArgumentException("pollInterval must be positive, got " + pollInterval);
+        if (writeTimeout <= 0)  throw new IllegalArgumentException("writeTimeout must be positive, got " + writeTimeout);
+    }
+
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     public static Config fromEnv() throws Exception {

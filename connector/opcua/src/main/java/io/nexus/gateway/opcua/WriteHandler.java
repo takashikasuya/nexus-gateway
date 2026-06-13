@@ -75,14 +75,20 @@ public class WriteHandler {
         }
 
         long timeoutMs = (long) (cfg.writeTimeout() * 1000);
-        Future<Void> future = writeExecutor.submit(() -> {
-            if (pt.methodNodeId() != null) {
-                client.callMethod(cmd.localId(), pt.methodNodeId(), cmd.value());
-            } else {
-                client.writeNode(cmd.localId(), cmd.value());
-            }
-            return null;
-        });
+        Future<Void> future;
+        try {
+            future = writeExecutor.submit(() -> {
+                if (pt.methodNodeId() != null) {
+                    client.callMethod(cmd.localId(), pt.methodNodeId(), cmd.value());
+                } else {
+                    client.writeNode(cmd.localId(), cmd.value());
+                }
+                return null;
+            });
+        } catch (RejectedExecutionException ex) {
+            log.warn("opcua: write executor unavailable for {} control_id={}", cmd.localId(), cmd.controlId());
+            return new WriteReply(false, "device_error: executor_shutdown");
+        }
 
         try {
             future.get(timeoutMs, TimeUnit.MILLISECONDS);
@@ -98,14 +104,23 @@ public class WriteHandler {
             return new WriteReply(false, "device_error: " + cause.getMessage());
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
-            return new WriteReply(false, "timeout");
+            return new WriteReply(false, "interrupted");
         }
     }
 
     private void evictIfNeeded() {
+        // Skip IN_FLIGHT sentinels — evicting them breaks the TOCTOU-safe idempotency guarantee.
         while (dedup.size() > DEDUP_MAX) {
-            String oldest = dedup.keys().nextElement();
-            dedup.remove(oldest);
+            boolean removed = false;
+            for (Map.Entry<String, WriteReply> entry : dedup.entrySet()) {
+                if (!IN_FLIGHT.equals(entry.getValue().response())) {
+                    if (dedup.remove(entry.getKey(), entry.getValue())) {
+                        removed = true;
+                        break;
+                    }
+                }
+            }
+            if (!removed) break; // only sentinels remain; don't evict
         }
     }
 
