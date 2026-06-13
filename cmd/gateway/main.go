@@ -45,6 +45,7 @@ func main() {
 	provURL := flag.String("provisioning-url", envOrDefault("PROVISIONING_URL", ""), "Provisioning API base URL (empty = fixture only)")
 	sfDB := flag.String("sf-db", envOrDefault("SF_DB", "data/storeforward.db"), "Store-and-Forward SQLite database path")
 	sfCap := flag.Int("sf-cap", 100_000, "Store-and-Forward ring buffer capacity (frames)")
+	devSim := flag.Bool("dev-sim", envOrDefault("DEV_SIM", "") == "true", "Run an in-process sim connector (dev/smoke only, non-production; ADR-0001)")
 	flag.Parse()
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -175,18 +176,13 @@ func main() {
 		}
 	}()
 
-	// Register sim connector in the lifecycle registry so the Admin UI can show it.
-	// The sim connector runs as an in-process goroutine (no container), so ContainerID
-	// stays empty and Docker inspection is skipped in Snapshot.
-	connRegistry.Register(lifecycle.ConnectorSpec{ID: "sim-01", Image: "sim:dev"})
-	connRegistry.SetRunning("sim-01", "", true)
-
-	// Start sim connector
-	connector := sim.New("sim-01", js, 5*time.Second, []sim.Point{
-		{LocalID: "sim://ahu-01/supply_air_temp", DeviceRef: "sim://ahu-01", Unit: "Cel", BaseValue: 22.0, Amplitude: 3.0},
-		{LocalID: "sim://ahu-01/fan_run", DeviceRef: "sim://ahu-01", Unit: "", BaseValue: 1.0, Amplitude: 0.0},
-	})
-	go connector.Run(ctx)
+	// The in-process sim connector is dev/smoke only and off by default: the
+	// default build runs no in-process connector, keeping connector isolation
+	// (ADR-0001). Real protocol simulators (EP-009) supersede it.
+	if *devSim {
+		slog.Warn("dev-sim enabled — in-process sim connector running (non-production, ADR-0001)")
+		startDevSim(ctx, js, connRegistry, 5*time.Second)
+	}
 
 	slog.Info("gateway started", "gateway_id", *gatewayID, "nats", *natsURL, "bos", *bosAddr)
 
@@ -205,6 +201,19 @@ func main() {
 	}
 	pumpWg.Wait()
 	buf.Close()
+}
+
+// startDevSim registers and runs the in-process sim connector (dev/smoke only).
+// It is invoked only under --dev-sim; the connector runs as a goroutine (no
+// container), so its ContainerID stays empty and Docker inspection is skipped.
+func startDevSim(ctx context.Context, js jetstream.JetStream, reg *lifecycle.Registry, interval time.Duration) {
+	reg.Register(lifecycle.ConnectorSpec{ID: "sim-01", Image: "sim:dev"})
+	reg.SetRunning("sim-01", "", true)
+	connector := sim.New("sim-01", js, interval, []sim.Point{
+		{LocalID: "sim://ahu-01/supply_air_temp", DeviceRef: "sim://ahu-01", Unit: "Cel", BaseValue: 22.0, Amplitude: 3.0},
+		{LocalID: "sim://ahu-01/fan_run", DeviceRef: "sim://ahu-01", Unit: "", BaseValue: 1.0, Amplitude: 0.0},
+	})
+	go connector.Run(ctx)
 }
 
 func loadFixtureEntries(path string) ([]pointlist.Entry, error) {
