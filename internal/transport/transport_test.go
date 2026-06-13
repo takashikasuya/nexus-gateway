@@ -13,6 +13,7 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -66,8 +67,36 @@ func TestTLSHandshakeFailsWithUntrustedCA(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ClientCredentials: %v", err)
 	}
-	if err := dialAndGreet(t, addr, creds); err == nil {
+	err = dialAndGreet(t, addr, creds)
+	if err == nil {
 		t.Fatal("expected handshake failure against untrusted CA, got nil")
+	}
+	// Assert it failed at certificate verification, not for an unrelated reason
+	// (refused/timeout) — otherwise a skipped-verification regression would pass.
+	if !strings.Contains(err.Error(), "certificate") {
+		t.Fatalf("want a certificate-verification error, got: %v", err)
+	}
+}
+
+func TestTLSHandshakeFailsOnServerNameMismatch(t *testing.T) {
+	ca := newTestCA(t)
+	dir := t.TempDir()
+	caPath := writePEM(t, dir, "ca.pem", ca.certPEM)
+	srvCert := ca.issue(t, "localhost", false) // SAN = localhost
+
+	addr := startTLSGreeter(t, srvCert, nil)
+
+	// Trust the CA but verify against the wrong name → SAN mismatch.
+	creds, err := ClientCredentials(Config{CAFile: caPath, ServerName: "wrong.example"})
+	if err != nil {
+		t.Fatalf("ClientCredentials: %v", err)
+	}
+	err = dialAndGreet(t, addr, creds)
+	if err == nil {
+		t.Fatal("expected SAN-mismatch failure, got nil")
+	}
+	if !strings.Contains(err.Error(), "certificate") {
+		t.Fatalf("want a certificate (hostname) verification error, got: %v", err)
 	}
 }
 
@@ -82,9 +111,19 @@ func TestMTLSRequiresClientCert(t *testing.T) {
 	addr := startTLSGreeter(t, srvCert, ca.pool()) // require + verify client cert
 
 	// Client without a cert → rejected.
-	noCert, _ := ClientCredentials(Config{CAFile: caPath, ServerName: "localhost"})
-	if err := dialAndGreet(t, addr, noCert); err == nil {
+	noCert, err := ClientCredentials(Config{CAFile: caPath, ServerName: "localhost"})
+	if err != nil {
+		t.Fatalf("ClientCredentials(no client cert): %v", err)
+	}
+	rejErr := dialAndGreet(t, addr, noCert)
+	if rejErr == nil {
 		t.Fatal("expected mTLS rejection without client cert, got nil")
+	}
+	// The server requires a client cert and aborts the handshake; depending on
+	// timing the client surfaces this as a TLS alert or a reset/broken-pipe write
+	// error — but never as a hang. Assert it was a prompt rejection, not a timeout.
+	if strings.Contains(rejErr.Error(), "context deadline") || strings.Contains(rejErr.Error(), "DeadlineExceeded") {
+		t.Fatalf("expected a prompt mTLS rejection, got a timeout: %v", rejErr)
 	}
 
 	// Client with a CA-issued cert → accepted.
@@ -115,11 +154,10 @@ func TestMissingCAFileErrors(t *testing.T) {
 	}
 }
 
-// ── greeter test server using the generated proto's GatewayEgress (Hello RPC) ──
-// We use a trivial unary call shape via the GatewayIngress StreamTelemetry? No —
-// use a minimal hand-rolled server registered on grpc for any method. Simpler:
-// register the GatewayEgress service is bidi; instead we just open the stream and
-// rely on the TLS handshake completing/failing during connection establishment.
+// ── greeter test server ───────────────────────────────────────────────────────
+// A minimal GatewayIngress server. The RPC body is irrelevant; dialAndGreet sends
+// one frame and closes so the TLS handshake is actually forced to complete (or
+// fail), since grpc.NewClient dials lazily.
 
 type greeter struct {
 	pb.UnimplementedGatewayIngressServer

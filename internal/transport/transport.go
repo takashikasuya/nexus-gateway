@@ -40,6 +40,11 @@ type Config struct {
 // ClientCredentials builds the gRPC transport credentials described by cfg.
 func ClientCredentials(cfg Config) (credentials.TransportCredentials, error) {
 	if cfg.Insecure {
+		// Refuse a contradictory config rather than silently dropping to plaintext
+		// while TLS material is present — that would ship cleartext believing it was mTLS.
+		if cfg.CAFile != "" || cfg.CertFile != "" || cfg.KeyFile != "" || cfg.ServerName != "" {
+			return nil, fmt.Errorf("transport: Insecure set together with TLS material (CA/cert/key/serverName)")
+		}
 		return insecure.NewCredentials(), nil
 	}
 
