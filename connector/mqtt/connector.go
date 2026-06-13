@@ -68,7 +68,7 @@ type Connector struct {
 	readyOnce sync.Once
 	ready     chan struct{}
 	dedupMu   sync.Mutex
-	dedup     map[string]WriteReply
+	dedup     map[string]*WriteReply // nil value = in-flight (reserved); non-nil = completed
 }
 
 func New(cfg Config, nc *nats.Conn, js jetstream.JetStream) *Connector {
@@ -77,7 +77,7 @@ func New(cfg Config, nc *nats.Conn, js jetstream.JetStream) *Connector {
 		nc:    nc,
 		js:    js,
 		ready: make(chan struct{}),
-		dedup: make(map[string]WriteReply),
+		dedup: make(map[string]*WriteReply),
 	}
 }
 
@@ -110,7 +110,21 @@ func (c *Connector) Run(ctx context.Context) {
 
 	subject := "evt.mqtt." + c.cfg.ConnectorID
 
-	cm, err := autopaho.NewConnection(ctx, autopaho.ClientConfig{
+	// Register write handler before starting the connection so it is live before
+	// readyOnce fires (OnConnectionUp runs on autopaho's internal goroutine).
+	var cm *autopaho.ConnectionManager
+	sub, err := c.nc.Subscribe("cmd.mqtt."+c.cfg.ConnectorID, func(msg *nats.Msg) {
+		// Each write runs in its own goroutine so the NATS dispatch goroutine is
+		// never blocked by the up-to-8 s cm.Publish call.
+		go c.handleWrite(ctx, cm, topicMap, msg)
+	})
+	if err != nil {
+		slog.Error("mqtt: write handler subscribe failed", "err", err)
+		return
+	}
+	defer sub.Unsubscribe()
+
+	cm, err = autopaho.NewConnection(ctx, autopaho.ClientConfig{
 		ServerUrls:                    []*url.URL{brokerURL},
 		KeepAlive:                     c.cfg.KeepAlive,
 		CleanStartOnInitialConnection: false,
@@ -179,16 +193,6 @@ func (c *Connector) Run(ctx context.Context) {
 		return
 	}
 
-	// Register write handler on NATS core request-reply (ADR-0004).
-	sub, err := c.nc.Subscribe("cmd.mqtt."+c.cfg.ConnectorID, func(msg *nats.Msg) {
-		c.handleWrite(ctx, cm, topicMap, msg)
-	})
-	if err != nil {
-		slog.Error("mqtt: write handler subscribe failed", "err", err)
-		return
-	}
-	defer sub.Unsubscribe()
-
 	<-cm.Done()
 }
 
@@ -199,13 +203,22 @@ func (c *Connector) handleWrite(ctx context.Context, cm *autopaho.ConnectionMana
 		return
 	}
 
-	// Idempotency: return cached reply for duplicate control_id.
+	// Reserve the slot atomically. nil = in-flight (first goroutine for this control_id),
+	// non-nil = completed (return cached result). This prevents a concurrent duplicate
+	// goroutine (same control_id) from issuing a second write to the device.
 	c.dedupMu.Lock()
-	if cached, ok := c.dedup[req.ControlID]; ok {
+	if entry, ok := c.dedup[req.ControlID]; ok {
 		c.dedupMu.Unlock()
-		respond(msg, cached)
+		if entry == nil {
+			// Another goroutine is in-flight for this control_id. Return early; the
+			// dispatcher will retry and eventually hit the cached result.
+			respond(msg, WriteReply{false, "in_flight"})
+		} else {
+			respond(msg, *entry)
+		}
 		return
 	}
+	c.dedup[req.ControlID] = nil // reserve slot
 	c.dedupMu.Unlock()
 
 	p, ok := topicMap[req.LocalID]
@@ -240,7 +253,7 @@ func (c *Connector) handleWrite(ctx context.Context, cm *autopaho.ConnectionMana
 
 func (c *Connector) cacheDedup(controlID string, reply WriteReply) {
 	c.dedupMu.Lock()
-	c.dedup[controlID] = reply
+	c.dedup[controlID] = &reply
 	c.dedupMu.Unlock()
 }
 
@@ -249,11 +262,19 @@ func respond(msg *nats.Msg, reply WriteReply) {
 	_ = msg.Respond(data)
 }
 
-func formatPayload(template string, value float64) []byte {
-	if template == "" {
-		return []byte(strconv.FormatFloat(value, 'g', -1, 64))
+func formatPayload(tmpl string, value float64) []byte {
+	plain := []byte(strconv.FormatFloat(value, 'g', -1, 64))
+	if tmpl == "" {
+		return plain
 	}
-	return []byte(fmt.Sprintf(template, value))
+	result := fmt.Sprintf(tmpl, value)
+	// fmt.Sprintf embeds "%!verb(type=value)" when the verb is wrong for the arg type.
+	// Fall back to plain float rather than sending malformed bytes to the device.
+	if strings.Contains(result, "%!") {
+		slog.Warn("mqtt: bad PayloadTemplate verb — falling back to plain float", "template", tmpl)
+		return plain
+	}
+	return []byte(result)
 }
 
 // extractValue extracts a float64 from a raw MQTT payload.
