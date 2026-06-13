@@ -1,6 +1,6 @@
 # EP-004: Admin UI
 
-**Status:** Draft
+**Status:** Prod
 **Priority:** P1
 
 ## Goal
@@ -12,8 +12,8 @@ The Admin UI is the operator console for the gateway: it surfaces gateway/connec
 - [ ] Built with React, Next.js, shadcn/ui, and TanStack Table; authenticated via Keycloak.
 - [ ] Gateway Dashboard shows gateway status, uptime, CPU, memory, disk.
 - [ ] Connector management lists connectors with version + status and offers Start/Stop/Restart/Upgrade.
-- [ ] Device management shows discovered devices, their points, and protocol.
-- [ ] Telemetry monitor shows received/sent counts, queue length, and latency.
+- [ ] Device management shows Devices and Points from the synced Point List (EP-006), grouped by protocol/connector.
+- [ ] Telemetry monitor shows received/sent/accepted counts, the per-`point_id` drift counter (`accepted < sent`, EP-003), Store-and-Forward buffer depth, EVENTS stream usage, and uplink latency.
 - [ ] Log monitor shows connector logs, gateway logs, errors, and warnings.
 
 ## Child Features

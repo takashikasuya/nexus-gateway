@@ -21,7 +21,7 @@ An isolated per-protocol container that talks to field equipment and publishes C
 _Avoid_: driver, adapter, plugin
 
 **Common Event**:
-The protocol-tagged event a Connector publishes to NATS JetStream. Carries `protocol` and **native addressing only** (`local_id` + native device ref) plus the raw value/unit/quality/timestamp. Identity is not yet resolved — that is the Normalizer's job.
+The protocol-tagged event a Connector publishes to NATS JetStream. Carries `protocol` and **native addressing only** (`local_id` + native device ref) plus the raw value/unit/quality/timestamp. Identity is not yet resolved — that is the Normalizer's job. Published on subject **`evt.<protocol>.<connector_id>`** in the single stream **`EVENTS`**; `local_id` rides in the payload, never the subject. The Normalizer is the single durable consumer on `evt.>`; replay/re-normalization filters by protocol or connector subject.
 _Avoid_: message, reading, datapoint
 
 **Normalizer**:
@@ -62,7 +62,7 @@ The gRPC link to Building OS. Two independent streams (separate scale units): **
 _Avoid_: upstream, sync
 
 **Store-and-Forward**:
-The SQLite-backed buffering that retains Telemetry during an Uplink outage and forwards it in order on reconnect.
+The SQLite-backed bounded ring buffer that retains Telemetry during an Uplink outage and forwards it in order on reconnect. Frames are sent **immediately** as they arrive; the Ingress stream is half-closed every **5 s / 1000 frames (configurable)** as an **ack checkpoint** — `StreamAck.accepted == sent` advances the cursor past the batch, `accepted < sent` advances it too (best-effort, no resend) while incrementing the per-`point_id` drift counter. The checkpoint period bounds the duplicate window on crash, not delivery latency.
 _Avoid_: queue, cache, spool
 
 ## Relationships

@@ -59,7 +59,7 @@ metadata:
 | Normalizer | Strips protocol-dependent info; unifies Point ID, Device ID, timestamp, quality, unit. Hosts future semantic mapping (REC/Brick/QUDT/BOT). |
 | NATS JetStream | Internal pub/sub transport for connector events; replay and short-term retention. |
 | SQLite Buffer | Local store-and-forward during uplink outages. |
-| gRPC Uplink | Stable contract to Building OS: TelemetryService, CommandService, DiscoveryService. |
+| gRPC Uplink | Building OS-owned contract (`gatewaybridge`, vendored from `../gutp-building-os-oss/proto/`): Ingress `GatewayIngress/StreamTelemetry` + Egress `GatewayEgress/Connect`. No DiscoveryService. |
 | OpenTelemetry Collector | Collects metrics/logs/traces; exports OTLP + Prometheus. |
 | Admin UI | React/Next.js operator console. |
 
@@ -76,12 +76,14 @@ metadata:
 
 ## Common Event Model (connector output)
 
+Native addressing only — no canonical `point_id`/`device_id` (ADR-0001). Published to JetStream `EVENTS` on `evt.<protocol>.<connector_id>` (ADR-0005).
+
 ```json
 {
-  "gateway_id": "gw-001",
   "protocol": "opcua",
-  "device_id": "ahu-01",
-  "point_id": "supply_air_temp",
+  "connector_id": "opcua-01",
+  "local_id": "ns=2;s=AHU01.SupplyAirTemp",
+  "device_ref": "opc.tcp://10.0.0.5:4840",
   "value": 23.4,
   "unit": "Cel",
   "quality": "Good",
@@ -91,8 +93,8 @@ metadata:
 
 ## Open Questions
 
-- [ ] Connector ↔ Core transport: NATS subjects/stream layout and back-pressure strategy.
-- [ ] SQLite buffer retention policy, ordering guarantees, and replay cursor semantics under uplink recovery.
-- [ ] Normalizer Point/Device ID mapping configuration format and source of truth.
+- [x] Connector ↔ Core transport → ADR-0005 (single `EVENTS` stream, `evt.<protocol>.<connector_id>`, limits 48 h / 2 GB DiscardOld).
+- [x] SQLite buffer / replay cursor semantics → ADR-0002 + decisions.md (ring buffer; immediate send + 5 s/1000-frame ack checkpoint).
+- [x] Normalizer ID-mapping source of truth → ADR-0003 (Building OS twin, diff sync, EP-006).
+- [x] Telemetry batching/acking granularity → decisions.md (ack only on stream close ⇒ checkpoint = stream rotation).
 - [ ] Connector upgrade flow (image pull, version pinning) given OTA is out of scope for MVP-1.
-- [ ] gRPC stream Telemetry batching/acking granularity vs. NATS JetStream consumer model.
