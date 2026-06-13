@@ -23,7 +23,7 @@ services:
       - OPCUA_ENDPOINT=opc.tcp://opcua-sim:4840/freeopcua/server/
       - OPCUA_DEVICE_REF=opcua-sim
       - OPCUA_POLL_INTERVAL=30
-      - OPCUA_POINTS=[{"local_id":"ns=2;i=3","device_ref":"opcua-sim","unit":"degC"},{"local_id":"ns=2;i=4","device_ref":"opcua-sim","unit":""}]
+      - OPCUA_POINTS=[{"local_id":"ns=2;i=2","device_ref":"opcua-sim","unit":"degC"},{"local_id":"ns=2;i=3","device_ref":"opcua-sim","unit":""}]
     depends_on:
       nats:
         condition: service_healthy

@@ -7,7 +7,6 @@ import os
 import time
 
 from asyncua import Server
-from asyncua.ua import NodeId, ObjectIds
 
 
 ENDPOINT = os.environ.get("OPCUA_SERVER_ENDPOINT", "opc.tcp://0.0.0.0:4840/freeopcua/server/")
@@ -31,8 +30,8 @@ async def main() -> None:
     status_node = await device.add_variable(nsidx, "Active", True)
     await status_node.set_writable()
 
-    temp_id = (await temp_node.get_node_id()).to_string()
-    status_id = (await status_node.get_node_id()).to_string()
+    temp_id = temp_node.nodeid.to_string()
+    status_id = status_node.nodeid.to_string()
     print(f"OPC-UA simulator running: endpoint={ENDPOINT}")
     print(f"  Temperature node: {temp_id}")
     print(f"  Active node:      {status_id}")

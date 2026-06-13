@@ -94,7 +94,11 @@ public class MiloOpcUaClientFacade implements OpcUaClientFacade {
         DataValue[] values = miloClient.read(0.0, TimestampsToReturn.Source, readValueIds).get().getResults();
 
         Map<String, OpcValue> result = new LinkedHashMap<>();
-        for (int i = 0; i < nodeIds.size(); i++) {
+        if (values == null) {
+            log.warn("opcua: read returned null results array for {} nodes", nodeIds.size());
+            return result;
+        }
+        for (int i = 0; i < Math.min(nodeIds.size(), values.length); i++) {
             result.put(nodeIds.get(i), toOpcValue(values[i]));
         }
         return result;

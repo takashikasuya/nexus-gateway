@@ -31,11 +31,17 @@ public record Config(
             pointsJson, new TypeReference<>() {}
         );
         List<PointConfig> points = rawPoints.stream()
-            .map(p -> new PointConfig(
-                (String) p.get("local_id"),
-                (String) p.getOrDefault("device_ref", deviceRef),
-                (String) p.getOrDefault("unit", "")
-            ))
+            .map(p -> {
+                String localId = (String) p.get("local_id");
+                if (localId == null || localId.isBlank()) {
+                    throw new IllegalArgumentException("point entry missing required 'local_id': " + p);
+                }
+                return new PointConfig(
+                    localId,
+                    (String) p.getOrDefault("device_ref", deviceRef),
+                    (String) p.getOrDefault("unit", "")
+                );
+            })
             .toList();
 
         return new Config(connectorId, natsUrl, endpoint, deviceRef, points, pollInterval);

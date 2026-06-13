@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
-import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 /** Connects to an OPC-UA server and publishes Common Events via the injected publisher. */
@@ -25,6 +24,8 @@ public class Connector {
     private final OpcUaClientFacade client;
     private final Publisher publisher;
     private final Map<String, PointConfig> pointMap;
+    private final List<String> nodeIds;
+    private final String subject;
     private final CountDownLatch stopLatch = new CountDownLatch(1);
 
     public Connector(Config cfg, OpcUaClientFacade client, Publisher publisher) {
@@ -33,6 +34,8 @@ public class Connector {
         this.publisher = publisher;
         this.pointMap = cfg.points().stream()
             .collect(Collectors.toMap(PointConfig::localId, p -> p));
+        this.nodeIds = cfg.points().stream().map(PointConfig::localId).toList();
+        this.subject = "evt.opcua." + cfg.connectorId();
     }
 
     /** Connect, poll once, subscribe, then block until stop() is called. */
@@ -49,20 +52,21 @@ public class Connector {
             log.warn("opcua: browse failed (non-fatal): {}", ex.getMessage());
         }
 
-        // Initial poll
-        pollAll();
+        try {
+            // Initial poll
+            pollAll();
 
-        // Subscribe to monitored items for all configured points
-        List<String> nodeIds = cfg.points().stream().map(PointConfig::localId).toList();
-        if (!nodeIds.isEmpty()) {
-            client.subscribe(nodeIds, this::onValue);
+            // Subscribe to monitored items for all configured points
+            if (!nodeIds.isEmpty()) {
+                client.subscribe(nodeIds, this::onValue);
+            }
+
+            log.info("opcua: connector {} subscribed to {} points", cfg.connectorId(), nodeIds.size());
+            stopLatch.await();
+        } finally {
+            client.close();
+            log.info("opcua: connector {} stopped", cfg.connectorId());
         }
-
-        log.info("opcua: connector {} subscribed to {} points", cfg.connectorId(), nodeIds.size());
-        stopLatch.await();
-
-        client.close();
-        log.info("opcua: connector {} stopped", cfg.connectorId());
     }
 
     public void stop() {
@@ -81,8 +85,7 @@ public class Connector {
     }
 
     private void pollAll() {
-        if (cfg.points().isEmpty()) return;
-        List<String> nodeIds = cfg.points().stream().map(PointConfig::localId).toList();
+        if (nodeIds.isEmpty()) return;
         try {
             Map<String, OpcValue> results = client.read(nodeIds);
             results.forEach((nodeId, opcValue) -> {
@@ -98,7 +101,6 @@ public class Connector {
     }
 
     private void publish(PointConfig pt, double value, String quality) {
-        String subject = "evt.opcua." + cfg.connectorId();
         try {
             byte[] data = MAPPER.writeValueAsBytes(
                 CommonEvent.now(cfg.connectorId(), pt.localId(), pt.deviceRef(), value, pt.unit(), quality)

@@ -73,10 +73,20 @@ class ConnectorTest {
             t.setDaemon(true);
             return t;
         });
-        return exec.submit(() -> {
+        Future<?> f = exec.submit(() -> {
             try { connector.run(); }
             catch (Exception e) { throw new RuntimeException(e); }
         });
+        exec.shutdown(); // threads finish naturally; shutdown releases internal resources
+        return f;
+    }
+
+    /** Spin until client.subscriber is set or 1 s elapses. */
+    static void awaitSubscribed(MockClient client) throws InterruptedException {
+        long deadline = System.currentTimeMillis() + 1_000;
+        while (client.subscriber == null && System.currentTimeMillis() < deadline) {
+            Thread.sleep(1);
+        }
     }
 
     // ── tests ─────────────────────────────────────────────────────────────────
@@ -92,11 +102,7 @@ class ConnectorTest {
         Connector connector = new Connector(cfg, client, pub.asPublisher());
         Future<?> task = startAsync(connector);
 
-        // Wait for subscription to be registered (connector is past pollAll)
-        long deadline = System.currentTimeMillis() + 1_000;
-        while (client.subscriber == null && System.currentTimeMillis() < deadline) {
-            Thread.sleep(1);
-        }
+        awaitSubscribed(client);
         connector.stop();
         task.get(2, TimeUnit.SECONDS);
 
@@ -120,11 +126,7 @@ class ConnectorTest {
         Connector connector = new Connector(onePointConfig(), client, pub.asPublisher());
         Future<?> task = startAsync(connector);
 
-        // Wait for subscriber to be wired up
-        long deadline = System.currentTimeMillis() + 1_000;
-        while (client.subscriber == null && System.currentTimeMillis() < deadline) {
-            Thread.sleep(1);
-        }
+        awaitSubscribed(client);
         assertNotNull(client.subscriber, "connector must register subscription");
 
         // Fire COV-style notification
@@ -151,8 +153,7 @@ class ConnectorTest {
         Connector connector = new Connector(onePointConfig(), client, pub.asPublisher());
         Future<?> task = startAsync(connector);
 
-        long deadline = System.currentTimeMillis() + 1_000;
-        while (client.subscriber == null && System.currentTimeMillis() < deadline) Thread.sleep(1);
+        awaitSubscribed(client);
 
         connector.stop();
         task.get(2, TimeUnit.SECONDS);
@@ -170,8 +171,7 @@ class ConnectorTest {
         Connector connector = new Connector(onePointConfig(), client, pub.asPublisher());
         Future<?> task = startAsync(connector);
 
-        long deadline = System.currentTimeMillis() + 1_000;
-        while (client.subscriber == null && System.currentTimeMillis() < deadline) Thread.sleep(1);
+        awaitSubscribed(client);
 
         connector.stop();
         task.get(2, TimeUnit.SECONDS);
@@ -189,8 +189,7 @@ class ConnectorTest {
         Connector connector = new Connector(onePointConfig(), client, pub.asPublisher());
         Future<?> task = startAsync(connector);
 
-        long deadline = System.currentTimeMillis() + 1_000;
-        while (client.subscriber == null && System.currentTimeMillis() < deadline) Thread.sleep(1);
+        awaitSubscribed(client);
         connector.stop();
         task.get(2, TimeUnit.SECONDS);
 
@@ -212,8 +211,7 @@ class ConnectorTest {
         Connector connector = new Connector(onePointConfig(), client, failingPub);
         Future<?> task = startAsync(connector);
 
-        long deadline = System.currentTimeMillis() + 1_000;
-        while (client.subscriber == null && System.currentTimeMillis() < deadline) Thread.sleep(1);
+        awaitSubscribed(client);
         connector.stop();
         task.get(2, TimeUnit.SECONDS); // must not throw
 
@@ -229,8 +227,7 @@ class ConnectorTest {
         Connector connector = new Connector(onePointConfig(), client, pub.asPublisher());
         Future<?> task = startAsync(connector);
 
-        long deadline = System.currentTimeMillis() + 1_000;
-        while (client.subscriber == null && System.currentTimeMillis() < deadline) Thread.sleep(1);
+        awaitSubscribed(client);
 
         // Fire notification for an unknown node
         client.subscriber.accept("ns=2;i=9999", OpcValue.good(99.0));
@@ -255,8 +252,7 @@ class ConnectorTest {
         Connector connector = new Connector(onePointConfig(), client, pub.asPublisher());
         Future<?> task = startAsync(connector);
 
-        long deadline = System.currentTimeMillis() + 1_000;
-        while (client.subscriber == null && System.currentTimeMillis() < deadline) Thread.sleep(1);
+        awaitSubscribed(client);
         connector.stop();
         task.get(2, TimeUnit.SECONDS);
 
