@@ -1,0 +1,39 @@
+"""Entry point: wire Config, BACnet client, NATS, and run the Connector."""
+from __future__ import annotations
+
+import asyncio
+import logging
+import signal
+
+import nats
+from nats.js import JetStreamContext
+
+from bacnet_connector.bacnet_client import Bacpypes3Client
+from bacnet_connector.config import Config
+from bacnet_connector.connector import Connector
+
+logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
+logger = logging.getLogger(__name__)
+
+
+async def _run(cfg: Config) -> None:
+    nc = await nats.connect(cfg.nats_url)
+    js: JetStreamContext = nc.jetstream()
+    bacnet = await Bacpypes3Client.create(cfg.local_address)
+
+    stop_event = asyncio.Event()
+
+    loop = asyncio.get_running_loop()
+    for sig in (signal.SIGINT, signal.SIGTERM):
+        loop.add_signal_handler(sig, stop_event.set)
+
+    connector = Connector(cfg, bacnet, js)
+    try:
+        await connector.run(stop_event=stop_event)
+    finally:
+        await nc.drain()
+
+
+def main() -> None:
+    cfg = Config.from_env()
+    asyncio.run(_run(cfg))
