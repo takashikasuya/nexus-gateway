@@ -40,7 +40,7 @@ per run:
 # OPC-UA telemetry E2E (#39) — plain TCP, CI-friendly
 docker compose -f docker-compose.yml -f docker-compose.integration.yml --profile opcua up
 
-# BACnet telemetry E2E (#38) — needs host networking for Who-Is/I-Am broadcast
+# BACnet telemetry E2E (#40) — needs host networking for Who-Is/I-Am broadcast
 docker compose -f docker-compose.yml -f docker-compose.integration.yml --profile bacnet up
 ```
 
@@ -49,7 +49,13 @@ The gateway is overridden to read `POINT_LIST_FILE=/fixtures/integration/point_l
 ## Status
 
 This slice provides the topology and shared addressing. Asserting telemetry
-actually flows through to the mock Building OS is **#38 (BACnet)** and **#39
-(OPC-UA)**; control round-trip is **#40**. Sibling-specific runtime details
+actually flows through to the mock Building OS is **#40 (BACnet)** and **#39
+(OPC-UA)**; control round-trip is **#42**. Sibling-specific runtime details
 (BACnet discovery params, OPC-UA endpoint/security) are finalized there against
 a live run.
+
+**Known limitation:** the connectors' poll lists (`BACNET_POINTS` / `OPCUA_POINTS`)
+currently restate the native addresses that also live in `point_list.json`. The
+two are kept in sync by hand here; deriving the connector poll list from the
+shared Point List (so there is a single source) is connector-side work tracked
+with the telemetry E2E slices (#39/#40).

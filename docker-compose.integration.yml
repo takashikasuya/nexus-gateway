@@ -12,9 +12,9 @@
 # point_id has a single source per run:
 #
 #   docker compose -f docker-compose.yml -f docker-compose.integration.yml --profile opcua  up   # OPC-UA E2E (#39, CI-friendly)
-#   docker compose -f docker-compose.yml -f docker-compose.integration.yml --profile bacnet up   # BACnet E2E (#38, needs host networking)
+#   docker compose -f docker-compose.yml -f docker-compose.integration.yml --profile bacnet up   # BACnet E2E (#40, needs host networking)
 #
-# Runtime verification (telemetry actually flowing) is #38/#39; this file is the
+# Runtime verification (telemetry actually flowing) is #39/#40; this file is the
 # topology + shared addressing. Sibling-specific details flagged TODO are nailed
 # down there against a live run.
 
@@ -23,9 +23,12 @@ version: "3.9"
 services:
   # The gateway resolves native addressing using the shared integration Point List
   # instead of the default sim fixture (./fixtures is already mounted by the base file).
+  # DEV_SIM stays false (default) so the in-process sim connector does not publish
+  # sim://… events that the integration Point List does not contain.
   gateway:
     environment:
       - POINT_LIST_FILE=/fixtures/integration/point_list.json
+      - DEV_SIM=false
 
   # ── OPC-UA (profile: opcua) — plain TCP:4840, CI-friendly ────────────────────
   opcua-sim:
