@@ -181,7 +181,7 @@ func TestHealth_ContainsGatewayAndConnectors(t *testing.T) {
 	reg.SetRunning("mqtt-01", "ctr-abc", true)
 
 	mon := lifecycle.NewHealthMonitor(mock, reg)
-	h := mon.Snapshot()
+	h := mon.Snapshot(context.Background())
 
 	assert.Greater(t, h.UptimeSeconds, 0.0)
 	require.Len(t, h.Connectors, 1)
