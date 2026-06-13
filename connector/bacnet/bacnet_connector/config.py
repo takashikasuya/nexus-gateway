@@ -21,12 +21,18 @@ class Config:
     bacnet_address: str  # target BACnet device IP address or "host/24"
     bacnet_device_id: int
     points: list[PointConfig] = field(default_factory=list)
-    poll_interval: float = 30.0  # seconds between full polls
-    local_address: str = "0.0.0.0"  # local BACnet interface address
+    poll_interval: float = 30.0          # seconds between full polls
+    local_address: str = "0.0.0.0"      # local BACnet interface address
+    default_write_priority: int = 8     # BACnet write priority (1=highest, 16=lowest)
+    write_timeout: float = 10.0         # seconds before a write is declared timed-out
 
     def __post_init__(self) -> None:
         if self.poll_interval <= 0:
             raise ValueError(f"poll_interval must be positive, got {self.poll_interval}")
+        if not 1 <= self.default_write_priority <= 16:
+            raise ValueError(f"default_write_priority must be 1–16, got {self.default_write_priority}")
+        if self.write_timeout <= 0:
+            raise ValueError(f"write_timeout must be positive, got {self.write_timeout}")
 
     @classmethod
     def from_env(cls) -> "Config":
@@ -48,4 +54,6 @@ class Config:
             points=points,
             poll_interval=float(os.environ.get("BACNET_POLL_INTERVAL", "30")),
             local_address=os.environ.get("BACNET_LOCAL_ADDRESS", "0.0.0.0"),
+            default_write_priority=int(os.environ.get("BACNET_DEFAULT_WRITE_PRIORITY", "8")),
+            write_timeout=float(os.environ.get("BACNET_WRITE_TIMEOUT", "10")),
         )

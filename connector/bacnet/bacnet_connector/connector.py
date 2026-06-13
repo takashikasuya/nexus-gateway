@@ -39,6 +39,18 @@ class BACnetClient:
         """Subscribe to COV notifications for obj_id. Calls callback on each change."""
         raise NotImplementedError
 
+    async def write_property(
+        self,
+        address: str,
+        device_id: int,
+        obj_id: str,
+        prop_id: str,
+        value: float,
+        priority: int,
+    ) -> None:
+        """Write a single property. Raises on device error or transport failure."""
+        raise NotImplementedError
+
     async def close(self) -> None:
         pass
 
