@@ -1,0 +1,32 @@
+# OPC-UA integration stack: adds a simulated OPC-UA server and the opcua connector.
+# Run with: docker compose -f docker-compose.yml -f docker-compose.opcua.yml up
+
+version: "3.9"
+
+services:
+  opcua-sim:
+    build:
+      context: connector/opcua/sim
+      dockerfile: Dockerfile
+    environment:
+      - OPCUA_SERVER_ENDPOINT=opc.tcp://0.0.0.0:4840/freeopcua/server/
+    ports:
+      - "4840:4840"
+    restart: unless-stopped
+
+  opcua-connector:
+    build:
+      context: connector/opcua
+    environment:
+      - CONNECTOR_ID=opcua-01
+      - NATS_URL=nats://nats:4222
+      - OPCUA_ENDPOINT=opc.tcp://opcua-sim:4840/freeopcua/server/
+      - OPCUA_DEVICE_REF=opcua-sim
+      - OPCUA_POLL_INTERVAL=30
+      - OPCUA_POINTS=[{"local_id":"ns=2;i=2","device_ref":"opcua-sim","unit":"degC"},{"local_id":"ns=2;i=3","device_ref":"opcua-sim","unit":""}]
+    depends_on:
+      nats:
+        condition: service_healthy
+      opcua-sim:
+        condition: service_started
+    restart: unless-stopped
