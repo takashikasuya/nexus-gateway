@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net"
+	"strings"
 	"testing"
 	"time"
 
@@ -41,9 +42,7 @@ func TestMQTT_NumericPayload(t *testing.T) {
 		},
 	}, js)
 	go conn.Run(ctx)
-
-	// Wait for connector to subscribe
-	time.Sleep(300 * time.Millisecond)
+	require.NoError(t, conn.AwaitReady(ctx))
 
 	publishMQTT(t, brokerAddr, "sensors/temp", []byte("22.5"))
 
@@ -75,7 +74,7 @@ func TestMQTT_JSONPayload(t *testing.T) {
 		},
 	}, js)
 	go conn.Run(ctx)
-	time.Sleep(300 * time.Millisecond)
+	require.NoError(t, conn.AwaitReady(ctx))
 
 	payload, _ := json.Marshal(map[string]any{"value": 850.0, "unit": "ppm"})
 	publishMQTT(t, brokerAddr, "sensors/co2", payload)
@@ -212,7 +211,7 @@ func dialPaho(ctx context.Context, addr, clientID string) (*pahoClient.Client, e
 func consumeOneEvent(t *testing.T, ctx context.Context, js jetstream.JetStream, subject string) common.Event {
 	t.Helper()
 	cons, err := js.CreateOrUpdateConsumer(ctx, "EVENTS", jetstream.ConsumerConfig{
-		Durable:       "test-" + subject[len(subject)-6:],
+		Durable:       "test-" + strings.ReplaceAll(subject, ".", "-"),
 		FilterSubject: subject,
 		AckPolicy:     jetstream.AckExplicitPolicy,
 	})
