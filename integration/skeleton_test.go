@@ -19,6 +19,7 @@ import (
 	"nexus-gateway/internal/common"
 	"nexus-gateway/internal/normalizer"
 	"nexus-gateway/internal/pointlist"
+	"nexus-gateway/internal/storeforward"
 	"nexus-gateway/internal/uplink"
 )
 
@@ -68,8 +69,13 @@ func TestE2E_SimConnectorFrameArrivesAtBOS(t *testing.T) {
 	norm, err := normalizer.New(ctx, js, pl, "gw-001")
 	require.NoError(t, err)
 
-	// ── 5. Ingress uplink: streams TelemetryFrames to mock BOS ───────────────
-	ul, err := uplink.NewIngress(ctx, mockBOS.addr, "gw-001", norm.Frames())
+	// ── 5. Store-and-Forward buffer + Ingress uplink ─────────────────────────
+	buf, err := storeforward.Open(t.TempDir()+"/sf.db", 1000)
+	require.NoError(t, err)
+	t.Cleanup(func() { buf.Close() })
+	go storeforward.Pump(ctx, norm.Frames(), buf)
+
+	ul, err := uplink.NewIngress(ctx, mockBOS.addr, "gw-001", buf, uplink.Config{CheckpointSize: 1000, CheckpointAge: 100 * time.Millisecond})
 	require.NoError(t, err)
 	go ul.Run(ctx)
 

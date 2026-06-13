@@ -1,0 +1,117 @@
+package storeforward_test
+
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
+	pb "nexus-gateway/gen"
+	"nexus-gateway/internal/storeforward"
+)
+
+func TestBuffer_WriteReadAdvance(t *testing.T) {
+	buf, err := storeforward.Open(t.TempDir()+"/sf.db", 100)
+	require.NoError(t, err)
+	defer buf.Close()
+
+	frames := []*pb.TelemetryFrame{
+		{GatewayId: "gw-1", PointId: "p1", Value: 1.0, Timestamp: "2024-01-01T00:00:00Z"},
+		{GatewayId: "gw-1", PointId: "p2", Value: 2.0, Timestamp: "2024-01-01T00:00:01Z"},
+		{GatewayId: "gw-1", PointId: "p3", Value: 3.0, Timestamp: "2024-01-01T00:00:02Z"},
+	}
+	for _, f := range frames {
+		require.NoError(t, buf.Write(f))
+	}
+
+	// ReadBatch from 0 should return all 3 in order
+	batch, err := buf.ReadBatch(0, 10)
+	require.NoError(t, err)
+	require.Len(t, batch, 3)
+	assert.Equal(t, "p1", batch[0].Frame.PointId)
+	assert.Equal(t, "p2", batch[1].Frame.PointId)
+	assert.Equal(t, "p3", batch[2].Frame.PointId)
+	assert.True(t, batch[0].Seq < batch[1].Seq && batch[1].Seq < batch[2].Seq)
+
+	// Advance past first two; ReadBatch should return only third
+	require.NoError(t, buf.Advance(batch[1].Seq))
+	batch2, err := buf.ReadBatch(batch[1].Seq, 10)
+	require.NoError(t, err)
+	require.Len(t, batch2, 1)
+	assert.Equal(t, "p3", batch2[0].Frame.PointId)
+}
+
+func TestBuffer_DropOldestOnOverflow(t *testing.T) {
+	buf, err := storeforward.Open(t.TempDir()+"/sf.db", 3) // capacity=3
+	require.NoError(t, err)
+	defer buf.Close()
+
+	for i := range 5 {
+		require.NoError(t, buf.Write(&pb.TelemetryFrame{
+			GatewayId: "gw-1",
+			PointId:   "p" + string(rune('0'+i)),
+			Value:     float64(i),
+			Timestamp: "2024-01-01T00:00:00Z",
+		}))
+	}
+
+	// Only 3 frames remain; they must be the newest (p2, p3, p4)
+	batch, err := buf.ReadBatch(0, 10)
+	require.NoError(t, err)
+	require.Len(t, batch, 3)
+	assert.Equal(t, "p2", batch[0].Frame.PointId)
+	assert.Equal(t, "p3", batch[1].Frame.PointId)
+	assert.Equal(t, "p4", batch[2].Frame.PointId)
+}
+
+func TestBuffer_DriftCounter(t *testing.T) {
+	buf, err := storeforward.Open(t.TempDir()+"/sf.db", 100)
+	require.NoError(t, err)
+	defer buf.Close()
+
+	require.NoError(t, buf.Write(&pb.TelemetryFrame{PointId: "temp", Value: 1.0, Timestamp: "t"}))
+	require.NoError(t, buf.Write(&pb.TelemetryFrame{PointId: "temp", Value: 2.0, Timestamp: "t"}))
+	require.NoError(t, buf.Write(&pb.TelemetryFrame{PointId: "hum", Value: 3.0, Timestamp: "t"}))
+
+	batch, err := buf.ReadBatch(0, 10)
+	require.NoError(t, err)
+	require.Len(t, batch, 3)
+
+	// Report drift: 2 sent for temp, 1 accepted (1 lost)
+	buf.RecordDrift("temp", 1)
+	// 1 sent for hum, 1 accepted (no drift)
+	buf.RecordDrift("hum", 0)
+
+	drifts := buf.Drifts()
+	assert.Equal(t, int64(1), drifts["temp"])
+	assert.Equal(t, int64(0), drifts["hum"])
+}
+
+func TestBuffer_PersistsCursor(t *testing.T) {
+	dir := t.TempDir()
+	dbPath := dir + "/sf.db"
+
+	buf, err := storeforward.Open(dbPath, 100)
+	require.NoError(t, err)
+	require.NoError(t, buf.Write(&pb.TelemetryFrame{PointId: "p1", Value: 1.0, Timestamp: "t"}))
+	require.NoError(t, buf.Write(&pb.TelemetryFrame{PointId: "p2", Value: 2.0, Timestamp: "t"}))
+
+	batch, err := buf.ReadBatch(0, 10)
+	require.NoError(t, err)
+	require.NoError(t, buf.Advance(batch[0].Seq))
+	buf.Close()
+
+	// Reopen: cursor should still be at batch[0].Seq
+	buf2, err := storeforward.Open(dbPath, 100)
+	require.NoError(t, err)
+	defer buf2.Close()
+
+	cursor := buf2.Cursor()
+	assert.Equal(t, batch[0].Seq, cursor)
+
+	// Read from cursor: should return only p2
+	batch2, err := buf2.ReadBatch(cursor, 10)
+	require.NoError(t, err)
+	require.Len(t, batch2, 1)
+	assert.Equal(t, "p2", batch2[0].Frame.PointId)
+}

@@ -10,33 +10,39 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 
 	pb "nexus-gateway/gen"
+	"nexus-gateway/internal/storeforward"
 )
 
-// Ingress streams TelemetryFrames to the Building OS GatewayIngress service.
-// It reads from frames, sends immediately (no buffering here — S&F is upstream),
-// and half-closes the stream every checkpointSize frames or checkpointAge,
-// whichever comes first, to collect the StreamAck (ADR-0002, decisions.md).
+// Config holds tunable checkpoint parameters.
+type Config struct {
+	CheckpointSize int
+	CheckpointAge  time.Duration
+}
+
+// DefaultConfig is the production default: send immediately, checkpoint every 5s/1000 frames.
+var DefaultConfig = Config{CheckpointSize: 1000, CheckpointAge: 5 * time.Second}
+
+// Ingress streams TelemetryFrames from a storeforward.Buffer to the Building OS
+// GatewayIngress service. Frames are sent immediately as they are read; the stream
+// is half-closed every CheckpointSize frames or CheckpointAge (whichever comes first)
+// to collect the StreamAck and advance the buffer cursor (ADR-0002).
 type Ingress struct {
 	addr      string
 	gatewayID string
-	frames    <-chan *pb.TelemetryFrame
+	buf       *storeforward.Buffer
 	conn      *grpc.ClientConn
+	cfg       Config
 }
 
-const (
-	checkpointSize = 1000
-	checkpointAge  = 5 * time.Second
-)
-
-func NewIngress(ctx context.Context, addr, gatewayID string, frames <-chan *pb.TelemetryFrame) (*Ingress, error) {
+func NewIngress(_ context.Context, addr, gatewayID string, buf *storeforward.Buffer, cfg Config) (*Ingress, error) {
 	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, fmt.Errorf("grpc dial %s: %w", addr, err)
 	}
-	return &Ingress{addr: addr, gatewayID: gatewayID, frames: frames, conn: conn}, nil
+	return &Ingress{addr: addr, gatewayID: gatewayID, buf: buf, conn: conn, cfg: cfg}, nil
 }
 
-// Run streams frames until ctx is cancelled. It reconnects on stream errors.
+// Run streams frames until ctx is cancelled. Reconnects on stream errors.
 func (u *Ingress) Run(ctx context.Context) {
 	defer u.conn.Close()
 	client := pb.NewGatewayIngressClient(u.conn)
@@ -55,58 +61,83 @@ func (u *Ingress) runStream(ctx context.Context, client pb.GatewayIngressClient)
 		return err
 	}
 
-	sent := 0
-	tick := time.NewTicker(checkpointAge)
+	cursor := u.buf.Cursor()
+	tick := time.NewTicker(u.cfg.CheckpointAge)
 	defer tick.Stop()
+	pollTick := time.NewTicker(50 * time.Millisecond)
+	defer pollTick.Stop()
+
+	// batch tracks frames sent since last checkpoint: seq → pointID
+	type sentFrame struct {
+		seq     int64
+		pointID string
+	}
+	var batch []sentFrame
 
 	checkpoint := func() error {
+		if len(batch) == 0 {
+			return nil
+		}
 		ack, err := stream.CloseAndRecv()
 		if err != nil {
 			return fmt.Errorf("checkpoint recv: %w", err)
 		}
-		if int64(sent) > ack.Accepted {
-			slog.Warn("ingress: drift detected", "sent", sent, "accepted", ack.Accepted)
+		sent := int64(len(batch))
+		lost := sent - ack.Accepted
+		if lost > 0 {
+			// attribute lost frames to the tail of the batch (last `lost` entries)
+			for _, sf := range batch[ack.Accepted:] {
+				u.buf.RecordDrift(sf.pointID, 1)
+			}
+			slog.Warn("ingress: drift", "sent", sent, "accepted", ack.Accepted, "lost", lost)
 		}
-		// Re-open stream for next batch
+		// Advance cursor past entire batch regardless (best-effort, ADR-0002)
+		cursor = batch[len(batch)-1].seq
+		if err := u.buf.Advance(cursor); err != nil {
+			return fmt.Errorf("advance cursor: %w", err)
+		}
+		batch = batch[:0]
+
 		newStream, err := client.StreamTelemetry(ctx)
 		if err != nil {
 			return fmt.Errorf("re-open stream: %w", err)
 		}
 		stream = newStream
-		sent = 0
+		tick.Reset(u.cfg.CheckpointAge)
 		return nil
 	}
 
 	for {
 		select {
-		case frame, ok := <-u.frames:
-			if !ok {
-				_, _ = stream.CloseAndRecv()
-				return nil
-			}
-			if err := stream.Send(frame); err != nil {
-				return fmt.Errorf("send: %w", err)
-			}
-			sent++
-			if sent >= checkpointSize {
-				tick.Reset(checkpointAge)
-				if err := checkpoint(); err != nil {
-					return err
-				}
-			}
-
-		case <-tick.C:
-			if sent > 0 {
-				if err := checkpoint(); err != nil {
-					return err
-				}
-			}
-
 		case <-ctx.Done():
-			if sent > 0 {
+			if len(batch) > 0 {
 				_, _ = stream.CloseAndRecv()
 			}
 			return nil
+
+		case <-tick.C:
+			if err := checkpoint(); err != nil {
+				return err
+			}
+
+		case <-pollTick.C:
+			frames, err := u.buf.ReadBatch(cursor, 32)
+			if err != nil {
+				slog.Warn("ingress: buffer read error", "err", err)
+				continue
+			}
+			for _, sf := range frames {
+				if err := stream.Send(sf.Frame); err != nil {
+					return fmt.Errorf("send: %w", err)
+				}
+				batch = append(batch, sentFrame{seq: sf.Seq, pointID: sf.Frame.PointId})
+				cursor = sf.Seq
+				if len(batch) >= u.cfg.CheckpointSize {
+					if err := checkpoint(); err != nil {
+						return err
+					}
+				}
+			}
 		}
 	}
 }

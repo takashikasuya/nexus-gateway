@@ -16,6 +16,7 @@ import (
 	"nexus-gateway/connector/sim"
 	"nexus-gateway/internal/normalizer"
 	"nexus-gateway/internal/pointlist"
+	"nexus-gateway/internal/storeforward"
 	"nexus-gateway/internal/uplink"
 )
 
@@ -24,6 +25,8 @@ func main() {
 	bosAddr := flag.String("bos", envOrDefault("BOS_ADDR", "localhost:50051"), "Building OS gRPC address")
 	gatewayID := flag.String("gateway-id", envOrDefault("GATEWAY_ID", "gw-001"), "Gateway ID")
 	plFile := flag.String("point-list", envOrDefault("POINT_LIST_FILE", "fixtures/point_list.json"), "Fixture point list file")
+	sfDB := flag.String("sf-db", envOrDefault("SF_DB", "data/storeforward.db"), "Store-and-Forward SQLite database path")
+	sfCap := flag.Int("sf-cap", 100_000, "Store-and-Forward ring buffer capacity (frames)")
 	flag.Parse()
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -75,8 +78,17 @@ func main() {
 		os.Exit(1)
 	}
 
+	// Open Store-and-Forward buffer
+	buf, err := storeforward.Open(*sfDB, *sfCap)
+	if err != nil {
+		slog.Error("storeforward open failed", "err", err)
+		os.Exit(1)
+	}
+	defer buf.Close()
+	go storeforward.Pump(ctx, norm.Frames(), buf)
+
 	// Start Ingress uplink
-	ul, err := uplink.NewIngress(ctx, *bosAddr, *gatewayID, norm.Frames())
+	ul, err := uplink.NewIngress(ctx, *bosAddr, *gatewayID, buf, uplink.DefaultConfig)
 	if err != nil {
 		slog.Error("uplink init failed", "err", err)
 		os.Exit(1)
