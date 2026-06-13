@@ -4,7 +4,7 @@
 
 ## Context
 
-The gateway's two gRPC links to Building OS — the telemetry **Ingress Uplink** (`gatewaybridge.GatewayIngress/StreamTelemetry`) and the control **Egress Uplink** (`GatewayEgress/Connect`) — currently use `insecure.NewCredentials()`. That is PoC-grade: the link crosses a trust boundary (the gateway is outside the Building OS cluster) and carries the `(gateway_id, point_id)` identity that Building OS treats as authoritative for twin ownership. We need to fix how this machine-to-machine link is authenticated and encrypted before any non-lab deployment, and the choice must match what Building OS actually enforces — not what we wish it enforced.
+The gateway's two gRPC links to Building OS — the telemetry **Ingress Uplink** (`gatewaybridge.GatewayIngress/StreamTelemetry`) and the control **Egress Uplink** (`gatewaybridge.GatewayEgress/Connect`) — currently use `insecure.NewCredentials()`. That is PoC-grade: the link crosses a trust boundary (the gateway is outside the Building OS cluster) and carries the `(gateway_id, point_id)` identity that Building OS treats as authoritative for twin ownership. We need to fix how this machine-to-machine link is authenticated and encrypted before any non-lab deployment, and the choice must match what Building OS actually enforces — not what we wish it enforced.
 
 Confirmed from the Building OS side (`gutp-building-os-oss`):
 
@@ -26,6 +26,6 @@ Authenticate the gateway→Building OS gRPC links with **mutual TLS terminated a
 
 - Matches Building OS's stated and partially-implemented model (#161); the gateway does not invent a second auth scheme. The Keycloak/OIDC machinery already in the repo stays scoped to the Admin API.
 - Production readiness depends on Building OS operational pieces the gateway does **not** own: Envoy client-cert enforcement, cert-manager issuance, and the `gateway_id ↔ CN/SAN` mapping. Whether the Helm/Envoy config is fully implemented on the Building OS side is **unconfirmed** and must be tracked as an external dependency (Building OS #161) before claiming production mTLS.
-- Until the edge exists in dev/CI, EP-009/EP-010 E2E runs plaintext h2c against the gРС services directly; the test topology must expose ConnectorWorker's gRPC ingress port (internal-only by default) and GatewayBridge's egress port.
+- Until the edge exists in dev/CI, EP-009/EP-010 E2E runs plaintext h2c against the gRPC services directly; the test topology must expose ConnectorWorker's gRPC ingress port (internal-only by default) and GatewayBridge's egress port.
 - The gateway must treat a TLS/cert error as a connection failure that the Store-and-Forward buffer rides out (ADR-0002), never a crash-loop or silent drop.
 - If Building OS later adds in-app token validation, this ADR is revisited; the config-driven credential surface (CA + client cert) is forward-compatible with adding a token source without re-architecting.
