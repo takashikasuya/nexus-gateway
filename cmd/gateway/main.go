@@ -45,6 +45,7 @@ func main() {
 	provURL := flag.String("provisioning-url", envOrDefault("PROVISIONING_URL", ""), "Provisioning API base URL (empty = fixture only)")
 	sfDB := flag.String("sf-db", envOrDefault("SF_DB", "data/storeforward.db"), "Store-and-Forward SQLite database path")
 	sfCap := flag.Int("sf-cap", 100_000, "Store-and-Forward ring buffer capacity (frames)")
+	syncInterval := flag.Duration("point-sync-interval", 10*time.Minute, "Point List poll interval after the initial sync (the list is near-static, ADR-0003)")
 	flag.Parse()
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -89,7 +90,7 @@ func main() {
 		syncLoop := pointsync.New(
 			provisioning.NewHTTPClient(*provURL),
 			resolver,
-			pointsync.Config{Interval: 30 * time.Second, PersistPath: *plPersist},
+			pointsync.Config{Interval: *syncInterval, PersistPath: *plPersist},
 		)
 		go syncLoop.Run(ctx)
 		// Wait for initial snapshot before starting the pipeline
