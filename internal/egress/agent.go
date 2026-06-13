@@ -7,7 +7,7 @@ import (
 
 	"github.com/nats-io/nats.go"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/credentials"
 
 	pb "nexus-gateway/gen"
 	"nexus-gateway/internal/dispatch"
@@ -20,15 +20,16 @@ type Agent struct {
 	addr      string
 	gatewayID string
 	d         *dispatch.Dispatcher
+	creds     credentials.TransportCredentials
 }
 
-func New(_ *nats.Conn, addr, gatewayID string, d *dispatch.Dispatcher) *Agent {
-	return &Agent{addr: addr, gatewayID: gatewayID, d: d}
+func New(_ *nats.Conn, addr, gatewayID string, d *dispatch.Dispatcher, creds credentials.TransportCredentials) *Agent {
+	return &Agent{addr: addr, gatewayID: gatewayID, d: d, creds: creds}
 }
 
 // Run connects to BOS and processes commands until ctx is cancelled.
 func (a *Agent) Run(ctx context.Context) {
-	conn, err := grpc.NewClient(a.addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient(a.addr, grpc.WithTransportCredentials(a.creds))
 	if err != nil {
 		slog.Error("egress: dial failed", "addr", a.addr, "err", err)
 		return
