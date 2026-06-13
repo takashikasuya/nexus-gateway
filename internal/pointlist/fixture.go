@@ -2,10 +2,14 @@ package pointlist
 
 // Entry maps one native address to one canonical PointID (ADR-0003).
 type Entry struct {
-	ConnectorID string `json:"connector_id"`
-	Protocol    string `json:"protocol"`
-	LocalID     string `json:"local_id"`
-	PointID     string `json:"point_id"`
+	ConnectorID   string `json:"connector_id"`
+	Protocol      string `json:"protocol"`
+	LocalID       string `json:"local_id"`
+	PointID       string `json:"point_id"`
+	Unit          string `json:"unit,omitempty"`
+	Writable      bool   `json:"writable,omitempty"`
+	DeviceRef     string `json:"device_ref,omitempty"`
+	ControlSchema string `json:"control_schema,omitempty"`
 }
 
 // Resolver resolves a native local_id to a canonical point_id.
