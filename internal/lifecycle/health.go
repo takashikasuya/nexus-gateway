@@ -4,12 +4,14 @@ import (
 	"context"
 	"runtime"
 	"runtime/metrics"
+	"sync"
 	"time"
 )
 
 // ConnectorHealth is the liveness status of one connector.
 type ConnectorHealth struct {
 	ID      string
+	Image   string
 	Running bool
 }
 
@@ -18,6 +20,8 @@ type GatewayHealth struct {
 	UptimeSeconds float64
 	GoRoutines    int
 	MemAllocMB    float64
+	DiskUsedMB    float64
+	DiskTotalMB   float64
 	Connectors    []ConnectorHealth
 }
 
@@ -43,23 +47,35 @@ func (h *HealthMonitor) Snapshot(ctx context.Context) GatewayHealth {
 		allocMB = float64(samples[0].Value.Uint64()) / 1024 / 1024
 	}
 
+	diskUsed, diskTotal := diskStatsMB()
+
 	snap := GatewayHealth{
 		UptimeSeconds: time.Since(h.startTime).Seconds(),
 		GoRoutines:    runtime.NumGoroutine(),
 		MemAllocMB:    allocMB,
+		DiskUsedMB:    diskUsed,
+		DiskTotalMB:   diskTotal,
 	}
 
-	for _, status := range h.registry.List() {
-		ch := ConnectorHealth{ID: status.Spec.ID, Running: status.Running}
-		if status.ContainerID != "" {
-			// Verify liveness by inspecting the container in the Docker daemon.
-			if resp, err := h.docker.ContainerInspect(ctx, status.ContainerID); err == nil {
-				ch.Running = resp.ContainerJSONBase != nil && resp.State != nil && resp.State.Running
-			} else {
-				ch.Running = false
-			}
+	statuses := h.registry.List()
+	connectors := make([]ConnectorHealth, len(statuses))
+	var wg sync.WaitGroup
+	for i, status := range statuses {
+		connectors[i] = ConnectorHealth{ID: status.Spec.ID, Image: status.Spec.Image, Running: status.Running}
+		if status.ContainerID != "" && h.docker != nil {
+			wg.Add(1)
+			go func(idx int, containerID string) {
+				defer wg.Done()
+				// Verify liveness by inspecting the container in the Docker daemon.
+				if resp, err := h.docker.ContainerInspect(ctx, containerID); err == nil {
+					connectors[idx].Running = resp.ContainerJSONBase != nil && resp.State != nil && resp.State.Running
+				} else {
+					connectors[idx].Running = false
+				}
+			}(i, status.ContainerID)
 		}
-		snap.Connectors = append(snap.Connectors, ch)
 	}
+	wg.Wait()
+	snap.Connectors = connectors
 	return snap
 }

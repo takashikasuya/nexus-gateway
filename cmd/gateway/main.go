@@ -15,9 +15,15 @@ import (
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 
+	"net/http"
+
+	dockerclient "github.com/docker/docker/client"
+
 	"nexus-gateway/connector/sim"
+	"nexus-gateway/internal/adminapi"
 	"nexus-gateway/internal/dispatch"
 	"nexus-gateway/internal/egress"
+	"nexus-gateway/internal/lifecycle"
 	"nexus-gateway/internal/normalizer"
 	"nexus-gateway/internal/pointlist"
 	"nexus-gateway/internal/pointsync"
@@ -30,6 +36,10 @@ func main() {
 	natsURL := flag.String("nats", envOrDefault("NATS_URL", nats.DefaultURL), "NATS URL")
 	bosAddr := flag.String("bos", envOrDefault("BOS_ADDR", "localhost:50051"), "Building OS gRPC address")
 	gatewayID := flag.String("gateway-id", envOrDefault("GATEWAY_ID", "gw-001"), "Gateway ID")
+	adminAddr := flag.String("admin-addr", envOrDefault("ADMIN_ADDR", ":8080"), "Admin API listen address")
+	jwksURL := flag.String("admin-jwks-url", envOrDefault("KEYCLOAK_JWKS_URL", ""), "Keycloak JWKS URL (empty = auth disabled)")
+	adminAudience := flag.String("admin-audience", envOrDefault("KEYCLOAK_AUDIENCE", "account"), "Expected JWT audience")
+	adminIssuer := flag.String("admin-issuer", envOrDefault("KEYCLOAK_ISSUER", ""), "Expected JWT issuer")
 	plFile := flag.String("point-list", envOrDefault("POINT_LIST_FILE", "fixtures/point_list.json"), "Bootstrap fixture point list (used when --provisioning-url is empty)")
 	plPersist := flag.String("point-list-persist", envOrDefault("POINT_LIST_PERSIST", "data/point_list.json"), "Path to persist the synced point list")
 	provURL := flag.String("provisioning-url", envOrDefault("PROVISIONING_URL", ""), "Provisioning API base URL (empty = fixture only)")
@@ -138,6 +148,39 @@ func main() {
 	egressAgent := egress.New(nc, *bosAddr, *gatewayID, d)
 	go egressAgent.Run(ctx)
 
+	// Start Admin API
+	connRegistry := lifecycle.NewRegistry()
+	docker, dockerErr := dockerclient.NewClientWithOpts(dockerclient.FromEnv, dockerclient.WithAPIVersionNegotiation())
+	if dockerErr != nil {
+		slog.Warn("admin: Docker client unavailable — lifecycle actions disabled", "err", dockerErr)
+	}
+	var dockerCC lifecycle.ContainerClient
+	if docker != nil {
+		dockerCC = docker
+	}
+	connMgr := lifecycle.NewManager(dockerCC, connRegistry)
+	healthMon := lifecycle.NewHealthMonitor(dockerCC, connRegistry)
+	var adminSrv *adminapi.Server
+	if *jwksURL != "" {
+		adminSrv = adminapi.New(connMgr, healthMon, *jwksURL, *adminAudience, *adminIssuer)
+	} else {
+		slog.Warn("admin: JWT auth disabled — set KEYCLOAK_JWKS_URL before exposing this port")
+		adminSrv = adminapi.NewNoAuth(connMgr, healthMon)
+	}
+	httpSrv := &http.Server{Addr: *adminAddr, Handler: adminSrv}
+	go func() {
+		slog.Info("admin: listening", "addr", *adminAddr)
+		if err := httpSrv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			slog.Error("admin: server error", "err", err)
+		}
+	}()
+
+	// Register sim connector in the lifecycle registry so the Admin UI can show it.
+	// The sim connector runs as an in-process goroutine (no container), so ContainerID
+	// stays empty and Docker inspection is skipped in Snapshot.
+	connRegistry.Register(lifecycle.ConnectorSpec{ID: "sim-01", Image: "sim:dev"})
+	connRegistry.SetRunning("sim-01", "", true)
+
 	// Start sim connector
 	connector := sim.New("sim-01", js, 5*time.Second, []sim.Point{
 		{LocalID: "sim://ahu-01/supply_air_temp", DeviceRef: "sim://ahu-01", Unit: "Cel", BaseValue: 22.0, Amplitude: 3.0},
@@ -152,6 +195,14 @@ func main() {
 	<-stop
 	slog.Info("gateway shutting down")
 	cancel()
+	shutCtx, shutCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer shutCancel()
+	if err := httpSrv.Shutdown(shutCtx); err != nil {
+		slog.Warn("admin: shutdown error", "err", err)
+	}
+	if adminSrv != nil {
+		adminSrv.Shutdown()
+	}
 	pumpWg.Wait()
 	buf.Close()
 }
