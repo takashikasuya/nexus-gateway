@@ -26,7 +26,7 @@ This epic wires those simulators into a reproducible integration environment and
 - [ ] **OPC-UA telemetry E2E:** the OPC-UA connector browses/reads/subscribes opcua-sim nodes and publishes Common Events carrying `protocol=opcua`; the frames arrive at the mock Building OS Ingress.
 - [ ] **Control E2E (both protocols):** a Control Command dispatched through the Egress/Command Channel reaches the connector write handler, performs the protocol write (BACnet WriteProperty with priority; OPC-UA Write/Method Call), and the change is observable back in the simulator's state; the typed ControlResult is returned within the deadline (ADR-0004), idempotent on `control_id`.
 - [ ] A value changed inside the simulator (simulator-generated waveform or Admin-UI-set value) is observed flowing through to the mock Building OS, proving the read path reflects live source state, not cached fixtures.
-- [ ] At least one CI job runs the telemetry E2E against the simulators headless (the control E2E may stay a documented manual/opt-in run if CI networking can't host BACnet broadcast).
+- [ ] CI (per-PR, headless) runs unit tests plus the **OPC-UA telemetry E2E** against opcua-sim (plain TCP:4840, mock Building OS) as the first integration job. The BACnet telemetry E2E runs in CI if the runner can host BACnet/IP networking; otherwise its discovery path is manual and a directed (configured-IP, non-broadcast) read stays in CI. Control E2E and the full SoS run (EP-010) are manual/nightly.
 - [ ] The integration run is documented in the README/run book (EP-008 FEAT-036) so a developer can reproduce both telemetry and control paths locally.
 
 ## Child Features

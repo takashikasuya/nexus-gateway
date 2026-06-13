@@ -12,20 +12,21 @@ This epic does **not** introduce new pipeline stages; it hardens existing ones. 
 ## Acceptance Criteria
 
 - [ ] The Ingress uplink (`internal/uplink`) and the Egress agent (`internal/egress`) connect to Building OS over TLS with a verified server certificate; `insecure.NewCredentials()` is gone from non-test code.
-- [ ] Each gRPC call to Building OS carries a gateway service credential (OIDC client-credentials token or mTLS client cert) that Building OS can authenticate to the issuing `gateway_id`; the mechanism is fixed in **ADR-0007 (transport security)** before implementation.
+- [ ] The gateway presents a **client certificate** whose CN/SAN encodes its `gateway_id` for mTLS terminated at the Building OS Envoy edge (ADR-0007); no OIDC bearer token is added to the gRPC link (Building OS does not validate one there). A config-driven `--insecure` h2c path exists only for dev/CI behind an explicit flag.
 - [ ] Transport security degrades safely: a cert/token error surfaces as a connection failure that the Store-and-Forward buffer rides out (ADR-0002), never as silent data loss or a crash loop without backoff.
-- [ ] The Normalizer's behavior for a Common Event whose `local_id` is absent from the current Point List is an explicit, documented policy fixed in **ADR-0008 (point-list-miss policy)** — not the current implicit "Nak ×3 then drop". The chosen policy is implemented with a counter/metric so misses are observable.
-- [ ] The sim Connector no longer runs in-process inside `cmd/gateway`; it is either a separate container started through the lifecycle Manager or gated behind an explicit `--dev-sim` flag that is off by default and documented as non-production. The connector-isolation invariant (ADR-0001) holds in the default build.
-- [ ] `go.mod` pins a toolchain version that CI actually runs; the `go` directive matches a released stable Go and `go build`/`go test` pass on that version in CI.
+- [ ] The Normalizer distinguishes a **poison** Common Event (unparseable/permanently invalid) from a **point-list miss** (unknown `local_id`): both are `Term()`-ed (no pointless `Nak ×3` redelivery), each under its own metric (`normalizer_invalid_total`, `normalizer_unresolved_total{reason="point_list_miss"}`) so misses are observable. Drop-on-miss is acceptable under best-effort (ADR-0002): the Point List is near-static, synced before the pipeline accepts telemetry, so a miss signals genuine misconfiguration, not a timing race — no parking/hold machinery is built.
+- [ ] Point List sync cadence is **initial-sync-then-slow-poll** (default ~10 min, configurable, may be slower) rather than the current 30 s — the list rarely changes, so frequent polling is waste (ADR-0003).
+- [ ] The sim Connector no longer runs in-process by default: it is gated behind an explicit `--dev-sim` flag, **off by default**, documented as a zero-dependency dev/smoke path superseded by the EP-009 simulators. The connector-isolation invariant (ADR-0001) holds in the default build (no in-process connector).
+- [ ] A CI workflow exists (none today) that runs `go build`/`go test` on the pinned Go 1.25.x; `go.mod` keeps `go 1.25` (stable, matches the local/CI toolchain) with an explicit `toolchain` directive — the original "downgrade to stable" concern is moot since 1.25 is stable.
 - [ ] A top-level `README` documents: what the gateway is, the pipeline diagram, prerequisites, `docker compose up` quickstart, the env/flags surface (NATS, BOS, Keycloak, Admin API), and how to point connectors at the simulators (EP-009).
 - [ ] `docker compose up` from a clean checkout brings the full stack (NATS, mock/real Building OS, gateway, Keycloak, Admin UI) to healthy with documented health checks; no manual post-steps.
 
 ## Child Features
 
-- [ ] FEAT-032: gRPC transport security — TLS + service credential for Ingress uplink and Egress agent (ADR-0007). **HITL** (cross-repo contract with Building OS; new ADR).
-- [ ] FEAT-033: Point-List-miss policy for the Normalizer — park/hold/drop decision, metric, bounded behavior (ADR-0008). **HITL** (new ADR).
-- [ ] FEAT-034: Sim Connector externalization — remove in-process sim from `cmd/gateway`; run as container or dev-only flag (ADR-0001 isolation).
-- [ ] FEAT-035: Toolchain & dependency hygiene — pin `go` directive to CI's stable Go, tidy modules, green CI.
+- [ ] FEAT-032: gRPC transport security — config-driven TLS/mTLS (CA + client cert/key, CN/SAN = `gateway_id`) for Ingress uplink and Egress agent; default-secure with explicit `--insecure` dev path (ADR-0007). External dep: Building OS Envoy/cert-manager edge (#161).
+- [ ] FEAT-033: Normalizer drop-and-meter policy — `Term()` poison + miss separately with per-reason metrics (replace `Nak ×3`); slow the Point List sync to initial + ~10 min poll. (No ADR — drop-on-miss is ADR-0002 best-effort applied; requirements confirmed relaxed.)
+- [ ] FEAT-034: Sim Connector de-default — gate in-process `sim` behind `--dev-sim` (off by default); default build has no in-process connector (ADR-0001 isolation). Not containerized — superseded by EP-009 real simulators.
+- [ ] FEAT-035: CI + toolchain hygiene — stand up the CI workflow (build + unit test on Go 1.25.x), add `toolchain` directive, `go mod tidy`. (go.mod stays at 1.25; real gap is absence of CI.)
 - [ ] FEAT-036: Operator run book & compose hardening — README, quickstart, env/flags reference, health-checked one-command bring-up.
 
 ## Dependencies
@@ -34,4 +35,7 @@ This epic does **not** introduce new pipeline stages; it hardens existing ones. 
 - EP-003 Normalizer/Uplink — FEAT-032 and FEAT-033 modify these stages.
 - EP-005 Control Path — FEAT-032 also secures the Egress gRPC link used by the Command path.
 - **External:** Building OS (`gutp-building-os-oss`) must accept the chosen TLS + credential mechanism; FEAT-032 is blocked on that contract being agreed in ADR-0007.
-- **Pending decisions:** ADR-0007 (transport security: mTLS vs OIDC client-credentials vs both) and ADR-0008 (point-list-miss policy) are not yet written; the two HITL features gate on them.
+- **Resolved (grill 2026-06-13/14):**
+  - ADR-0007 written — mTLS at the Building OS Envoy edge, h2c in-cluster, `gateway_id`↔cert CN/SAN, no OIDC token on the gRPC link. FEAT-032 is AFK on the gateway side (config + TLS dialer); production cutover waits on Building OS edge (#161, external).
+  - Point-list-miss policy: **no ADR** — relaxed loss/timing requirements collapse the trade-off to drop-and-meter under ADR-0002; FEAT-033 is AFK. Sync cadence relaxed to initial + ~10 min.
+- **No remaining HITL gates.**
