@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import asyncio
+import dataclasses
 import json
 
 import pytest
@@ -147,8 +148,7 @@ async def test_write_timeout_replies_timeout():
 async def test_priority_zero_uses_default_write_priority():
     """priority=0 in command falls back to config.default_write_priority."""
     bacnet = MockBACnetClient()
-    cfg = make_config([writable_point()])
-    cfg = Config(**{**cfg.__dict__, "default_write_priority": 12})
+    cfg = dataclasses.replace(make_config([writable_point()]), default_write_priority=12)
     handler = WriteHandler(cfg, bacnet)
 
     msg = cmd_msg(priority=0)

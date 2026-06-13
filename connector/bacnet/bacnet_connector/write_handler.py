@@ -3,14 +3,10 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import TYPE_CHECKING
 
 from bacnet_connector.command import ControlCommand, WriteReply
 from bacnet_connector.config import Config
 from bacnet_connector.connector import BACnetClient
-
-if TYPE_CHECKING:
-    import nats
 
 logger = logging.getLogger(__name__)
 
@@ -39,11 +35,14 @@ class WriteHandler:
             await msg.respond(WriteReply(success=False, response="bad_request").encode())  # type: ignore[union-attr]
             return
 
-        # Idempotency: return cached result for duplicate control_id
+        # Idempotency: reserve sentinel before first await to prevent TOCTOU double-write.
         if cmd.control_id in self._dedup:
-            await msg.respond(self._dedup[cmd.control_id].encode())  # type: ignore[union-attr]
-            return
+            cached = self._dedup[cmd.control_id]
+            if cached is not None:
+                await msg.respond(cached.encode())  # type: ignore[union-attr]
+            return  # in-flight duplicate: drop silently
 
+        self._dedup[cmd.control_id] = None  # type: ignore[assignment]  # reserve slot
         result = await self._execute(cmd)
         self._cache(cmd.control_id, result)
         await msg.respond(result.encode())  # type: ignore[union-attr]

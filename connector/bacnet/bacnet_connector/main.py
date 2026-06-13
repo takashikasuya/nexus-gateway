@@ -37,8 +37,10 @@ async def _run(cfg: Config) -> None:
     try:
         await connector.run(stop_event=stop_event)
     finally:
-        await sub.unsubscribe()
-        await nc.drain()
+        try:
+            await sub.unsubscribe()
+        finally:
+            await nc.drain()
 
 
 def main() -> None:

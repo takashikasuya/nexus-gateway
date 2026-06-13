@@ -29,6 +29,10 @@ class Config:
     def __post_init__(self) -> None:
         if self.poll_interval <= 0:
             raise ValueError(f"poll_interval must be positive, got {self.poll_interval}")
+        if not 1 <= self.default_write_priority <= 16:
+            raise ValueError(f"default_write_priority must be 1–16, got {self.default_write_priority}")
+        if self.write_timeout <= 0:
+            raise ValueError(f"write_timeout must be positive, got {self.write_timeout}")
 
     @classmethod
     def from_env(cls) -> "Config":
