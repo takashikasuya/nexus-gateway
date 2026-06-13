@@ -154,6 +154,20 @@ func TestMissingCAFileErrors(t *testing.T) {
 	}
 }
 
+func TestInsecureWithTLSMaterialRejected(t *testing.T) {
+	// Insecure must not silently win over supplied TLS material — that would ship
+	// cleartext while the operator believes mTLS is configured.
+	for _, cfg := range []Config{
+		{Insecure: true, CAFile: "ca.pem"},
+		{Insecure: true, CertFile: "c.pem", KeyFile: "k.pem"},
+		{Insecure: true, ServerName: "bos.example"},
+	} {
+		if _, err := ClientCredentials(cfg); err == nil {
+			t.Fatalf("Insecure + TLS material must error, got nil for %+v", cfg)
+		}
+	}
+}
+
 // ── greeter test server ───────────────────────────────────────────────────────
 // A minimal GatewayIngress server. The RPC body is irrelevant; dialAndGreet sends
 // one frame and closes so the TLS handshake is actually forced to complete (or
