@@ -25,6 +25,26 @@ services:
       nats:
         condition: service_healthy
 
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    command: start-dev --import-realm
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HTTP_PORT: "8090"
+      KC_HOSTNAME_STRICT: "false"
+      KC_HTTP_ENABLED: "true"
+    ports:
+      - "8090:8090"
+    volumes:
+      - ./fixtures/keycloak:/opt/keycloak/data/import:ro
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8090/realms/nexus-gateway/.well-known/openid-configuration || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
   gateway:
     build:
       context: .
@@ -34,12 +54,41 @@ services:
       - NATS_URL=nats://nats:4222
       - BOS_ADDR=mock-bos:50051
       - POINT_LIST_FILE=/fixtures/point_list.json
+      - ADMIN_ADDR=:8080
+      # When KEYCLOAK_JWKS_URL is set, tokens are validated; omit for auth-free dev.
+      - KEYCLOAK_JWKS_URL=http://keycloak:8090/realms/nexus-gateway/protocol/openid-connect/certs
+      # Issuer must match the iss claim in tokens (uses external hostname seen by browser).
+      - KEYCLOAK_ISSUER=http://localhost:8090/realms/nexus-gateway
+      - KEYCLOAK_AUDIENCE=account
+    ports:
+      - "8080:8080"
     volumes:
       - ./fixtures:/fixtures:ro
     depends_on:
       nats:
         condition: service_healthy
       mock-bos:
+        condition: service_started
+      keycloak:
+        condition: service_healthy
+
+  admin-ui:
+    build:
+      context: ./admin-ui
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXTAUTH_URL=http://localhost:3000
+      - NEXTAUTH_SECRET=dev-secret-change-in-production
+      - KEYCLOAK_ID=admin-ui
+      - KEYCLOAK_SECRET=admin-ui-secret
+      - KEYCLOAK_ISSUER=http://localhost:8090/realms/nexus-gateway
+      - ADMIN_API_URL=http://gateway:8080
+    depends_on:
+      keycloak:
+        condition: service_healthy
+      gateway:
         condition: service_started
 
 volumes:

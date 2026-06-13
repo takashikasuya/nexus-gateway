@@ -1,0 +1,14 @@
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { getHealth } from "@/lib/api";
+import { NextResponse } from "next/server";
+
+export async function GET() {
+  const session = await getServerSession(authOptions);
+  try {
+    const health = await getHealth(session?.accessToken);
+    return NextResponse.json(health);
+  } catch (err) {
+    return NextResponse.json({ error: String(err) }, { status: 502 });
+  }
+}

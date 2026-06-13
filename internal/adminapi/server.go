@@ -47,6 +47,22 @@ func New(mgr ConnectorManager, monitor HealthSnapshotter, jwksURL, audience, iss
 	return s
 }
 
+// NewNoAuth creates a Server with authentication disabled (dev/local use only).
+func NewNoAuth(mgr ConnectorManager, monitor HealthSnapshotter) *Server {
+	noAuth := &JWTMiddleware{}
+	s := &Server{
+		mux:     http.NewServeMux(),
+		auth:    noAuth,
+		mgr:     mgr,
+		monitor: monitor,
+	}
+	s.mux.HandleFunc("GET /health", s.handleHealth)
+	s.mux.HandleFunc("GET /metrics", s.handleMetrics)
+	s.mux.HandleFunc("GET /connectors", s.handleListConnectors)
+	s.mux.HandleFunc("POST /connectors/{id}/{action}", s.handleAction)
+	return s
+}
+
 // Shutdown stops the JWKS cache background refresh goroutine.
 func (s *Server) Shutdown() {
 	if s.shutdown != nil {
@@ -78,6 +94,7 @@ func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {
 
 type connectorItem struct {
 	ID      string `json:"id"`
+	Image   string `json:"image"`
 	Running bool   `json:"running"`
 }
 
@@ -85,7 +102,7 @@ func (s *Server) handleListConnectors(w http.ResponseWriter, r *http.Request) {
 	h := s.monitor.Snapshot(r.Context())
 	items := make([]connectorItem, 0, len(h.Connectors))
 	for _, c := range h.Connectors {
-		items = append(items, connectorItem{ID: c.ID, Running: c.Running})
+		items = append(items, connectorItem{ID: c.ID, Image: c.Image, Running: c.Running})
 	}
 	writeJSON(w, items)
 }

@@ -4,12 +4,14 @@ import (
 	"context"
 	"runtime"
 	"runtime/metrics"
+	"syscall"
 	"time"
 )
 
 // ConnectorHealth is the liveness status of one connector.
 type ConnectorHealth struct {
 	ID      string
+	Image   string
 	Running bool
 }
 
@@ -18,6 +20,8 @@ type GatewayHealth struct {
 	UptimeSeconds float64
 	GoRoutines    int
 	MemAllocMB    float64
+	DiskUsedMB    float64
+	DiskTotalMB   float64
 	Connectors    []ConnectorHealth
 }
 
@@ -43,14 +47,25 @@ func (h *HealthMonitor) Snapshot(ctx context.Context) GatewayHealth {
 		allocMB = float64(samples[0].Value.Uint64()) / 1024 / 1024
 	}
 
+	var diskUsed, diskTotal float64
+	var st syscall.Statfs_t
+	if err := syscall.Statfs("/", &st); err == nil {
+		total := float64(st.Blocks) * float64(st.Bsize)
+		free := float64(st.Bfree) * float64(st.Bsize)
+		diskTotal = total / 1024 / 1024
+		diskUsed = (total - free) / 1024 / 1024
+	}
+
 	snap := GatewayHealth{
 		UptimeSeconds: time.Since(h.startTime).Seconds(),
 		GoRoutines:    runtime.NumGoroutine(),
 		MemAllocMB:    allocMB,
+		DiskUsedMB:    diskUsed,
+		DiskTotalMB:   diskTotal,
 	}
 
 	for _, status := range h.registry.List() {
-		ch := ConnectorHealth{ID: status.Spec.ID, Running: status.Running}
+		ch := ConnectorHealth{ID: status.Spec.ID, Image: status.Spec.Image, Running: status.Running}
 		if status.ContainerID != "" {
 			// Verify liveness by inspecting the container in the Docker daemon.
 			if resp, err := h.docker.ContainerInspect(ctx, status.ContainerID); err == nil {
