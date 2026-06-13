@@ -2,6 +2,8 @@
 
 **An edge integration gateway that connects building equipment (BMS, IoT, field protocols) to [Building OS](https://github.com/takashikasuya/gutp-building-os-oss).**
 
+*English / [日本語](README.ja.md)*
+
 It collects equipment data, relays control, absorbs protocol differences, and
 normalizes everything into Building OS's common data model. Building OS is the
 **System of Record**; this gateway is responsible only for **connection and
