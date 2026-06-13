@@ -48,7 +48,11 @@ export function ConnectorTable({ data, isOperator, onRefresh }: Props) {
       cell: (info) => {
         const img = info.getValue();
         if (!img) return "—";
-        const [, tag] = img.split(":");
+        // Extract the tag from the part after the last '/'; skip digest refs.
+        const afterSlash = img.slice(img.lastIndexOf("/") + 1);
+        const tag = !afterSlash.includes("@") && afterSlash.includes(":")
+          ? afterSlash.slice(afterSlash.lastIndexOf(":") + 1)
+          : "";
         return (
           <span title={img}>
             {img.length > 40 ? `…${img.slice(-37)}` : img}

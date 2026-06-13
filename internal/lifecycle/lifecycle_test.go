@@ -184,8 +184,14 @@ func TestHealth_ContainsGatewayAndConnectors(t *testing.T) {
 	h := mon.Snapshot(context.Background())
 
 	assert.Greater(t, h.UptimeSeconds, 0.0)
+	assert.GreaterOrEqual(t, h.DiskTotalMB, 0.0)
+	assert.GreaterOrEqual(t, h.DiskUsedMB, 0.0)
+	if h.DiskTotalMB > 0 {
+		assert.LessOrEqual(t, h.DiskUsedMB, h.DiskTotalMB)
+	}
 	require.Len(t, h.Connectors, 1)
 	assert.Equal(t, "mqtt-01", h.Connectors[0].ID)
+	assert.Equal(t, "img:v1", h.Connectors[0].Image)
 	assert.True(t, h.Connectors[0].Running)
 }
 

@@ -5,8 +5,11 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   const session = await getServerSession(authOptions);
+  if (!session?.accessToken) {
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
   try {
-    const health = await getHealth(session?.accessToken);
+    const health = await getHealth(session.accessToken);
     return NextResponse.json(health);
   } catch (err) {
     return NextResponse.json({ error: String(err) }, { status: 502 });

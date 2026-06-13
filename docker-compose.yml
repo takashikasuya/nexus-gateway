@@ -67,6 +67,8 @@ services:
       - "8080:8080"
     volumes:
       - ./fixtures:/fixtures:ro
+      # Mount host Docker socket so the gateway can manage connector containers.
+      - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       nats:
         condition: service_healthy

@@ -5,7 +5,6 @@ import (
 	"runtime"
 	"runtime/metrics"
 	"sync"
-	"syscall"
 	"time"
 )
 
@@ -48,14 +47,7 @@ func (h *HealthMonitor) Snapshot(ctx context.Context) GatewayHealth {
 		allocMB = float64(samples[0].Value.Uint64()) / 1024 / 1024
 	}
 
-	var diskUsed, diskTotal float64
-	var st syscall.Statfs_t
-	if err := syscall.Statfs("/", &st); err == nil {
-		total := float64(st.Blocks) * float64(st.Bsize)
-		free := float64(st.Bavail) * float64(st.Bsize)
-		diskTotal = total / 1024 / 1024
-		diskUsed = (total - free) / 1024 / 1024
-	}
+	diskUsed, diskTotal := diskStatsMB()
 
 	snap := GatewayHealth{
 		UptimeSeconds: time.Since(h.startTime).Seconds(),
@@ -70,7 +62,7 @@ func (h *HealthMonitor) Snapshot(ctx context.Context) GatewayHealth {
 	var wg sync.WaitGroup
 	for i, status := range statuses {
 		connectors[i] = ConnectorHealth{ID: status.Spec.ID, Image: status.Spec.Image, Running: status.Running}
-		if status.ContainerID != "" {
+		if status.ContainerID != "" && h.docker != nil {
 			wg.Add(1)
 			go func(idx int, containerID string) {
 				defer wg.Done()

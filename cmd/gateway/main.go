@@ -164,6 +164,7 @@ func main() {
 	if *jwksURL != "" {
 		adminSrv = adminapi.New(connMgr, healthMon, *jwksURL, *adminAudience, *adminIssuer)
 	} else {
+		slog.Warn("admin: JWT auth disabled — set KEYCLOAK_JWKS_URL before exposing this port")
 		adminSrv = adminapi.NewNoAuth(connMgr, healthMon)
 	}
 	httpSrv := &http.Server{Addr: *adminAddr, Handler: adminSrv}
@@ -173,6 +174,12 @@ func main() {
 			slog.Error("admin: server error", "err", err)
 		}
 	}()
+
+	// Register sim connector in the lifecycle registry so the Admin UI can show it.
+	// The sim connector runs as an in-process goroutine (no container), so ContainerID
+	// stays empty and Docker inspection is skipped in Snapshot.
+	connRegistry.Register(lifecycle.ConnectorSpec{ID: "sim-01", Image: "sim:dev"})
+	connRegistry.SetRunning("sim-01", "", true)
 
 	// Start sim connector
 	connector := sim.New("sim-01", js, 5*time.Second, []sim.Point{
