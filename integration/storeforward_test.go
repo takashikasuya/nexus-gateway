@@ -67,7 +67,7 @@ func TestSF_OutageSurvival(t *testing.T) {
 	bos := startMockBOS(t, received, &accepted)
 
 	cfg := uplink.Config{CheckpointSize: 1000, CheckpointAge: 100 * time.Millisecond}
-	ul, err := uplink.NewIngress(ctx, bos.addr, "gw-001", buf, cfg)
+	ul, err := uplink.NewIngress(ctx, bos.addr, "gw-001", buf, cfg, insecureCreds())
 	require.NoError(t, err)
 	go ul.Run(ctx)
 
@@ -152,7 +152,7 @@ func TestSF_ImmediateSend(t *testing.T) {
 	bos := startMockBOS(t, received, &acc)
 
 	cfg := uplink.Config{CheckpointSize: 1000, CheckpointAge: 5 * time.Second} // long checkpoint
-	ul, err := uplink.NewIngress(ctx, bos.addr, "gw-001", buf, cfg)
+	ul, err := uplink.NewIngress(ctx, bos.addr, "gw-001", buf, cfg, insecureCreds())
 	require.NoError(t, err)
 	go ul.Run(ctx)
 
@@ -203,7 +203,7 @@ func TestSF_DriftCounterRises(t *testing.T) {
 	bos := startMockBOSWithAccepted(t, received2)
 
 	cfg := uplink.Config{CheckpointSize: 2, CheckpointAge: 5 * time.Second}
-	ul, err := uplink.NewIngress(ctx, bos.addr, "gw-001", buf, cfg)
+	ul, err := uplink.NewIngress(ctx, bos.addr, "gw-001", buf, cfg, insecureCreds())
 	require.NoError(t, err)
 	go ul.Run(ctx)
 

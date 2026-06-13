@@ -66,7 +66,7 @@ func TestPointSync_LiveRemap(t *testing.T) {
 	var acc atomic.Int64
 	bos := startMockBOS(t, received, &acc)
 	ul, err := uplink.NewIngress(ctx, bos.addr, "gw-001", buf,
-		uplink.Config{CheckpointSize: 1000, CheckpointAge: 100 * time.Millisecond})
+		uplink.Config{CheckpointSize: 1000, CheckpointAge: 100 * time.Millisecond}, insecureCreds())
 	require.NoError(t, err)
 	go ul.Run(ctx)
 
@@ -143,7 +143,7 @@ func TestPointSync_RemovalSkipsFrames(t *testing.T) {
 	var acc atomic.Int64
 	bos := startMockBOS(t, received, &acc)
 	ul, err := uplink.NewIngress(ctx, bos.addr, "gw-001", buf,
-		uplink.Config{CheckpointSize: 1000, CheckpointAge: 100 * time.Millisecond})
+		uplink.Config{CheckpointSize: 1000, CheckpointAge: 100 * time.Millisecond}, insecureCreds())
 	require.NoError(t, err)
 	go ul.Run(ctx)
 
