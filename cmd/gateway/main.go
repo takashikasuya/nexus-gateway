@@ -18,6 +18,8 @@ import (
 	"nexus-gateway/connector/sim"
 	"nexus-gateway/internal/normalizer"
 	"nexus-gateway/internal/pointlist"
+	"nexus-gateway/internal/pointsync"
+	"nexus-gateway/internal/provisioning"
 	"nexus-gateway/internal/storeforward"
 	"nexus-gateway/internal/uplink"
 )
@@ -26,7 +28,9 @@ func main() {
 	natsURL := flag.String("nats", envOrDefault("NATS_URL", nats.DefaultURL), "NATS URL")
 	bosAddr := flag.String("bos", envOrDefault("BOS_ADDR", "localhost:50051"), "Building OS gRPC address")
 	gatewayID := flag.String("gateway-id", envOrDefault("GATEWAY_ID", "gw-001"), "Gateway ID")
-	plFile := flag.String("point-list", envOrDefault("POINT_LIST_FILE", "fixtures/point_list.json"), "Fixture point list file")
+	plFile := flag.String("point-list", envOrDefault("POINT_LIST_FILE", "fixtures/point_list.json"), "Bootstrap fixture point list (used when --provisioning-url is empty)")
+	plPersist := flag.String("point-list-persist", envOrDefault("POINT_LIST_PERSIST", "data/point_list.json"), "Path to persist the synced point list")
+	provURL := flag.String("provisioning-url", envOrDefault("PROVISIONING_URL", ""), "Provisioning API base URL (empty = fixture only)")
 	sfDB := flag.String("sf-db", envOrDefault("SF_DB", "data/storeforward.db"), "Store-and-Forward SQLite database path")
 	sfCap := flag.Int("sf-cap", 100_000, "Store-and-Forward ring buffer capacity (frames)")
 	flag.Parse()
@@ -66,15 +70,37 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Load fixture point list
-	pl, err := loadFixturePointList(*plFile)
-	if err != nil {
-		slog.Error("load point list failed", "err", err)
-		os.Exit(1)
+	// Build the live point list resolver
+	resolver := pointlist.NewSynced(nil)
+	if *provURL != "" {
+		// Real sync loop against the provisioning API (ADR-0003)
+		syncLoop := pointsync.New(
+			provisioning.NewHTTPClient(*provURL),
+			resolver,
+			pointsync.Config{Interval: 30 * time.Second, PersistPath: *plPersist},
+		)
+		go syncLoop.Run(ctx)
+		// Wait for initial snapshot before starting the pipeline
+		waitCtx, waitCancel := context.WithTimeout(ctx, 30*time.Second)
+		defer waitCancel()
+		for {
+			if len(resolver.Snapshot()) > 0 || waitCtx.Err() != nil {
+				break
+			}
+			time.Sleep(100 * time.Millisecond)
+		}
+	} else {
+		// Bootstrap from fixture file (dev / no provisioning API)
+		entries, err := loadFixtureEntries(*plFile)
+		if err != nil {
+			slog.Error("load point list failed", "err", err)
+			os.Exit(1)
+		}
+		resolver.Update(entries)
 	}
 
 	// Start Normalizer
-	norm, err := normalizer.New(ctx, js, pl, *gatewayID)
+	norm, err := normalizer.New(ctx, js, resolver, *gatewayID)
 	if err != nil {
 		slog.Error("normalizer init failed", "err", err)
 		os.Exit(1)
@@ -123,16 +149,13 @@ func main() {
 	buf.Close()
 }
 
-func loadFixturePointList(path string) (*pointlist.Fixture, error) {
+func loadFixtureEntries(path string) ([]pointlist.Entry, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
 	var entries []pointlist.Entry
-	if err := json.Unmarshal(data, &entries); err != nil {
-		return nil, err
-	}
-	return pointlist.NewFixture(entries), nil
+	return entries, json.Unmarshal(data, &entries)
 }
 
 func envOrDefault(key, def string) string {
