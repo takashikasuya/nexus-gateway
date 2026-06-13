@@ -18,5 +18,11 @@ public interface OpcUaClientFacade {
     /** Browse children of rootNodeId; returns map of nodeId → display name. */
     Map<String, String> browse(String rootNodeId) throws Exception;
 
+    /** Write a scalar double to a node's Value attribute. Throws on bad StatusCode or transport error. */
+    void writeNode(String nodeId, double value) throws Exception;
+
+    /** Call a method node with a single scalar double argument. Throws on bad StatusCode or transport error. */
+    void callMethod(String objectNodeId, String methodNodeId, double value) throws Exception;
+
     void close() throws Exception;
 }

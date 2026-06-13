@@ -28,12 +28,23 @@ public class Main {
         MiloOpcUaClientFacade miloClient = new MiloOpcUaClientFacade(cfg.opcuaEndpoint());
         Connector connector = new Connector(cfg, miloClient, publisher);
 
+        WriteHandler writeHandler = new WriteHandler(
+            cfg, miloClient,
+            (replyTo, data) -> nats.publish(replyTo, data)
+        );
+
+        String cmdSubject = "cmd.opcua." + cfg.connectorId();
+        var dispatcher = nats.createDispatcher(msg -> writeHandler.handle(msg.getData(), msg.getReplyTo()));
+        dispatcher.subscribe(cmdSubject);
+        log.info("opcua: write handler subscribed to {}", cmdSubject);
+
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             log.info("opcua: shutdown signal received");
             connector.stop();
         }));
 
         connector.run();
+        try { dispatcher.unsubscribe(cmdSubject); } catch (Exception ignored) {}
         nats.close();
     }
 }

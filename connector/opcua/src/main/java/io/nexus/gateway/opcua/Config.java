@@ -12,7 +12,8 @@ public record Config(
     String opcuaEndpoint,
     String deviceRef,
     List<PointConfig> points,
-    double pollInterval
+    double pollInterval,
+    double writeTimeout
 ) {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -24,6 +25,10 @@ public record Config(
         double pollInterval = Double.parseDouble(env("OPCUA_POLL_INTERVAL", "30"));
         if (pollInterval <= 0) {
             throw new IllegalArgumentException("OPCUA_POLL_INTERVAL must be positive");
+        }
+        double writeTimeout = Double.parseDouble(env("OPCUA_WRITE_TIMEOUT", "10"));
+        if (writeTimeout <= 0) {
+            throw new IllegalArgumentException("OPCUA_WRITE_TIMEOUT must be positive");
         }
 
         String pointsJson = env("OPCUA_POINTS", "[]");
@@ -39,12 +44,14 @@ public record Config(
                 return new PointConfig(
                     localId,
                     (String) p.getOrDefault("device_ref", deviceRef),
-                    (String) p.getOrDefault("unit", "")
+                    (String) p.getOrDefault("unit", ""),
+                    Boolean.TRUE.equals(p.get("writable")),
+                    (String) p.get("method_node_id")
                 );
             })
             .toList();
 
-        return new Config(connectorId, natsUrl, endpoint, deviceRef, points, pollInterval);
+        return new Config(connectorId, natsUrl, endpoint, deviceRef, points, pollInterval, writeTimeout);
     }
 
     private static String required(String key) {

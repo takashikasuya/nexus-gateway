@@ -17,6 +17,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.function.BiConsumer;
 
 import static org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.Unsigned.uint;
+import static org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.Unsigned.ushort;
 
 public class MiloOpcUaClientFacade implements OpcUaClientFacade {
 
@@ -126,6 +127,39 @@ public class MiloOpcUaClientFacade implements OpcUaClientFacade {
             }
         }
         return nodes;
+    }
+
+    @Override
+    public void writeNode(String nodeId, double value) throws Exception {
+        DataValue dv = new DataValue(new Variant(value), null, null);
+        WriteValue wv = new WriteValue(NodeId.parse(nodeId), AttributeId.Value.uid(), null, dv);
+        StatusCode[] results = miloClient.write(List.of(wv)).get().getResults();
+        if (results == null || results.length == 0) {
+            throw new Exception("opcua: writeNode returned no results for " + nodeId);
+        }
+        StatusCode sc = results[0];
+        if (sc.isBad()) {
+            throw new Exception("opcua: writeNode bad status " + sc + " for " + nodeId);
+        }
+        log.debug("opcua: writeNode {} = {} status={}", nodeId, value, sc);
+    }
+
+    @Override
+    public void callMethod(String objectNodeId, String methodNodeId, double value) throws Exception {
+        CallMethodRequest req = new CallMethodRequest(
+            NodeId.parse(objectNodeId),
+            NodeId.parse(methodNodeId),
+            new Variant[]{new Variant(value)}
+        );
+        CallMethodResult[] results = miloClient.call(List.of(req)).get().getResults();
+        if (results == null || results.length == 0) {
+            throw new Exception("opcua: callMethod returned no results for " + methodNodeId);
+        }
+        StatusCode sc = results[0].getStatusCode();
+        if (sc.isBad()) {
+            throw new Exception("opcua: callMethod bad status " + sc + " for " + methodNodeId);
+        }
+        log.debug("opcua: callMethod {}({}) status={}", methodNodeId, value, sc);
     }
 
     @Override
