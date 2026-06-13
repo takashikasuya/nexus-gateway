@@ -174,7 +174,7 @@ func startEmbeddedNATS(t *testing.T) *server.Server {
 
 type mockBOSServer struct {
 	pb.UnimplementedGatewayIngressServer
-	received *chan *pb.TelemetryFrame
+	received chan *pb.TelemetryFrame
 	accepted *atomic.Int64
 }
 
@@ -184,7 +184,7 @@ func (s *mockBOSServer) StreamTelemetry(stream pb.GatewayIngress_StreamTelemetry
 		if err != nil {
 			return stream.SendAndClose(&pb.StreamAck{Accepted: s.accepted.Load()})
 		}
-		*s.received <- frame
+		s.received <- frame
 		s.accepted.Add(1)
 	}
 }
@@ -200,7 +200,7 @@ func startMockBOS(t *testing.T, received chan *pb.TelemetryFrame, accepted *atom
 	require.NoError(t, err)
 
 	srv := grpc.NewServer()
-	pb.RegisterGatewayIngressServer(srv, &mockBOSServer{received: &received, accepted: accepted})
+	pb.RegisterGatewayIngressServer(srv, &mockBOSServer{received: received, accepted: accepted})
 
 	go func() { _ = srv.Serve(lis) }()
 	t.Cleanup(srv.GracefulStop)

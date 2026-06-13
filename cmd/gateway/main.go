@@ -96,13 +96,7 @@ func main() {
 	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)
 	<-stop
 	slog.Info("gateway shutting down")
-}
-
-type fixtureEntry struct {
-	ConnectorID string `json:"connector_id"`
-	Protocol    string `json:"protocol"`
-	LocalID     string `json:"local_id"`
-	PointID     string `json:"point_id"`
+	cancel()
 }
 
 func loadFixturePointList(path string) (*pointlist.Fixture, error) {
@@ -110,15 +104,11 @@ func loadFixturePointList(path string) (*pointlist.Fixture, error) {
 	if err != nil {
 		return nil, err
 	}
-	var entries []fixtureEntry
+	var entries []pointlist.Entry
 	if err := json.Unmarshal(data, &entries); err != nil {
 		return nil, err
 	}
-	pl := make([]pointlist.Entry, len(entries))
-	for i, e := range entries {
-		pl[i] = pointlist.Entry{ConnectorID: e.ConnectorID, Protocol: e.Protocol, LocalID: e.LocalID, PointID: e.PointID}
-	}
-	return pointlist.NewFixture(pl), nil
+	return pointlist.NewFixture(entries), nil
 }
 
 func envOrDefault(key, def string) string {

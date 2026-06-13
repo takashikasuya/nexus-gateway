@@ -1,5 +1,5 @@
 GOBIN ?= $(HOME)/go/bin
-GO    ?= $(HOME)/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.25.0.linux-amd64/bin/go
+GO    ?= go
 BUF   ?= $(GOBIN)/buf
 
 .PHONY: generate build test lint clean

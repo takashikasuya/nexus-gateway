@@ -10,7 +10,7 @@ services:
     volumes:
       - nats-data:/data
     healthcheck:
-      test: ["CMD", "nats-server", "--health"]
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8222/healthz || exit 1"]
       interval: 5s
       timeout: 3s
       retries: 5

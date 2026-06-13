@@ -45,6 +45,7 @@ func (n *Normalizer) Frames() <-chan *pb.TelemetryFrame {
 }
 
 func (n *Normalizer) consume(ctx context.Context, cons jetstream.Consumer, resolver pointlist.Resolver, gatewayID string) {
+	defer close(n.frames)
 	for {
 		if ctx.Err() != nil {
 			return
@@ -69,6 +70,9 @@ func (n *Normalizer) consume(ctx context.Context, cons jetstream.Consumer, resol
 				_ = msg.Nak()
 				return
 			}
+		}
+		if err := msgs.Error(); err != nil {
+			slog.Warn("normalizer: fetch error", "err", err)
 		}
 	}
 }
