@@ -58,7 +58,10 @@ func LoadCSV(r io.Reader, connectorID string) ([]Entry, error) {
 			continue // not a resolvable BACnet point
 		}
 		if seen[pointID] {
-			slog.Warn("pointlist: duplicate point_id in CSV — last entry wins", "point_id", pointID)
+			// Dedupe in the loader so the returned snapshot has exactly one entry per
+			// point_id (the resolver would otherwise silently keep only one anyway).
+			slog.Warn("pointlist: duplicate point_id in CSV — ignoring later row", "point_id", pointID)
+			continue
 		}
 		seen[pointID] = true
 		entries = append(entries, Entry{

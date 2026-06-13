@@ -70,6 +70,17 @@ func TestLoadCSV_StripsBOMAndSkipsEmptyPointID(t *testing.T) {
 	assert.Equal(t, "SOS-PT-001", entries[0].PointID)
 }
 
+func TestLoadCSV_DedupesDuplicatePointID(t *testing.T) {
+	const csv = `point_id,object_type_bacnet,instance_no_bacnet
+SOS-PT-001,analogInput,1
+SOS-PT-001,analogInput,99
+`
+	entries, err := pointlist.LoadCSV(strings.NewReader(csv), "bacnet-01")
+	require.NoError(t, err)
+	require.Len(t, entries, 1, "duplicate point_id must collapse to a single entry")
+	assert.Equal(t, "analogInput,1", entries[0].LocalID, "first row wins")
+}
+
 func TestLoadCSV_ToleratesColumnReordering(t *testing.T) {
 	const csv = `instance_no_bacnet,object_type_bacnet,point_id,writable
 7,analogValue,SOS-PT-099,true

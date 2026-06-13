@@ -41,7 +41,7 @@ func main() {
 	jwksURL := flag.String("admin-jwks-url", envOrDefault("KEYCLOAK_JWKS_URL", ""), "Keycloak JWKS URL (empty = auth disabled)")
 	adminAudience := flag.String("admin-audience", envOrDefault("KEYCLOAK_AUDIENCE", "account"), "Expected JWT audience")
 	adminIssuer := flag.String("admin-issuer", envOrDefault("KEYCLOAK_ISSUER", ""), "Expected JWT issuer")
-	plFile := flag.String("point-list", envOrDefault("POINT_LIST_FILE", "fixtures/point_list.json"), "Bootstrap fixture point list (used when --provisioning-url is empty)")
+	plFile := flag.String("point-list", envOrDefault("POINT_LIST_FILE", "fixtures/point_list.json"), "Bootstrap fixture point list (used when both --provisioning-url and --provisioning-file are empty)")
 	plPersist := flag.String("point-list-persist", envOrDefault("POINT_LIST_PERSIST", "data/point_list.json"), "Path to persist the synced point list")
 	provURL := flag.String("provisioning-url", envOrDefault("PROVISIONING_URL", ""), "Provisioning API base URL (empty = fixture only)")
 	provFile := flag.String("provisioning-file", envOrDefault("PROVISIONING_FILE", ""), "File-backed Point List provisioning source (.csv or .json); overridden by --provisioning-url")
@@ -117,10 +117,14 @@ func main() {
 	case *provURL != "":
 		provClient = provisioning.NewHTTPClient(*provURL)
 	case *provFile != "":
-		// Fail fast on a typo'd path rather than spinning the startup wait and then
+		// Fail fast on a bad path rather than spinning the startup wait and then
 		// running with an empty Point List.
-		if _, err := os.Stat(*provFile); err != nil {
-			slog.Error("provisioning file not found", "path", *provFile, "err", err)
+		switch fi, err := os.Stat(*provFile); {
+		case err != nil:
+			slog.Error("provisioning file not readable", "path", *provFile, "err", err)
+			os.Exit(1)
+		case !fi.Mode().IsRegular():
+			slog.Error("provisioning file is not a regular file", "path", *provFile)
 			os.Exit(1)
 		}
 		provClient = provisioning.NewFileClient(*provFile, *provConnID)

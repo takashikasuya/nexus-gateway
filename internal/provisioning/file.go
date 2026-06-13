@@ -24,8 +24,8 @@ type FileClient struct {
 }
 
 // NewFileClient serves the Point List from path. A .csv file is parsed via
-// LoadCSV (BACnet native-address projection); any other extension is parsed as
-// a JSON array of pointlist.Entry.
+// LoadCSV (BACnet native-address projection); a .json file is parsed as a JSON
+// array of pointlist.Entry. Any other extension is rejected by Snapshot.
 func NewFileClient(path, connectorID string) *FileClient {
 	return &FileClient{path: path, connectorID: connectorID}
 }
