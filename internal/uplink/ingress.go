@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/credentials"
 
 	pb "nexus-gateway/gen"
 	"nexus-gateway/internal/storeforward"
@@ -34,8 +34,8 @@ type Ingress struct {
 	cfg       Config
 }
 
-func NewIngress(_ context.Context, addr, gatewayID string, buf *storeforward.Buffer, cfg Config) (*Ingress, error) {
-	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+func NewIngress(_ context.Context, addr, gatewayID string, buf *storeforward.Buffer, cfg Config, creds credentials.TransportCredentials) (*Ingress, error) {
+	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(creds))
 	if err != nil {
 		return nil, fmt.Errorf("grpc dial %s: %w", addr, err)
 	}

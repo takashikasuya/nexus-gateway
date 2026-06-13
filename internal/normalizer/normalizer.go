@@ -11,7 +11,18 @@ import (
 
 	pb "nexus-gateway/gen"
 	"nexus-gateway/internal/common"
+	"nexus-gateway/internal/metrics"
 	"nexus-gateway/internal/pointlist"
+)
+
+// outcome classifies a Common Event so the consume loop can drop-and-meter
+// poison and point-list-miss events distinctly (ADR-0002 best-effort).
+type outcome int
+
+const (
+	outcomeOK     outcome = iota // resolved → emit a TelemetryFrame
+	outcomePoison                // unparseable/permanently invalid → Term + meter
+	outcomeMiss                  // unknown local_id → Term + meter
 )
 
 // Normalizer is the single durable pull consumer on evt.> (ADR-0001, ADR-0005).
@@ -58,9 +69,18 @@ func (n *Normalizer) consume(ctx context.Context, cons jetstream.Consumer, resol
 			continue
 		}
 		for msg := range msgs.Messages() {
-			frame, ok := normalize(msg.Data(), resolver, gatewayID)
-			if !ok {
-				_ = msg.Nak()
+			frame, out := normalize(msg.Data(), resolver, gatewayID)
+			switch out {
+			case outcomePoison:
+				// Retrying an unparseable event is pointless; terminate, don't redeliver.
+				metrics.IncNormalizerInvalid()
+				_ = msg.Term()
+				continue
+			case outcomeMiss:
+				// The Point List is synced before telemetry flows (ADR-0003), so an
+				// unknown local_id is misconfiguration, not a sync race: drop and meter.
+				metrics.IncNormalizerUnresolved()
+				_ = msg.Term()
 				continue
 			}
 			select {
@@ -77,16 +97,16 @@ func (n *Normalizer) consume(ctx context.Context, cons jetstream.Consumer, resol
 	}
 }
 
-func normalize(data []byte, resolver pointlist.Resolver, gatewayID string) (*pb.TelemetryFrame, bool) {
+func normalize(data []byte, resolver pointlist.Resolver, gatewayID string) (*pb.TelemetryFrame, outcome) {
 	var evt common.Event
 	if err := json.Unmarshal(data, &evt); err != nil {
 		slog.Warn("normalizer: unmarshal error", "err", err)
-		return nil, false
+		return nil, outcomePoison
 	}
 	pointID, ok := resolver.Resolve(evt.ConnectorID, evt.LocalID)
 	if !ok {
 		slog.Warn("normalizer: unknown local_id", "connector", evt.ConnectorID, "local_id", evt.LocalID)
-		return nil, false
+		return nil, outcomeMiss
 	}
 	ts := evt.Timestamp
 	if ts == "" {
@@ -97,5 +117,5 @@ func normalize(data []byte, resolver pointlist.Resolver, gatewayID string) (*pb.
 		PointId:   pointID,
 		Value:     evt.Value,
 		Timestamp: ts,
-	}, true
+	}, outcomeOK
 }

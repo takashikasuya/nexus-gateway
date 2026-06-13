@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"nexus-gateway/internal/lifecycle"
+	"nexus-gateway/internal/metrics"
 )
 
 const (
@@ -156,6 +157,12 @@ func (s *Server) handleMetrics(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "gateway_mem_alloc_mb %g\n", h.MemAllocMB)
 	fmt.Fprintf(w, "gateway_connectors_total %d\n", len(h.Connectors))
 	fmt.Fprintf(w, "gateway_connectors_running %d\n", running)
+	fmt.Fprintf(w, "# HELP normalizer_invalid_total Common Events the Normalizer could not parse.\n")
+	fmt.Fprintf(w, "# TYPE normalizer_invalid_total counter\n")
+	fmt.Fprintf(w, "normalizer_invalid_total %d\n", metrics.NormalizerInvalid())
+	fmt.Fprintf(w, "# HELP normalizer_unresolved_total Common Events whose local_id is absent from the Point List.\n")
+	fmt.Fprintf(w, "# TYPE normalizer_unresolved_total counter\n")
+	fmt.Fprintf(w, "normalizer_unresolved_total{reason=\"point_list_miss\"} %d\n", metrics.NormalizerUnresolved())
 }
 
 func writeJSON(w http.ResponseWriter, v any) {
