@@ -15,6 +15,7 @@ from bacpypes3.apdu import (
     PropertyReference,
     PropertyIdentifier,
 )
+from bacpypes3.primitivedata import Real
 from bacpypes3.vendor import VendorInfo
 
 from bacnet_connector.connector import BACnetClient
@@ -128,6 +129,23 @@ class Bacpypes3Client(BACnetClient):
             except Exception as exc:
                 logger.warning("bacnet: COV loop error for %s: %s — retrying", obj_id, exc)
                 await asyncio.sleep(5)
+
+    async def write_property(
+        self,
+        address: str,
+        device_id: int,
+        obj_id: str,
+        prop_id: str,
+        value: float,
+        priority: int,
+    ) -> None:
+        await self._app.write_property(
+            Address(address),
+            ObjectIdentifier(obj_id),
+            PropertyIdentifier(prop_id),
+            Real(value),
+            priority=priority,
+        )
 
     async def close(self) -> None:
         for task in self._cov_tasks.values():
