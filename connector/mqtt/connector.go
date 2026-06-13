@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/eclipse/paho.golang/autopaho"
@@ -25,25 +26,38 @@ type PointConfig struct {
 
 // Config holds all settings for one MQTT connector instance.
 type Config struct {
-	ConnectorID        string
-	BrokerURL          string // e.g. "mqtt://localhost:1883"
-	ClientID           string
-	Username           string
-	Password           []byte
-	KeepAlive          uint16
-	SessionExpiry      uint32 // seconds; 0 = session ends on disconnect
-	Points             []PointConfig
+	ConnectorID   string
+	BrokerURL     string // e.g. "mqtt://localhost:1883"
+	ClientID      string
+	Username      string
+	Password      []byte
+	KeepAlive     uint16
+	SessionExpiry uint32 // seconds; 0 = session ends on disconnect
+	Points        []PointConfig
 }
 
 // Connector subscribes to an MQTT broker and publishes Common Events to NATS JetStream
 // on subject evt.mqtt.<connector_id> (ADR-0001, ADR-0005).
 type Connector struct {
-	cfg Config
-	js  jetstream.JetStream
+	cfg       Config
+	js        jetstream.JetStream
+	readyOnce sync.Once
+	ready     chan struct{}
 }
 
 func New(cfg Config, js jetstream.JetStream) *Connector {
-	return &Connector{cfg: cfg, js: js}
+	return &Connector{cfg: cfg, js: js, ready: make(chan struct{})}
+}
+
+// AwaitReady blocks until the first MQTT subscription is active or ctx is cancelled.
+// Use this in tests and startup sequences instead of time.Sleep.
+func (c *Connector) AwaitReady(ctx context.Context) error {
+	select {
+	case <-c.ready:
+		return nil
+	case <-ctx.Done():
+		return ctx.Err()
+	}
 }
 
 // Run connects to the MQTT broker and processes messages until ctx is cancelled.
@@ -73,24 +87,33 @@ func (c *Connector) Run(ctx context.Context) {
 		ConnectUsername:               c.cfg.Username,
 		ConnectPassword:               c.cfg.Password,
 		OnConnectionUp: func(cm *autopaho.ConnectionManager, _ *paho.Connack) {
-			if len(subs) == 0 {
-				return
+			if len(subs) > 0 {
+				if _, err := cm.Subscribe(ctx, &paho.Subscribe{Subscriptions: subs}); err != nil {
+					slog.Error("mqtt: subscribe failed", "err", err)
+					return
+				}
 			}
-			if _, err := cm.Subscribe(ctx, &paho.Subscribe{Subscriptions: subs}); err != nil {
-				slog.Error("mqtt: subscribe failed", "err", err)
-			}
+			// Signal that the first subscription is ready (subsequent reconnects are silently ignored).
+			c.readyOnce.Do(func() { close(c.ready) })
 		},
 		ClientConfig: paho.ClientConfig{
 			ClientID: c.cfg.ClientID,
+			// Manual acknowledgment: PUBACK is sent only after the event lands in JetStream,
+			// preventing data loss when NATS is temporarily unavailable (QoS 1 guarantee).
+			EnableManualAcknowledgment: true,
 			OnPublishReceived: []func(paho.PublishReceived) (bool, error){
 				func(pr paho.PublishReceived) (bool, error) {
 					p, ok := topicMap[pr.Packet.Topic]
 					if !ok {
+						// Unknown topic: ack immediately to avoid infinite broker retry.
+						_ = pr.Client.Ack(pr.Packet)
 						return true, nil
 					}
 					value, ok := extractValue(pr.Packet.Payload)
 					if !ok {
 						slog.Warn("mqtt: unparseable payload", "topic", pr.Packet.Topic)
+						// Unparseable: ack to avoid infinite retry; event cannot be used.
+						_ = pr.Client.Ack(pr.Packet)
 						return true, nil
 					}
 					evt := common.Event{
@@ -105,11 +128,15 @@ func (c *Connector) Run(ctx context.Context) {
 					}
 					data, err := json.Marshal(evt)
 					if err != nil {
+						_ = pr.Client.Ack(pr.Packet)
 						return true, nil
 					}
 					if _, err := c.js.Publish(ctx, subject, data); err != nil {
-						slog.Warn("mqtt: nats publish failed", "err", err)
+						slog.Warn("mqtt: nats publish failed — withholding PUBACK for QoS 1 retry", "err", err)
+						// Do not ack: broker will redeliver when NATS is available again.
+						return true, nil
 					}
+					_ = pr.Client.Ack(pr.Packet)
 					return true, nil
 				},
 			},
