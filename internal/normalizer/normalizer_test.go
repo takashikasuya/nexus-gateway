@@ -97,6 +97,9 @@ func TestNormalizer_BoolValueNormalisedToNumeric(t *testing.T) {
 }
 
 func TestNormalizer_DropsAndMetersPoisonAndMiss(t *testing.T) {
+	// NOTE: reads the process-global metrics counters via before/after deltas.
+	// The normalizer tests must NOT be t.Parallel()'d — another test producing a
+	// miss/poison concurrently would perturb the delta. Go runs them serially.
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 

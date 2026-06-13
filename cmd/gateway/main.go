@@ -102,6 +102,11 @@ func main() {
 			}
 			time.Sleep(100 * time.Millisecond)
 		}
+		if len(resolver.Snapshot()) == 0 {
+			// Proceeding with an empty resolver means every Common Event resolves to a
+			// point-list miss and is dropped (ADR-0002). Make that loud rather than silent.
+			slog.Error("point list: initial sync did not complete within 30s — starting with an empty Point List; telemetry will be dropped as point-list misses until sync succeeds")
+		}
 	} else {
 		// Bootstrap from fixture file (dev / no provisioning API)
 		entries, err := loadFixtureEntries(*plFile)
