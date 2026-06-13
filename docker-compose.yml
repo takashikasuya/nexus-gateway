@@ -1,0 +1,46 @@
+version: "3.9"
+
+services:
+  nats:
+    image: nats:2.10-alpine
+    command: ["--jetstream", "--store_dir=/data"]
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    volumes:
+      - nats-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8222/healthz || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  mock-bos:
+    build:
+      context: .
+      dockerfile: Dockerfile.mockbos
+    ports:
+      - "50051:50051"
+    depends_on:
+      nats:
+        condition: service_healthy
+
+  gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile.gateway
+    environment:
+      - GATEWAY_ID=gw-001
+      - NATS_URL=nats://nats:4222
+      - BOS_ADDR=mock-bos:50051
+      - POINT_LIST_FILE=/fixtures/point_list.json
+    volumes:
+      - ./fixtures:/fixtures:ro
+    depends_on:
+      nats:
+        condition: service_healthy
+      mock-bos:
+        condition: service_started
+
+volumes:
+  nats-data:
