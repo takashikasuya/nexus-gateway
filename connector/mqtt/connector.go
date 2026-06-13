@@ -3,6 +3,7 @@ package mqtt
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log/slog"
 	"net/url"
 	"strconv"
@@ -12,6 +13,7 @@ import (
 
 	"github.com/eclipse/paho.golang/autopaho"
 	"github.com/eclipse/paho.golang/paho"
+	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 
 	"nexus-gateway/internal/common"
@@ -19,9 +21,12 @@ import (
 
 // PointConfig describes a single MQTT point: the topic is the native local_id (ADR-0001).
 type PointConfig struct {
-	Topic     string
-	DeviceRef string
-	Unit      string
+	Topic           string
+	DeviceRef       string
+	Unit            string
+	Writable        bool   // point accepts write commands
+	CommandTopic    string // MQTT topic to publish writes to; required when Writable is true
+	PayloadTemplate string // fmt.Sprintf template for the write payload, e.g. `{"present_value": %g}`; defaults to plain float string
 }
 
 // Config holds all settings for one MQTT connector instance.
@@ -36,17 +41,44 @@ type Config struct {
 	Points        []PointConfig
 }
 
+// WriteReply is the JSON payload returned by the connector write handler over NATS request-reply.
+// It mirrors dispatch.ConnectorReply and is exported so tests and callers can decode it.
+type WriteReply struct {
+	Success  bool   `json:"success"`
+	Response string `json:"response"`
+}
+
+// writeRequest mirrors dispatch.WriteRequest — kept local to avoid import cycle.
+type writeRequest struct {
+	ControlID string  `json:"control_id"`
+	LocalID   string  `json:"local_id"`
+	DeviceRef string  `json:"device_ref"`
+	Value     float64 `json:"value"`
+	Priority  int32   `json:"priority"`
+}
+
 // Connector subscribes to an MQTT broker and publishes Common Events to NATS JetStream
 // on subject evt.mqtt.<connector_id> (ADR-0001, ADR-0005).
+// It also handles write commands arriving on cmd.mqtt.<connector_id> via NATS request-reply
+// and publishes them to the broker (ADR-0004).
 type Connector struct {
 	cfg       Config
+	nc        *nats.Conn
 	js        jetstream.JetStream
 	readyOnce sync.Once
 	ready     chan struct{}
+	dedupMu   sync.Mutex
+	dedup     map[string]*WriteReply // nil value = in-flight (reserved); non-nil = completed
 }
 
-func New(cfg Config, js jetstream.JetStream) *Connector {
-	return &Connector{cfg: cfg, js: js, ready: make(chan struct{})}
+func New(cfg Config, nc *nats.Conn, js jetstream.JetStream) *Connector {
+	return &Connector{
+		cfg:   cfg,
+		nc:    nc,
+		js:    js,
+		ready: make(chan struct{}),
+		dedup: make(map[string]*WriteReply),
+	}
 }
 
 // AwaitReady blocks until the first MQTT subscription is active or ctx is cancelled.
@@ -78,7 +110,21 @@ func (c *Connector) Run(ctx context.Context) {
 
 	subject := "evt.mqtt." + c.cfg.ConnectorID
 
-	cm, err := autopaho.NewConnection(ctx, autopaho.ClientConfig{
+	// Register write handler before starting the connection so it is live before
+	// readyOnce fires (OnConnectionUp runs on autopaho's internal goroutine).
+	var cm *autopaho.ConnectionManager
+	sub, err := c.nc.Subscribe("cmd.mqtt."+c.cfg.ConnectorID, func(msg *nats.Msg) {
+		// Each write runs in its own goroutine so the NATS dispatch goroutine is
+		// never blocked by the up-to-8 s cm.Publish call.
+		go c.handleWrite(ctx, cm, topicMap, msg)
+	})
+	if err != nil {
+		slog.Error("mqtt: write handler subscribe failed", "err", err)
+		return
+	}
+	defer sub.Unsubscribe()
+
+	cm, err = autopaho.NewConnection(ctx, autopaho.ClientConfig{
 		ServerUrls:                    []*url.URL{brokerURL},
 		KeepAlive:                     c.cfg.KeepAlive,
 		CleanStartOnInitialConnection: false,
@@ -146,7 +192,89 @@ func (c *Connector) Run(ctx context.Context) {
 		slog.Error("mqtt: connection manager init failed", "err", err)
 		return
 	}
+
 	<-cm.Done()
+}
+
+func (c *Connector) handleWrite(ctx context.Context, cm *autopaho.ConnectionManager, topicMap map[string]PointConfig, msg *nats.Msg) {
+	var req writeRequest
+	if err := json.Unmarshal(msg.Data, &req); err != nil {
+		respond(msg, WriteReply{false, "bad_request"})
+		return
+	}
+
+	// Reserve the slot atomically. nil = in-flight (first goroutine for this control_id),
+	// non-nil = completed (return cached result). This prevents a concurrent duplicate
+	// goroutine (same control_id) from issuing a second write to the device.
+	c.dedupMu.Lock()
+	if entry, ok := c.dedup[req.ControlID]; ok {
+		c.dedupMu.Unlock()
+		if entry == nil {
+			// Another goroutine is in-flight for this control_id. Return early; the
+			// dispatcher will retry and eventually hit the cached result.
+			respond(msg, WriteReply{false, "in_flight"})
+		} else {
+			respond(msg, *entry)
+		}
+		return
+	}
+	c.dedup[req.ControlID] = nil // reserve slot
+	c.dedupMu.Unlock()
+
+	p, ok := topicMap[req.LocalID]
+	if !ok || !p.Writable || p.CommandTopic == "" {
+		reply := WriteReply{false, "not_writable"}
+		c.cacheDedup(req.ControlID, reply)
+		respond(msg, reply)
+		return
+	}
+
+	payload := formatPayload(p.PayloadTemplate, req.Value)
+
+	// Use a bounded timeout so we never block past the dispatcher's deadline.
+	wCtx, wCancel := context.WithTimeout(ctx, 8*time.Second)
+	defer wCancel()
+
+	_, err := cm.Publish(wCtx, &paho.Publish{
+		Topic:   p.CommandTopic,
+		QoS:     1,
+		Payload: payload,
+	})
+
+	var reply WriteReply
+	if err != nil {
+		reply = WriteReply{false, "device_error: " + err.Error()}
+	} else {
+		reply = WriteReply{true, "ok"}
+	}
+	c.cacheDedup(req.ControlID, reply)
+	respond(msg, reply)
+}
+
+func (c *Connector) cacheDedup(controlID string, reply WriteReply) {
+	c.dedupMu.Lock()
+	c.dedup[controlID] = &reply
+	c.dedupMu.Unlock()
+}
+
+func respond(msg *nats.Msg, reply WriteReply) {
+	data, _ := json.Marshal(reply)
+	_ = msg.Respond(data)
+}
+
+func formatPayload(tmpl string, value float64) []byte {
+	plain := []byte(strconv.FormatFloat(value, 'g', -1, 64))
+	if tmpl == "" {
+		return plain
+	}
+	result := fmt.Sprintf(tmpl, value)
+	// fmt.Sprintf embeds "%!verb(type=value)" when the verb is wrong for the arg type.
+	// Fall back to plain float rather than sending malformed bytes to the device.
+	if strings.Contains(result, "%!") {
+		slog.Warn("mqtt: bad PayloadTemplate verb — falling back to plain float", "template", tmpl)
+		return plain
+	}
+	return []byte(result)
 }
 
 // extractValue extracts a float64 from a raw MQTT payload.
