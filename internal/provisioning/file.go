@@ -46,12 +46,17 @@ func (c *FileClient) Snapshot(_ context.Context) ([]pointlist.Entry, error) {
 	if err != nil {
 		return nil, fmt.Errorf("provisioning: read %q: %w", c.path, err)
 	}
-	if strings.HasSuffix(strings.ToLower(c.path), ".csv") {
+	lower := strings.ToLower(c.path)
+	switch {
+	case strings.HasSuffix(lower, ".csv"):
 		return pointlist.LoadCSV(strings.NewReader(string(data)), c.connectorID)
+	case strings.HasSuffix(lower, ".json"):
+		var entries []pointlist.Entry
+		if err := json.Unmarshal(data, &entries); err != nil {
+			return nil, fmt.Errorf("provisioning: parse %q as JSON: %w", c.path, err)
+		}
+		return entries, nil
+	default:
+		return nil, fmt.Errorf("provisioning: unsupported file format %q (want .csv or .json)", c.path)
 	}
-	var entries []pointlist.Entry
-	if err := json.Unmarshal(data, &entries); err != nil {
-		return nil, fmt.Errorf("provisioning: parse %q as JSON: %w", c.path, err)
-	}
-	return entries, nil
 }

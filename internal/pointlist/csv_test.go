@@ -59,6 +59,17 @@ analogInput,1
 	require.Error(t, err, "missing point_id column must error")
 }
 
+func TestLoadCSV_StripsBOMAndSkipsEmptyPointID(t *testing.T) {
+	// Leading UTF-8 BOM (Excel export) + a row with a blank point_id.
+	const csv = "\ufeffpoint_id,object_type_bacnet,instance_no_bacnet\n" +
+		"SOS-PT-001,analogInput,1\n" +
+		",analogInput,2\n"
+	entries, err := pointlist.LoadCSV(strings.NewReader(csv), "bacnet-01")
+	require.NoError(t, err, "BOM on the header must not break column matching")
+	require.Len(t, entries, 1, "row with empty point_id must be skipped")
+	assert.Equal(t, "SOS-PT-001", entries[0].PointID)
+}
+
 func TestLoadCSV_ToleratesColumnReordering(t *testing.T) {
 	const csv = `instance_no_bacnet,object_type_bacnet,point_id,writable
 7,analogValue,SOS-PT-099,true

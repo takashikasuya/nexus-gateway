@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"io"
+	"log/slog"
 	"strings"
 )
 
@@ -25,6 +26,9 @@ func LoadCSV(r io.Reader, connectorID string) ([]Entry, error) {
 		return nil, fmt.Errorf("pointlist: empty CSV")
 	}
 
+	// Strip a UTF-8 BOM from the first header cell (common in Excel/SBCO exports);
+	// TrimSpace does not remove U+FEFF, which would otherwise break column matching.
+	rows[0][0] = strings.TrimPrefix(rows[0][0], "\ufeff")
 	col := map[string]int{}
 	for i, name := range rows[0] {
 		col[strings.TrimSpace(name)] = i
@@ -45,17 +49,23 @@ func LoadCSV(r io.Reader, connectorID string) ([]Entry, error) {
 	}
 
 	var entries []Entry
+	seen := map[string]bool{}
 	for _, row := range rows[1:] {
 		objType := get(row, "object_type_bacnet")
 		instance := get(row, "instance_no_bacnet")
-		if objType == "" || instance == "" {
-			continue // not a BACnet point
+		pointID := get(row, "point_id")
+		if objType == "" || instance == "" || pointID == "" {
+			continue // not a resolvable BACnet point
 		}
+		if seen[pointID] {
+			slog.Warn("pointlist: duplicate point_id in CSV — last entry wins", "point_id", pointID)
+		}
+		seen[pointID] = true
 		entries = append(entries, Entry{
 			ConnectorID: connectorID,
 			Protocol:    "bacnet",
 			LocalID:     objType + "," + instance,
-			PointID:     get(row, "point_id"),
+			PointID:     pointID,
 			Unit:        get(row, "unit"),
 			Writable:    strings.EqualFold(get(row, "writable"), "true"),
 			DeviceRef:   get(row, "device_id"),

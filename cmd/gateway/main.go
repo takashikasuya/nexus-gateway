@@ -93,6 +93,12 @@ func main() {
 	case *provURL != "":
 		provClient = provisioning.NewHTTPClient(*provURL)
 	case *provFile != "":
+		// Fail fast on a typo'd path rather than spinning the startup wait and then
+		// running with an empty Point List.
+		if _, err := os.Stat(*provFile); err != nil {
+			slog.Error("provisioning file not found", "path", *provFile, "err", err)
+			os.Exit(1)
+		}
 		provClient = provisioning.NewFileClient(*provFile, *provConnID)
 	}
 	if provClient != nil {

@@ -65,6 +65,12 @@ func TestFileClient_VersionTokenStableThenChangesOnEdit(t *testing.T) {
 	assert.NotEqual(t, v1, v2, "token changes when the file content changes")
 }
 
+func TestFileClient_UnsupportedExtensionErrors(t *testing.T) {
+	path := writeFile(t, t.TempDir(), "pl.txt", "point_id\nX\n")
+	_, err := provisioning.NewFileClient(path, "bacnet-01").Snapshot(context.Background())
+	require.Error(t, err, "a non-.csv/.json file must be rejected with a clear error")
+}
+
 func TestFileClient_MissingFileErrors(t *testing.T) {
 	c := provisioning.NewFileClient("/nonexistent/pl.csv", "bacnet-01")
 	_, err := c.Snapshot(context.Background())
