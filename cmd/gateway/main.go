@@ -16,6 +16,8 @@ import (
 	"github.com/nats-io/nats.go/jetstream"
 
 	"nexus-gateway/connector/sim"
+	"nexus-gateway/internal/dispatch"
+	"nexus-gateway/internal/egress"
 	"nexus-gateway/internal/normalizer"
 	"nexus-gateway/internal/pointlist"
 	"nexus-gateway/internal/pointsync"
@@ -130,6 +132,11 @@ func main() {
 		os.Exit(1)
 	}
 	go ul.Run(ctx)
+
+	// Start Egress agent (control path, ADR-0004)
+	d := dispatch.New(nc, resolver, 5*time.Second)
+	egressAgent := egress.New(nc, *bosAddr, *gatewayID, d)
+	go egressAgent.Run(ctx)
 
 	// Start sim connector
 	connector := sim.New("sim-01", js, 5*time.Second, []sim.Point{

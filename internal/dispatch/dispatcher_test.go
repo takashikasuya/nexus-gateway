@@ -79,7 +79,7 @@ func TestDispatch_Timeout(t *testing.T) {
 		{ConnectorID: "sim-01", Protocol: "sim", LocalID: "l1", PointID: "p1",
 			Writable: true, DeviceRef: "dev:1"},
 	})
-	// No subscriber = NATS request times out
+	// No subscriber → ErrNoResponders (connector process not running)
 	d := dispatch.New(nc, resolver, 50*time.Millisecond)
 
 	start := time.Now()
@@ -88,7 +88,7 @@ func TestDispatch_Timeout(t *testing.T) {
 	})
 	assert.WithinDuration(t, start.Add(200*time.Millisecond), time.Now(), 300*time.Millisecond)
 	assert.False(t, result.Success)
-	assert.Equal(t, "timeout", result.Response)
+	assert.Equal(t, "no_responder", result.Response)
 }
 
 func TestDispatch_DeviceError(t *testing.T) {

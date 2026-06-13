@@ -94,7 +94,11 @@ func (d *Dispatcher) execute(ctx context.Context, cmd *pb.ControlCommand) *pb.Co
 
 	msg, err := d.nc.RequestWithContext(reqCtx, subject, data)
 	if err != nil {
-		return &pb.ControlResult{ControlId: cmd.ControlId, Success: false, Response: "timeout"}
+		resp := "timeout"
+		if err == nats.ErrNoResponders {
+			resp = "no_responder"
+		}
+		return &pb.ControlResult{ControlId: cmd.ControlId, Success: false, Response: resp}
 	}
 
 	var reply ConnectorReply
