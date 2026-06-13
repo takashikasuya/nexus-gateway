@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   createColumnHelper,
   flexRender,
@@ -41,7 +41,7 @@ export function ConnectorTable({ data, isOperator, onRefresh }: Props) {
     [onRefresh]
   );
 
-  const columns = [
+  const columns = useMemo(() => [
     col.accessor("id", { header: "ID" }),
     col.accessor("image", {
       header: "Image / Version",
@@ -98,7 +98,8 @@ export function ConnectorTable({ data, isOperator, onRefresh }: Props) {
         );
       },
     }),
-  ];
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  ], [busy, isOperator, doAction]);
 
   const table = useReactTable({ data, columns, getCoreRowModel: getCoreRowModel() });
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"runtime"
 	"runtime/metrics"
+	"sync"
 	"syscall"
 	"time"
 )
@@ -51,7 +52,7 @@ func (h *HealthMonitor) Snapshot(ctx context.Context) GatewayHealth {
 	var st syscall.Statfs_t
 	if err := syscall.Statfs("/", &st); err == nil {
 		total := float64(st.Blocks) * float64(st.Bsize)
-		free := float64(st.Bfree) * float64(st.Bsize)
+		free := float64(st.Bavail) * float64(st.Bsize)
 		diskTotal = total / 1024 / 1024
 		diskUsed = (total - free) / 1024 / 1024
 	}
@@ -64,17 +65,25 @@ func (h *HealthMonitor) Snapshot(ctx context.Context) GatewayHealth {
 		DiskTotalMB:   diskTotal,
 	}
 
-	for _, status := range h.registry.List() {
-		ch := ConnectorHealth{ID: status.Spec.ID, Image: status.Spec.Image, Running: status.Running}
+	statuses := h.registry.List()
+	connectors := make([]ConnectorHealth, len(statuses))
+	var wg sync.WaitGroup
+	for i, status := range statuses {
+		connectors[i] = ConnectorHealth{ID: status.Spec.ID, Image: status.Spec.Image, Running: status.Running}
 		if status.ContainerID != "" {
-			// Verify liveness by inspecting the container in the Docker daemon.
-			if resp, err := h.docker.ContainerInspect(ctx, status.ContainerID); err == nil {
-				ch.Running = resp.ContainerJSONBase != nil && resp.State != nil && resp.State.Running
-			} else {
-				ch.Running = false
-			}
+			wg.Add(1)
+			go func(idx int, containerID string) {
+				defer wg.Done()
+				// Verify liveness by inspecting the container in the Docker daemon.
+				if resp, err := h.docker.ContainerInspect(ctx, containerID); err == nil {
+					connectors[idx].Running = resp.ContainerJSONBase != nil && resp.State != nil && resp.State.Running
+				} else {
+					connectors[idx].Running = false
+				}
+			}(i, status.ContainerID)
 		}
-		snap.Connectors = append(snap.Connectors, ch)
 	}
+	wg.Wait()
+	snap.Connectors = connectors
 	return snap
 }

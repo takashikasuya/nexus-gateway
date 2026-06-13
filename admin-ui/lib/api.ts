@@ -48,7 +48,7 @@ export async function connectorAction(
   image?: string
 ): Promise<void> {
   const url = image
-    ? `/connectors/${encodeURIComponent(id)}/${action}?image=${encodeURIComponent(image)}`
-    : `/connectors/${encodeURIComponent(id)}/${action}`;
+    ? `/connectors/${encodeURIComponent(id)}/${encodeURIComponent(action)}?image=${encodeURIComponent(image)}`
+    : `/connectors/${encodeURIComponent(id)}/${encodeURIComponent(action)}`;
   await adminFetch(url, token, { method: "POST" });
 }

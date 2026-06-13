@@ -34,6 +34,9 @@ services:
       KC_HTTP_PORT: "8090"
       KC_HOSTNAME_STRICT: "false"
       KC_HTTP_ENABLED: "true"
+      # Force Keycloak to embed localhost in the iss claim regardless of which
+      # hostname the token request arrives from (e.g. keycloak:8090 from admin-ui).
+      KC_HOSTNAME_URL: "http://localhost:8090"
     ports:
       - "8090:8090"
     volumes:
@@ -83,7 +86,10 @@ services:
       - NEXTAUTH_SECRET=dev-secret-change-in-production
       - KEYCLOAK_ID=admin-ui
       - KEYCLOAK_SECRET=admin-ui-secret
+      # Browser-facing issuer (must match iss claim in tokens, which KC_HOSTNAME_URL controls).
       - KEYCLOAK_ISSUER=http://localhost:8090/realms/nexus-gateway
+      # Internal Docker hostname for NextAuth server-side OIDC discovery (code exchange, token refresh).
+      - KEYCLOAK_INTERNAL_ISSUER=http://keycloak:8090/realms/nexus-gateway
       - ADMIN_API_URL=http://gateway:8080
     depends_on:
       keycloak:
