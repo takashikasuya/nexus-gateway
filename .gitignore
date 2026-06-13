@@ -3,3 +3,10 @@
 *.out
 /tmp/
 nats-data/
+connector/bacnet/.venv/
+connector/bacnet/**/__pycache__/
+connector/bacnet/**/*.pyc
+connector/bacnet/.venv/
+connector/bacnet/.pytest_cache/
+connector/bacnet/**/__pycache__/
+connector/bacnet/**/*.pyc

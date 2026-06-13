@@ -1,0 +1,36 @@
+# BACnet integration stack: adds a BACnet demo device and the bacnet connector.
+# Run with: docker compose -f docker-compose.yml -f docker-compose.bacnet.yml up
+
+version: "3.9"
+
+services:
+  # Minimal BACnet/IP device simulator using bacpypes3.
+  # Exposes one analogInput object with a sine-wave present value.
+  bacnet-sim:
+    build:
+      context: connector/bacnet
+      dockerfile: Dockerfile.sim
+    environment:
+      - BACNET_DEVICE_ID=999
+      - BACNET_ADDRESS=0.0.0.0
+    network_mode: host  # BACnet/IP requires host networking for UDP broadcast
+    restart: unless-stopped
+
+  bacnet-connector:
+    build:
+      context: connector/bacnet
+    environment:
+      - CONNECTOR_ID=bacnet-01
+      - NATS_URL=nats://nats:4222
+      - BACNET_ADDRESS=127.0.0.1
+      - BACNET_DEVICE_ID=999
+      - BACNET_LOCAL_ADDRESS=0.0.0.0
+      - BACNET_POLL_INTERVAL=5
+      - BACNET_POINTS=[{"local_id":"analogInput,0","device_ref":"bacnet-sim","unit":"degC"}]
+    network_mode: host
+    depends_on:
+      nats:
+        condition: service_healthy
+      bacnet-sim:
+        condition: service_started
+    restart: unless-stopped
