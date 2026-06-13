@@ -54,6 +54,7 @@ class Connector:
         self._bacnet = bacnet
         self._js = js
         self._subject = f"evt.bacnet.{cfg.connector_id}"
+        self._point_map = {pt.local_id: pt for pt in cfg.points}
         self._cov_tasks: list[asyncio.Task] = []
 
     async def run(self, *, stop_event: asyncio.Event | None = None) -> None:
@@ -81,7 +82,7 @@ class Connector:
                 if stop_event is not None:
                     try:
                         await asyncio.wait_for(
-                            asyncio.shield(stop_event.wait()),
+                            stop_event.wait(),
                             timeout=self._cfg.poll_interval,
                         )
                         break  # stop_event fired
@@ -114,9 +115,8 @@ class Connector:
             logger.warning("bacnet: poll failed: %s", exc)
             return
 
-        point_map = {pt.local_id: pt for pt in self._cfg.points}
         for obj_id, value, status in results:
-            pt = point_map.get(obj_id)
+            pt = self._point_map.get(obj_id)
             if pt is None or value is None:
                 continue
             await self._publish(pt, value, bacnet_quality(status))

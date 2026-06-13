@@ -81,7 +81,7 @@ class Bacpypes3Client(BACnetClient):
                                 elif hasattr(pv, "errorCode"):
                                     status = str(pv.errorCode)
                                 break
-                        break
+                        break  # found the matching object; stop searching
             out.append((obj_id, val, status))
         return out
 
@@ -94,8 +94,8 @@ class Bacpypes3Client(BACnetClient):
         lifetime: int = 300,
     ) -> None:
         key = (address, obj_id)
-        if key in self._cov_tasks:
-            return  # already subscribed
+        if key in self._cov_tasks and not self._cov_tasks[key].done():
+            return  # already subscribed and still running
 
         task = asyncio.create_task(
             self._cov_loop(address, obj_id, callback, lifetime),

@@ -117,7 +117,13 @@ async def test_cov_callback_publishes_event():
 
     # Run connector in background, then fire a COV callback, then stop.
     task = asyncio.create_task(conn.run(stop_event=stop))
-    await asyncio.sleep(0.05)  # let initial poll and COV subscribe happen
+
+    # Yield until the connector has registered the COV subscription.
+    async def _cov_ready() -> None:
+        while "analogInput,0" not in bacnet.cov_callbacks:
+            await asyncio.sleep(0)
+
+    await asyncio.wait_for(_cov_ready(), timeout=1.0)
 
     # Fire COV with a new value
     cb = bacnet.cov_callbacks.get("analogInput,0")

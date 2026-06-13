@@ -24,6 +24,10 @@ class Config:
     poll_interval: float = 30.0  # seconds between full polls
     local_address: str = "0.0.0.0"  # local BACnet interface address
 
+    def __post_init__(self) -> None:
+        if self.poll_interval <= 0:
+            raise ValueError(f"poll_interval must be positive, got {self.poll_interval}")
+
     @classmethod
     def from_env(cls) -> "Config":
         points_raw = os.environ.get("BACNET_POINTS", "[]")
