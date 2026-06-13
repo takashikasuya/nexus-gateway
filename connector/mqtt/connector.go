@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/eclipse/paho.golang/autopaho"
@@ -112,11 +113,13 @@ func (c *Connector) Run(ctx context.Context) {
 
 	// Register write handler before starting the connection so it is live before
 	// readyOnce fires (OnConnectionUp runs on autopaho's internal goroutine).
-	var cm *autopaho.ConnectionManager
+	// cm is published atomically: the NATS callback may fire (and Load) on another
+	// goroutine concurrently with the Store below once NewConnection returns.
+	var cm atomic.Pointer[autopaho.ConnectionManager]
 	sub, err := c.nc.Subscribe("cmd.mqtt."+c.cfg.ConnectorID, func(msg *nats.Msg) {
 		// Each write runs in its own goroutine so the NATS dispatch goroutine is
 		// never blocked by the up-to-8 s cm.Publish call.
-		go c.handleWrite(ctx, cm, topicMap, msg)
+		go c.handleWrite(ctx, cm.Load(), topicMap, msg)
 	})
 	if err != nil {
 		slog.Error("mqtt: write handler subscribe failed", "err", err)
@@ -124,7 +127,7 @@ func (c *Connector) Run(ctx context.Context) {
 	}
 	defer sub.Unsubscribe()
 
-	cm, err = autopaho.NewConnection(ctx, autopaho.ClientConfig{
+	mgr, err := autopaho.NewConnection(ctx, autopaho.ClientConfig{
 		ServerUrls:                    []*url.URL{brokerURL},
 		KeepAlive:                     c.cfg.KeepAlive,
 		CleanStartOnInitialConnection: false,
@@ -192,14 +195,22 @@ func (c *Connector) Run(ctx context.Context) {
 		slog.Error("mqtt: connection manager init failed", "err", err)
 		return
 	}
+	cm.Store(mgr)
 
-	<-cm.Done()
+	<-mgr.Done()
 }
 
 func (c *Connector) handleWrite(ctx context.Context, cm *autopaho.ConnectionManager, topicMap map[string]PointConfig, msg *nats.Msg) {
 	var req writeRequest
 	if err := json.Unmarshal(msg.Data, &req); err != nil {
 		respond(msg, WriteReply{false, "bad_request"})
+		return
+	}
+
+	// The connection may not be established yet (a command can arrive between the
+	// NATS subscribe and cm.Store). Fail fast rather than dereference a nil manager.
+	if cm == nil {
+		respond(msg, WriteReply{false, "not_connected"})
 		return
 	}
 

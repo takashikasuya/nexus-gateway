@@ -29,6 +29,7 @@ import (
 	"nexus-gateway/internal/pointsync"
 	"nexus-gateway/internal/provisioning"
 	"nexus-gateway/internal/storeforward"
+	"nexus-gateway/internal/transport"
 	"nexus-gateway/internal/uplink"
 )
 
@@ -47,7 +48,30 @@ func main() {
 	provConnID := flag.String("provisioning-connector-id", envOrDefault("PROVISIONING_CONNECTOR_ID", "bacnet-01"), "Connector id stamped on entries loaded from a provisioning CSV")
 	sfDB := flag.String("sf-db", envOrDefault("SF_DB", "data/storeforward.db"), "Store-and-Forward SQLite database path")
 	sfCap := flag.Int("sf-cap", 100_000, "Store-and-Forward ring buffer capacity (frames)")
+	devSim := flag.Bool("dev-sim", envOrDefault("DEV_SIM", "") == "true", "Run an in-process sim connector (dev/smoke only, non-production; ADR-0001)")
+	syncInterval := flag.Duration("point-sync-interval", 10*time.Minute, "Point List poll interval after the initial sync (the list is near-static, ADR-0003)")
+	bosInsecure := flag.Bool("bos-insecure", envOrDefault("BOS_INSECURE", "") == "true", "Dial Building OS over plaintext h2c (no TLS) — dev/CI only (ADR-0007)")
+	bosCA := flag.String("bos-ca", envOrDefault("BOS_CA_FILE", ""), "PEM CA bundle to verify the Building OS server cert (empty = system roots)")
+	bosCert := flag.String("bos-cert", envOrDefault("BOS_CERT_FILE", ""), "Client certificate for mTLS to Building OS (CN/SAN = gateway_id)")
+	bosKey := flag.String("bos-key", envOrDefault("BOS_KEY_FILE", ""), "Client private key for mTLS to Building OS")
+	bosServerName := flag.String("bos-servername", envOrDefault("BOS_SERVER_NAME", ""), "Override the server name verified in the Building OS cert")
 	flag.Parse()
+
+	// Build the gRPC transport credentials for both Building OS links (ADR-0007).
+	bosCreds, err := transport.ClientCredentials(transport.Config{
+		Insecure:   *bosInsecure,
+		CAFile:     *bosCA,
+		CertFile:   *bosCert,
+		KeyFile:    *bosKey,
+		ServerName: *bosServerName,
+	})
+	if err != nil {
+		slog.Error("Building OS transport credentials", "err", err)
+		os.Exit(1)
+	}
+	if *bosInsecure {
+		slog.Warn("Building OS link is plaintext h2c (--bos-insecure) — dev/CI only")
+	}
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -106,7 +130,7 @@ func main() {
 		syncLoop := pointsync.New(
 			provClient,
 			resolver,
-			pointsync.Config{Interval: 30 * time.Second, PersistPath: *plPersist},
+			pointsync.Config{Interval: *syncInterval, PersistPath: *plPersist},
 		)
 		go syncLoop.Run(ctx)
 		// Wait for initial snapshot before starting the pipeline
@@ -117,6 +141,11 @@ func main() {
 				break
 			}
 			time.Sleep(100 * time.Millisecond)
+		}
+		if len(resolver.Snapshot()) == 0 {
+			// Proceeding with an empty resolver means every Common Event resolves to a
+			// point-list miss and is dropped (ADR-0002). Make that loud rather than silent.
+			slog.Error("point list: initial sync did not complete within 30s — starting with an empty Point List; telemetry will be dropped as point-list misses until sync succeeds")
 		}
 	} else {
 		// Bootstrap from fixture file (dev / no provisioning API)
@@ -153,7 +182,7 @@ func main() {
 	}()
 
 	// Start Ingress uplink
-	ul, err := uplink.NewIngress(ctx, *bosAddr, *gatewayID, buf, uplink.DefaultConfig)
+	ul, err := uplink.NewIngress(ctx, *bosAddr, *gatewayID, buf, uplink.DefaultConfig, bosCreds)
 	if err != nil {
 		slog.Error("uplink init failed", "err", err)
 		os.Exit(1)
@@ -162,7 +191,7 @@ func main() {
 
 	// Start Egress agent (control path, ADR-0004)
 	d := dispatch.New(nc, resolver, 5*time.Second)
-	egressAgent := egress.New(nc, *bosAddr, *gatewayID, d)
+	egressAgent := egress.New(nc, *bosAddr, *gatewayID, d, bosCreds)
 	go egressAgent.Run(ctx)
 
 	// Start Admin API
@@ -192,18 +221,13 @@ func main() {
 		}
 	}()
 
-	// Register sim connector in the lifecycle registry so the Admin UI can show it.
-	// The sim connector runs as an in-process goroutine (no container), so ContainerID
-	// stays empty and Docker inspection is skipped in Snapshot.
-	connRegistry.Register(lifecycle.ConnectorSpec{ID: "sim-01", Image: "sim:dev"})
-	connRegistry.SetRunning("sim-01", "", true)
-
-	// Start sim connector
-	connector := sim.New("sim-01", js, 5*time.Second, []sim.Point{
-		{LocalID: "sim://ahu-01/supply_air_temp", DeviceRef: "sim://ahu-01", Unit: "Cel", BaseValue: 22.0, Amplitude: 3.0},
-		{LocalID: "sim://ahu-01/fan_run", DeviceRef: "sim://ahu-01", Unit: "", BaseValue: 1.0, Amplitude: 0.0},
-	})
-	go connector.Run(ctx)
+	// The in-process sim connector is dev/smoke only and off by default: the
+	// default build runs no in-process connector, keeping connector isolation
+	// (ADR-0001). Real protocol simulators (EP-009) supersede it.
+	if *devSim {
+		slog.Warn("dev-sim enabled — in-process sim connector running (non-production, ADR-0001)")
+		startDevSim(ctx, js, connRegistry, 5*time.Second)
+	}
 
 	slog.Info("gateway started", "gateway_id", *gatewayID, "nats", *natsURL, "bos", *bosAddr)
 
@@ -222,6 +246,25 @@ func main() {
 	}
 	pumpWg.Wait()
 	buf.Close()
+}
+
+// startDevSim registers and runs the in-process sim connector (dev/smoke only).
+// It is invoked only under --dev-sim; the connector runs as a goroutine (no
+// container), so its ContainerID stays empty and Docker inspection is skipped.
+func startDevSim(ctx context.Context, js jetstream.JetStream, reg *lifecycle.Registry, interval time.Duration) {
+	reg.Register(lifecycle.ConnectorSpec{ID: "sim-01", Image: "sim:dev"})
+	reg.SetRunning("sim-01", "", true)
+	connector := sim.New("sim-01", js, interval, []sim.Point{
+		{LocalID: "sim://ahu-01/supply_air_temp", DeviceRef: "sim://ahu-01", Unit: "Cel", BaseValue: 22.0, Amplitude: 3.0},
+		{LocalID: "sim://ahu-01/fan_run", DeviceRef: "sim://ahu-01", Unit: "", BaseValue: 1.0, Amplitude: 0.0},
+	})
+	go connector.Run(ctx)
+	// Reflect the connector's lifetime in the registry so the Admin UI does not show
+	// sim-01 as running after shutdown.
+	go func() {
+		<-ctx.Done()
+		reg.SetRunning("sim-01", "", false)
+	}()
 }
 
 func loadFixtureEntries(path string) ([]pointlist.Entry, error) {

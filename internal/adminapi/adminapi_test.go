@@ -280,4 +280,6 @@ func TestMetrics_NoAuthRequired(t *testing.T) {
 	bodyBytes, _ := io.ReadAll(resp.Body)
 	assert.Contains(t, string(bodyBytes), "gateway_uptime_seconds")
 	assert.Contains(t, string(bodyBytes), "gateway_goroutines")
+	assert.Contains(t, string(bodyBytes), "normalizer_invalid_total")
+	assert.Contains(t, string(bodyBytes), "normalizer_unresolved_total")
 }
