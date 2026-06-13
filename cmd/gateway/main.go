@@ -43,6 +43,8 @@ func main() {
 	plFile := flag.String("point-list", envOrDefault("POINT_LIST_FILE", "fixtures/point_list.json"), "Bootstrap fixture point list (used when --provisioning-url is empty)")
 	plPersist := flag.String("point-list-persist", envOrDefault("POINT_LIST_PERSIST", "data/point_list.json"), "Path to persist the synced point list")
 	provURL := flag.String("provisioning-url", envOrDefault("PROVISIONING_URL", ""), "Provisioning API base URL (empty = fixture only)")
+	provFile := flag.String("provisioning-file", envOrDefault("PROVISIONING_FILE", ""), "File-backed Point List provisioning source (.csv or .json); overridden by --provisioning-url")
+	provConnID := flag.String("provisioning-connector-id", envOrDefault("PROVISIONING_CONNECTOR_ID", "bacnet-01"), "Connector id stamped on entries loaded from a provisioning CSV")
 	sfDB := flag.String("sf-db", envOrDefault("SF_DB", "data/storeforward.db"), "Store-and-Forward SQLite database path")
 	sfCap := flag.Int("sf-cap", 100_000, "Store-and-Forward ring buffer capacity (frames)")
 	flag.Parse()
@@ -82,12 +84,21 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Build the live point list resolver
+	// Build the live point list resolver. Source precedence (ADR-0003): an
+	// authoritative provisioning source (HTTP API, or a file-backed stand-in)
+	// always overrides the local fixture bootstrap once synced.
 	resolver := pointlist.NewSynced(nil)
-	if *provURL != "" {
-		// Real sync loop against the provisioning API (ADR-0003)
+	var provClient provisioning.Client
+	switch {
+	case *provURL != "":
+		provClient = provisioning.NewHTTPClient(*provURL)
+	case *provFile != "":
+		provClient = provisioning.NewFileClient(*provFile, *provConnID)
+	}
+	if provClient != nil {
+		// Real sync loop against the provisioning source (ADR-0003)
 		syncLoop := pointsync.New(
-			provisioning.NewHTTPClient(*provURL),
+			provClient,
 			resolver,
 			pointsync.Config{Interval: 30 * time.Second, PersistPath: *plPersist},
 		)
