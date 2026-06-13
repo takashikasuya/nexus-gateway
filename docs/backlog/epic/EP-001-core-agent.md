@@ -14,7 +14,7 @@ The Core Agent is the Go orchestration brain of the gateway. It manages connecto
 - [ ] Core Agent runs as a single Go binary and manages connector containers via the Docker Engine SDK.
 - [ ] Core Agent provisions the `EVENTS` JetStream stream on bring-up with ADR-0005 limits (maxAge 48 h, maxBytes 2 GB, DiscardOld — all configurable).
 - [ ] Connector Registry tracks installed connectors and their versions.
-- [ ] Lifecycle Manager supports Start, Stop, Restart, and Upgrade of connectors.
+- [ ] Lifecycle Manager supports Start, Stop, Restart, and Upgrade of connectors. (Production upgrades are catalog-driven and signature-verified — EP-007 builds on this.)
 - [ ] Config Manager persists and distributes gateway + connector configuration.
 - [ ] Health Monitor reports gateway uptime, CPU, memory, disk, and per-connector liveness.
 - [ ] Admin API exposes the above operations, protected by Keycloak OIDC/OAuth2.

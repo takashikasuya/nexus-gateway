@@ -17,8 +17,12 @@ A single deployed instance of this system at a building edge, identified by `gat
 _Avoid_: edge node, agent (the Core Agent is a component inside the Gateway)
 
 **Connector**:
-An isolated per-protocol container that talks to field equipment and publishes Common Events. Holds no equipment-specific or Building-OS domain model; has no dependency on other Connectors.
+An isolated per-protocol container that talks to field equipment and publishes Common Events. Holds no equipment-specific or Building-OS domain model; has no dependency on other Connectors. Distributed as a **signed OCI image**, always executed **digest-pinned** (never by tag), installed/updated only through the Connector Catalog.
 _Avoid_: driver, adapter, plugin
+
+**Connector Catalog**:
+The approved-manifest service (a **standalone management server**, not Building OS) that the Gateway polls to learn which Connector versions may run. Each entry carries `name`, `version`, `image`, `digest`, `min_gateway_version`, `permissions` (network/mounts), `signature_required`. The Core Agent never pulls an image the Catalog does not list, never runs an unsigned or digest-mismatched image, and never pulls from a registry outside the allowlist (ADR-0006).
+_Avoid_: registry (that is the OCI Container Registry), store, marketplace
 
 **Common Event**:
 The protocol-tagged event a Connector publishes to NATS JetStream. Carries `protocol` and **native addressing only** (`local_id` + native device ref) plus the raw value/unit/quality/timestamp. Identity is not yet resolved — that is the Normalizer's job. Published on subject **`evt.<protocol>.<connector_id>`** in the single stream **`EVENTS`**; `local_id` rides in the payload, never the subject. The Normalizer is the single durable consumer on `evt.>`; replay/re-normalization filters by protocol or connector subject.

@@ -20,7 +20,7 @@ Buildings run on heterogeneous equipment that speaks incompatible protocols (BAC
 
 - Kubernetes-based orchestration (the runtime is container-based but not K8s-dependent).
 - Multi-gateway federation across sites.
-- Over-the-air (OTA) connector/firmware update infrastructure.
+- Firmware OTA update infrastructure. (Scope change 2026-06-13: **connector** OTA update — signed OCI images distributed via the Connector Catalog — is now IN scope; see ADR-0006 / EP-007.)
 - Semantic reasoning, knowledge graph, or inference engines.
 - Device registry, metadata registry, and command authority — these are owned by Building OS as the System of Record.
 - Reimplementing EdgeX Foundry / Eclipse Hono capabilities that duplicate Building OS responsibilities.

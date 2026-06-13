@@ -62,6 +62,7 @@ metadata:
 | gRPC Uplink | Building OS-owned contract (`gatewaybridge`, vendored from `../gutp-building-os-oss/proto/`): Ingress `GatewayIngress/StreamTelemetry` + Egress `GatewayEgress/Connect`. No DiscoveryService. |
 | OpenTelemetry Collector | Collects metrics/logs/traces; exports OTLP + Prometheus. |
 | Admin UI | React/Next.js operator console. |
+| Connector Catalog (external) | Standalone management server serving approved connector manifests (image digest, permissions, signature policy). Polled by the Core Agent; see ADR-0006. |
 
 ## Technology Stack
 
@@ -97,4 +98,4 @@ Native addressing only — no canonical `point_id`/`device_id` (ADR-0001). Publi
 - [x] SQLite buffer / replay cursor semantics → ADR-0002 + decisions.md (ring buffer; immediate send + 5 s/1000-frame ack checkpoint).
 - [x] Normalizer ID-mapping source of truth → ADR-0003 (Building OS twin, diff sync, EP-006).
 - [x] Telemetry batching/acking granularity → decisions.md (ack only on stream close ⇒ checkpoint = stream rotation).
-- [ ] Connector upgrade flow (image pull, version pinning) given OTA is out of scope for MVP-1.
+- [x] Connector upgrade flow → ADR-0006 / EP-007 (catalog-mediated signed OCI, digest-pinned, stop-replace-rollback; connector OTA brought into scope 2026-06-13).
