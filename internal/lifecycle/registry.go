@@ -1,6 +1,12 @@
 package lifecycle
 
-import "sync"
+import (
+	"errors"
+	"sync"
+)
+
+// ErrConnectorNotFound is returned when an operation targets an ID that is not in the registry.
+var ErrConnectorNotFound = errors.New("lifecycle: connector not found")
 
 // ConnectorSpec describes a connector installation.
 type ConnectorSpec struct {

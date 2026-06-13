@@ -66,7 +66,7 @@ func (m *Manager) Start(ctx context.Context, id string) error {
 func (m *Manager) doStart(ctx context.Context, id string) error {
 	status, ok := m.registry.Get(id)
 	if !ok {
-		return fmt.Errorf("lifecycle: connector %q not in registry", id)
+		return fmt.Errorf("lifecycle: connector %q: %w", id, ErrConnectorNotFound)
 	}
 	containerID, err := m.create(ctx, status.Spec)
 	if err != nil {
@@ -91,7 +91,7 @@ func (m *Manager) Stop(ctx context.Context, id string) error {
 func (m *Manager) doStop(ctx context.Context, id string) error {
 	status, ok := m.registry.Get(id)
 	if !ok {
-		return fmt.Errorf("lifecycle: connector %q not in registry", id)
+		return fmt.Errorf("lifecycle: connector %q: %w", id, ErrConnectorNotFound)
 	}
 	if status.ContainerID == "" {
 		return nil // already stopped
@@ -112,7 +112,7 @@ func (m *Manager) Restart(ctx context.Context, id string) error {
 
 	status, ok := m.registry.Get(id)
 	if !ok {
-		return fmt.Errorf("lifecycle: connector %q not in registry", id)
+		return fmt.Errorf("lifecycle: connector %q: %w", id, ErrConnectorNotFound)
 	}
 	if status.ContainerID != "" {
 		timeout := 10
@@ -135,7 +135,7 @@ func (m *Manager) Upgrade(ctx context.Context, id, newImage string) error {
 	// Capture full spec once — avoids TOCTOU from multiple registry.Get calls.
 	status, ok := m.registry.Get(id)
 	if !ok {
-		return fmt.Errorf("lifecycle: connector %q not in registry", id)
+		return fmt.Errorf("lifecycle: connector %q: %w", id, ErrConnectorNotFound)
 	}
 	oldContainerID := status.ContainerID
 	env := status.Spec.Env
