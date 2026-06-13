@@ -46,6 +46,7 @@ func main() {
 	provURL := flag.String("provisioning-url", envOrDefault("PROVISIONING_URL", ""), "Provisioning API base URL (empty = fixture only)")
 	sfDB := flag.String("sf-db", envOrDefault("SF_DB", "data/storeforward.db"), "Store-and-Forward SQLite database path")
 	sfCap := flag.Int("sf-cap", 100_000, "Store-and-Forward ring buffer capacity (frames)")
+	syncInterval := flag.Duration("point-sync-interval", 10*time.Minute, "Point List poll interval after the initial sync (the list is near-static, ADR-0003)")
 	bosInsecure := flag.Bool("bos-insecure", envOrDefault("BOS_INSECURE", "") == "true", "Dial Building OS over plaintext h2c (no TLS) — dev/CI only (ADR-0007)")
 	bosCA := flag.String("bos-ca", envOrDefault("BOS_CA_FILE", ""), "PEM CA bundle to verify the Building OS server cert (empty = system roots)")
 	bosCert := flag.String("bos-cert", envOrDefault("BOS_CERT_FILE", ""), "Client certificate for mTLS to Building OS (CN/SAN = gateway_id)")
@@ -111,7 +112,7 @@ func main() {
 		syncLoop := pointsync.New(
 			provisioning.NewHTTPClient(*provURL),
 			resolver,
-			pointsync.Config{Interval: 30 * time.Second, PersistPath: *plPersist},
+			pointsync.Config{Interval: *syncInterval, PersistPath: *plPersist},
 		)
 		go syncLoop.Run(ctx)
 		// Wait for initial snapshot before starting the pipeline
@@ -122,6 +123,11 @@ func main() {
 				break
 			}
 			time.Sleep(100 * time.Millisecond)
+		}
+		if len(resolver.Snapshot()) == 0 {
+			// Proceeding with an empty resolver means every Common Event resolves to a
+			// point-list miss and is dropped (ADR-0002). Make that loud rather than silent.
+			slog.Error("point list: initial sync did not complete within 30s — starting with an empty Point List; telemetry will be dropped as point-list misses until sync succeeds")
 		}
 	} else {
 		// Bootstrap from fixture file (dev / no provisioning API)
