@@ -41,9 +41,11 @@ func main() {
 	jwksURL := flag.String("admin-jwks-url", envOrDefault("KEYCLOAK_JWKS_URL", ""), "Keycloak JWKS URL (empty = auth disabled)")
 	adminAudience := flag.String("admin-audience", envOrDefault("KEYCLOAK_AUDIENCE", "account"), "Expected JWT audience")
 	adminIssuer := flag.String("admin-issuer", envOrDefault("KEYCLOAK_ISSUER", ""), "Expected JWT issuer")
-	plFile := flag.String("point-list", envOrDefault("POINT_LIST_FILE", "fixtures/point_list.json"), "Bootstrap fixture point list (used when --provisioning-url is empty)")
+	plFile := flag.String("point-list", envOrDefault("POINT_LIST_FILE", "fixtures/point_list.json"), "Bootstrap fixture point list (used when both --provisioning-url and --provisioning-file are empty)")
 	plPersist := flag.String("point-list-persist", envOrDefault("POINT_LIST_PERSIST", "data/point_list.json"), "Path to persist the synced point list")
 	provURL := flag.String("provisioning-url", envOrDefault("PROVISIONING_URL", ""), "Provisioning API base URL (empty = fixture only)")
+	provFile := flag.String("provisioning-file", envOrDefault("PROVISIONING_FILE", ""), "File-backed Point List provisioning source (.csv or .json); overridden by --provisioning-url")
+	provConnID := flag.String("provisioning-connector-id", envOrDefault("PROVISIONING_CONNECTOR_ID", "bacnet-01"), "Connector id stamped on entries loaded from a provisioning CSV")
 	sfDB := flag.String("sf-db", envOrDefault("SF_DB", "data/storeforward.db"), "Store-and-Forward SQLite database path")
 	sfCap := flag.Int("sf-cap", 100_000, "Store-and-Forward ring buffer capacity (frames)")
 	devSim := flag.Bool("dev-sim", envOrDefault("DEV_SIM", "") == "true", "Run an in-process sim connector (dev/smoke only, non-production; ADR-0001)")
@@ -106,12 +108,31 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Build the live point list resolver
+	// Build the live point list resolver. Source precedence (ADR-0003): an
+	// authoritative provisioning source (HTTP API, or a file-backed stand-in)
+	// always overrides the local fixture bootstrap once synced.
 	resolver := pointlist.NewSynced(nil)
-	if *provURL != "" {
-		// Real sync loop against the provisioning API (ADR-0003)
+	var provClient provisioning.Client
+	switch {
+	case *provURL != "":
+		provClient = provisioning.NewHTTPClient(*provURL)
+	case *provFile != "":
+		// Fail fast on a bad path rather than spinning the startup wait and then
+		// running with an empty Point List.
+		switch fi, err := os.Stat(*provFile); {
+		case err != nil:
+			slog.Error("provisioning file not readable", "path", *provFile, "err", err)
+			os.Exit(1)
+		case !fi.Mode().IsRegular():
+			slog.Error("provisioning file is not a regular file", "path", *provFile)
+			os.Exit(1)
+		}
+		provClient = provisioning.NewFileClient(*provFile, *provConnID)
+	}
+	if provClient != nil {
+		// Real sync loop against the provisioning source (ADR-0003)
 		syncLoop := pointsync.New(
-			provisioning.NewHTTPClient(*provURL),
+			provClient,
 			resolver,
 			pointsync.Config{Interval: *syncInterval, PersistPath: *plPersist},
 		)
