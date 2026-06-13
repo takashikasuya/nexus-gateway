@@ -48,6 +48,9 @@ class ConnectorTest {
         public Map<String, String> browse(String root) {
             return Map.of();
         }
+
+        @Override public void writeNode(String nodeId, double value) {}
+        @Override public void callMethod(String objectNodeId, String methodNodeId, double value) {}
     }
 
     static class RecordingPublisher {
@@ -62,7 +65,7 @@ class ConnectorTest {
             "opcua-01", "nats://localhost:4222", "opc.tcp://localhost:4840",
             "sim-server",
             List.of(new PointConfig("ns=2;i=1001", "sim-server", "degC")),
-            30.0
+            30.0, 10.0
         );
     }
 
