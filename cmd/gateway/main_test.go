@@ -18,11 +18,22 @@ import (
 // runs no in-process connector — the connector-isolation invariant holds (ADR-0001).
 // This test exercises the enabled path: registration + a live connector.
 
-func TestDevSim_OffByDefault_NoConnectorRegistered(t *testing.T) {
-	// The default build never calls startDevSim, so the registry is empty of any
-	// in-process connector. This documents the gate.
+func TestStartDevSim_ClearsRunningOnCancel(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	nc, js := newTestNATS(t, ctx)
+	_ = nc
 	reg := lifecycle.NewRegistry()
-	assert.Empty(t, reg.List(), "default build must register no in-process connector")
+
+	startDevSim(ctx, js, reg, time.Hour) // long interval: we only care about lifecycle state
+	require.True(t, reg.List()[0].Running)
+
+	cancel()
+	// On shutdown the connector lifetime ends; the registry must reflect not-running
+	// so the Admin UI does not show a stale running sim.
+	assert.Eventually(t, func() bool {
+		entries := reg.List()
+		return len(entries) == 1 && !entries[0].Running
+	}, 3*time.Second, 20*time.Millisecond, "sim-01 must be marked not-running after ctx cancel")
 }
 
 func TestStartDevSim_RegistersAndRunsSim(t *testing.T) {

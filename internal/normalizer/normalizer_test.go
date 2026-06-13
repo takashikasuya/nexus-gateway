@@ -13,6 +13,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"nexus-gateway/internal/common"
+	"nexus-gateway/internal/metrics"
 	"nexus-gateway/internal/normalizer"
 	"nexus-gateway/internal/pointlist"
 )
@@ -93,6 +94,53 @@ func TestNormalizer_BoolValueNormalisedToNumeric(t *testing.T) {
 	case <-ctx.Done():
 		t.Fatal("timeout")
 	}
+}
+
+func TestNormalizer_DropsAndMetersPoisonAndMiss(t *testing.T) {
+	// NOTE: reads the process-global metrics counters via before/after deltas, so
+	// this test must NOT be t.Parallel()'d and no other test in this package that
+	// produces a miss/poison may run concurrently — that would perturb the delta.
+	// (Package tests are serial by default; this comment is the guard against a
+	// future t.Parallel() silently introducing flakiness.)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	js := newTestJetStream(t, ctx)
+	pl := pointlist.NewFixture(nil) // empty — every event is a miss
+
+	invBefore := metrics.NormalizerInvalid()
+	unrBefore := metrics.NormalizerUnresolved()
+
+	norm, err := normalizer.New(ctx, js, pl, "gw-test")
+	require.NoError(t, err)
+
+	// Poison: raw bytes that are not a valid Common Event.
+	_, err = js.Publish(ctx, "evt.sim.c", []byte("{not valid json"))
+	require.NoError(t, err)
+
+	// Miss: well-formed event whose local_id resolves to nothing.
+	publish(t, ctx, js, "evt.sim.c", common.Event{
+		ConnectorID: "c", LocalID: "unknown/point",
+		Value: 1.0, Timestamp: time.Now().UTC().Format(time.RFC3339),
+	})
+
+	// Each is metered exactly once.
+	require.Eventually(t, func() bool {
+		return metrics.NormalizerInvalid()-invBefore == 1 &&
+			metrics.NormalizerUnresolved()-unrBefore == 1
+	}, 3*time.Second, 20*time.Millisecond, "poison and miss should each be metered once")
+
+	// No frame is emitted for either.
+	select {
+	case <-norm.Frames():
+		t.Fatal("no frame expected for poison/miss")
+	case <-time.After(300 * time.Millisecond):
+	}
+
+	// Counters stay at 1: the messages were Term()-ed, not Nak()-redelivered (which
+	// would climb toward MaxDeliver under the old behavior).
+	assert.Equal(t, int64(1), metrics.NormalizerInvalid()-invBefore)
+	assert.Equal(t, int64(1), metrics.NormalizerUnresolved()-unrBefore)
 }
 
 // ── helpers ───────────────────────────────────────────────────────────────────
