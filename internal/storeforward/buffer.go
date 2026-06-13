@@ -2,7 +2,9 @@ package storeforward
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
+	"log/slog"
 	"sync"
 
 	_ "modernc.org/sqlite"
@@ -105,9 +107,13 @@ func (b *Buffer) Advance(seq int64) error {
 }
 
 // Cursor returns the current persisted cursor (last acked seq).
+// Returns 0 for a fresh buffer (no cursor row yet). Logs a warning for any other error.
 func (b *Buffer) Cursor() int64 {
 	var seq int64
-	_ = b.db.QueryRow(`SELECT seq FROM cursor WHERE id = 1`).Scan(&seq)
+	err := b.db.QueryRow(`SELECT seq FROM cursor WHERE id = 1`).Scan(&seq)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		slog.Warn("storeforward: cursor read error", "err", err)
+	}
 	return seq
 }
 

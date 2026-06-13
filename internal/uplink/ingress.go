@@ -56,10 +56,9 @@ func (u *Ingress) Run(ctx context.Context) {
 }
 
 func (u *Ingress) runStream(ctx context.Context, client pb.GatewayIngressClient) error {
-	stream, err := client.StreamTelemetry(ctx)
-	if err != nil {
-		return err
-	}
+	// stream is opened lazily on the first frame to avoid holding an idle connection
+	// that server-side idle-timeout policies would tear down repeatedly.
+	var stream pb.GatewayIngress_StreamTelemetryClient
 
 	cursor := u.buf.Cursor()
 	tick := time.NewTicker(u.cfg.CheckpointAge)
@@ -67,15 +66,21 @@ func (u *Ingress) runStream(ctx context.Context, client pb.GatewayIngressClient)
 	pollTick := time.NewTicker(50 * time.Millisecond)
 	defer pollTick.Stop()
 
-	// batch tracks frames sent since last checkpoint: seq → pointID
+	// batch tracks frames sent since last checkpoint.
 	type sentFrame struct {
 		seq     int64
 		pointID string
 	}
 	var batch []sentFrame
 
+	openStream := func() error {
+		var err error
+		stream, err = client.StreamTelemetry(ctx)
+		return err
+	}
+
 	checkpoint := func() error {
-		if len(batch) == 0 {
+		if stream == nil || len(batch) == 0 {
 			return nil
 		}
 		ack, err := stream.CloseAndRecv()
@@ -85,24 +90,24 @@ func (u *Ingress) runStream(ctx context.Context, client pb.GatewayIngressClient)
 		sent := int64(len(batch))
 		lost := sent - ack.Accepted
 		if lost > 0 {
-			// attribute lost frames to the tail of the batch (last `lost` entries)
-			for _, sf := range batch[ack.Accepted:] {
+			// Guard against negative or out-of-range ack.Accepted from a buggy server.
+			start := int(ack.Accepted)
+			if start < 0 {
+				start = 0
+			}
+			for _, sf := range batch[start:] {
 				u.buf.RecordDrift(sf.pointID, 1)
 			}
 			slog.Warn("ingress: drift", "sent", sent, "accepted", ack.Accepted, "lost", lost)
 		}
-		// Advance cursor past entire batch regardless (best-effort, ADR-0002)
+		// Advance cursor past entire batch regardless (best-effort, ADR-0002).
 		cursor = batch[len(batch)-1].seq
 		if err := u.buf.Advance(cursor); err != nil {
 			return fmt.Errorf("advance cursor: %w", err)
 		}
 		batch = batch[:0]
+		stream = nil // force lazy re-open on next Send
 
-		newStream, err := client.StreamTelemetry(ctx)
-		if err != nil {
-			return fmt.Errorf("re-open stream: %w", err)
-		}
-		stream = newStream
 		tick.Reset(u.cfg.CheckpointAge)
 		return nil
 	}
@@ -110,7 +115,7 @@ func (u *Ingress) runStream(ctx context.Context, client pb.GatewayIngressClient)
 	for {
 		select {
 		case <-ctx.Done():
-			if len(batch) > 0 {
+			if stream != nil && len(batch) > 0 {
 				_, _ = stream.CloseAndRecv()
 			}
 			return nil
@@ -127,6 +132,11 @@ func (u *Ingress) runStream(ctx context.Context, client pb.GatewayIngressClient)
 				continue
 			}
 			for _, sf := range frames {
+				if stream == nil {
+					if err := openStream(); err != nil {
+						return err
+					}
+				}
 				if err := stream.Send(sf.Frame); err != nil {
 					return fmt.Errorf("send: %w", err)
 				}

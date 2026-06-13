@@ -7,6 +7,8 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
+	"path/filepath"
+	"sync"
 	"syscall"
 	"time"
 
@@ -78,14 +80,22 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Open Store-and-Forward buffer
+	// Open Store-and-Forward buffer (create parent directory if needed)
+	if err := os.MkdirAll(filepath.Dir(*sfDB), 0o755); err != nil {
+		slog.Error("storeforward dir create failed", "err", err)
+		os.Exit(1)
+	}
 	buf, err := storeforward.Open(*sfDB, *sfCap)
 	if err != nil {
 		slog.Error("storeforward open failed", "err", err)
 		os.Exit(1)
 	}
-	defer buf.Close()
-	go storeforward.Pump(ctx, norm.Frames(), buf)
+	var pumpWg sync.WaitGroup
+	pumpWg.Add(1)
+	go func() {
+		defer pumpWg.Done()
+		storeforward.Pump(ctx, norm.Frames(), buf)
+	}()
 
 	// Start Ingress uplink
 	ul, err := uplink.NewIngress(ctx, *bosAddr, *gatewayID, buf, uplink.DefaultConfig)
@@ -109,6 +119,8 @@ func main() {
 	<-stop
 	slog.Info("gateway shutting down")
 	cancel()
+	pumpWg.Wait()
+	buf.Close()
 }
 
 func loadFixturePointList(path string) (*pointlist.Fixture, error) {

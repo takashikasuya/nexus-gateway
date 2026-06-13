@@ -94,11 +94,15 @@ func TestSF_OutageSurvival(t *testing.T) {
 	for _, lid := range []string{"l1", "l2", "l3"} {
 		publish(t, js, "sim-01", lid, 2.0)
 	}
-	time.Sleep(300 * time.Millisecond) // let normalizer process them into buffer
+	// Wait for outage frames to land in SQLite buffer before restarting BOS
+	preOutageCursor := buf.Cursor()
+	require.Eventually(t, func() bool {
+		batch, _ := buf.ReadBatch(preOutageCursor, 10)
+		return len(batch) >= 3
+	}, 5*time.Second, 20*time.Millisecond, "outage frames must be in buffer before BOS restart")
 
 	// Restart mock BOS on same port
-	bos2 := restartMockBOS(t, bos.addr, received, &accepted)
-	defer bos2.srv.GracefulStop()
+	restartMockBOS(t, bos.addr, received, &accepted)
 	slog.Info("mock BOS restarted", "addr", bos.addr)
 
 	// Expect all 3 buffered frames to arrive, in order
@@ -195,9 +199,8 @@ func TestSF_DriftCounterRises(t *testing.T) {
 	go storeforward.Pump(ctx, norm.Frames(), buf)
 
 	// Mock BOS that reports accepted=0 (rejects everything)
-	var rejectAcc atomic.Int64
 	received2 := make(chan *pb.TelemetryFrame, 10)
-	bos := startMockBOSWithAccepted(t, received2, &rejectAcc)
+	bos := startMockBOSWithAccepted(t, received2)
 
 	cfg := uplink.Config{CheckpointSize: 2, CheckpointAge: 5 * time.Second}
 	ul, err := uplink.NewIngress(ctx, bos.addr, "gw-001", buf, cfg)
@@ -238,6 +241,7 @@ func restartMockBOS(t *testing.T, addr string, received chan *pb.TelemetryFrame,
 	srv := grpc.NewServer()
 	pb.RegisterGatewayIngressServer(srv, &mockBOSServer{received: received, accepted: accepted})
 	go func() { _ = srv.Serve(lis) }()
+	t.Cleanup(srv.GracefulStop)
 	return &mockBOSHandle{addr: addr, srv: srv}
 }
 
@@ -257,7 +261,7 @@ func (s *rejectBOSServer) StreamTelemetry(stream pb.GatewayIngress_StreamTelemet
 	}
 }
 
-func startMockBOSWithAccepted(t *testing.T, received chan *pb.TelemetryFrame, _ *atomic.Int64) *mockBOSHandle {
+func startMockBOSWithAccepted(t *testing.T, received chan *pb.TelemetryFrame) *mockBOSHandle {
 	t.Helper()
 	lis, err := net.Listen("tcp", "127.0.0.1:0")
 	require.NoError(t, err)
