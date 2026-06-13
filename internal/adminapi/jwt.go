@@ -2,6 +2,7 @@ package adminapi
 
 import (
 	"context"
+	"log/slog"
 	"net/http"
 	"strings"
 	"time"
@@ -13,13 +14,17 @@ import (
 // KeyFetcher retrieves the JWKS key set used to verify tokens.
 type KeyFetcher func(ctx context.Context) (jwk.Set, error)
 
-// newURLKeyFetcher returns a KeyFetcher that fetches from a remote JWKS URL.
-// Keys are cached for 15 minutes to avoid a network call per request.
-func newURLKeyFetcher(jwksURL string) KeyFetcher {
-	cache := jwk.NewCache(context.Background())
+// newURLKeyFetcher returns a KeyFetcher backed by a refreshing JWKS cache.
+// ctx controls the cache's background refresh goroutine — cancel it (via
+// Server.Shutdown) to stop the goroutine cleanly.
+func newURLKeyFetcher(ctx context.Context, jwksURL string) KeyFetcher {
+	cache := jwk.NewCache(ctx)
 	cache.Register(jwksURL, jwk.WithMinRefreshInterval(15*time.Minute))
-	// Warm the cache immediately so the first request doesn't pay the fetch latency.
-	_, _ = cache.Refresh(context.Background(), jwksURL)
+	// Warm cache immediately so the first request doesn't pay fetch latency.
+	if _, err := cache.Refresh(ctx, jwksURL); err != nil {
+		slog.Warn("adminapi: initial JWKS fetch failed — tokens will be rejected until next refresh",
+			"url", jwksURL, "err", err)
+	}
 	return func(ctx context.Context) (jwk.Set, error) {
 		return cache.Get(ctx, jwksURL)
 	}
@@ -73,11 +78,11 @@ func (m *JWTMiddleware) require(role string, next http.HandlerFunc) http.Handler
 }
 
 func extractBearer(r *http.Request) string {
-	auth := r.Header.Get("Authorization")
-	if !strings.HasPrefix(auth, "Bearer ") {
+	token, ok := strings.CutPrefix(r.Header.Get("Authorization"), "Bearer ")
+	if !ok {
 		return ""
 	}
-	return strings.TrimPrefix(auth, "Bearer ")
+	return token
 }
 
 // realmRoles extracts roles from the Keycloak realm_access.roles claim.

@@ -3,6 +3,7 @@ package adminapi
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -30,16 +31,27 @@ type HealthSnapshotter interface {
 
 // Server is the Admin HTTP API server.
 type Server struct {
-	mux     *http.ServeMux
-	auth    *JWTMiddleware
-	mgr     ConnectorManager
-	monitor HealthSnapshotter
+	mux      *http.ServeMux
+	auth     *JWTMiddleware
+	mgr      ConnectorManager
+	monitor  HealthSnapshotter
+	shutdown context.CancelFunc // stops the JWKS cache refresh goroutine
 }
 
 // New creates a Server. jwksURL is fetched for JWKS key validation; audience
-// and issuer are enforced on every token.
+// and issuer are enforced on every token. Call Shutdown() to stop background goroutines.
 func New(mgr ConnectorManager, monitor HealthSnapshotter, jwksURL, audience, issuer string) *Server {
-	return newServer(mgr, monitor, newURLKeyFetcher(jwksURL), audience, issuer)
+	ctx, cancel := context.WithCancel(context.Background())
+	s := newServer(mgr, monitor, newURLKeyFetcher(ctx, jwksURL), audience, issuer)
+	s.shutdown = cancel
+	return s
+}
+
+// Shutdown stops the JWKS cache background refresh goroutine.
+func (s *Server) Shutdown() {
+	if s.shutdown != nil {
+		s.shutdown()
+	}
 }
 
 func newServer(mgr ConnectorManager, monitor HealthSnapshotter, keys KeyFetcher, audience, issuer string) *Server {
@@ -91,7 +103,7 @@ func (s *Server) handleAction(w http.ResponseWriter, r *http.Request) {
 	case "restart":
 		err = s.mgr.Restart(r.Context(), id)
 	case "upgrade":
-		newImage := r.URL.Query().Get("image")
+		newImage := strings.TrimSpace(r.URL.Query().Get("image"))
 		if newImage == "" {
 			http.Error(w, "upgrade requires ?image=<ref>", http.StatusBadRequest)
 			return
@@ -103,7 +115,7 @@ func (s *Server) handleAction(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err != nil {
-		if strings.Contains(err.Error(), "not in registry") {
+		if errors.Is(err, lifecycle.ErrConnectorNotFound) {
 			http.Error(w, err.Error(), http.StatusNotFound)
 			return
 		}
@@ -130,6 +142,11 @@ func (s *Server) handleMetrics(w http.ResponseWriter, r *http.Request) {
 }
 
 func writeJSON(w http.ResponseWriter, v any) {
+	data, err := json.Marshal(v)
+	if err != nil {
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(v) //nolint:errcheck
+	w.Write(data) //nolint:errcheck
 }

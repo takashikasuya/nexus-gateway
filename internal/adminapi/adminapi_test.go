@@ -26,8 +26,8 @@ import (
 
 type testFixture struct {
 	privKey    *rsa.PrivateKey
-	keySet     jwk.Set
 	jwksServer *httptest.Server
+	srv        *adminapi.Server
 	apiServer  *httptest.Server
 }
 
@@ -47,34 +47,41 @@ func newFixture(t *testing.T) *testFixture {
 
 	jwksServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(set)
+		json.NewEncoder(w).Encode(set) //nolint:errcheck
 	}))
 	t.Cleanup(jwksServer.Close)
 
 	mgr := &mockManager{}
 	mon := &mockMonitor{}
 	srv := adminapi.New(mgr, mon, jwksServer.URL, "nexus-gateway", "test-issuer")
+	t.Cleanup(srv.Shutdown)
 	apiServer := httptest.NewServer(srv)
 	t.Cleanup(apiServer.Close)
 
 	return &testFixture{
 		privKey:    privKey,
-		keySet:     set,
 		jwksServer: jwksServer,
+		srv:        srv,
 		apiServer:  apiServer,
 	}
 }
 
 func (f *testFixture) signToken(t *testing.T, roles []string, expiry time.Time) string {
 	t.Helper()
+	return signToken(t, f.privKey, "test-issuer", "nexus-gateway", roles, expiry)
+}
+
+// signToken builds and signs a JWT with configurable issuer and audience.
+func signToken(t *testing.T, privKey *rsa.PrivateKey, issuer, audience string, roles []string, expiry time.Time) string {
+	t.Helper()
 	b := jwt.NewBuilder().
-		Issuer("test-issuer").
-		Audience([]string{"nexus-gateway"}).
+		Issuer(issuer).
+		Audience([]string{audience}).
 		Expiration(expiry).
 		Claim("realm_access", map[string]any{"roles": roles})
 	tok, err := b.Build()
 	require.NoError(t, err)
-	priv, err := jwk.FromRaw(f.privKey)
+	priv, err := jwk.FromRaw(privKey)
 	require.NoError(t, err)
 	require.NoError(t, priv.Set(jwk.KeyIDKey, "test-key"))
 	signed, err := jwt.Sign(tok, jwt.WithKey(jwa.RS256, priv))
@@ -144,18 +151,6 @@ func (m *mockMonitor) Snapshot(_ context.Context) lifecycle.GatewayHealth {
 	}
 }
 
-type mockConnectorLister struct{}
-
-func (m *mockConnectorLister) List() []lifecycle.ConnectorStatus {
-	return []lifecycle.ConnectorStatus{
-		{
-			Spec:        lifecycle.ConnectorSpec{ID: "mqtt-01", Image: "registry.example.com/mqtt:v1.0.0"},
-			ContainerID: "ctr-abc",
-			Running:     true,
-		},
-	}
-}
-
 // ── auth tests ────────────────────────────────────────────────────────────
 
 func TestAuth_NoToken_Returns401(t *testing.T) {
@@ -173,18 +168,15 @@ func TestAuth_ExpiredToken_Returns401(t *testing.T) {
 
 func TestAuth_WrongAudience_Returns401(t *testing.T) {
 	f := newFixture(t)
-	b := jwt.NewBuilder().
-		Issuer("test-issuer").
-		Audience([]string{"wrong-audience"}).
-		Expiration(time.Now().Add(1 * time.Hour)).
-		Claim("realm_access", map[string]any{"roles": []string{adminapi.RoleViewer}})
-	tok, err := b.Build()
-	require.NoError(t, err)
-	priv, _ := jwk.FromRaw(f.privKey)
-	_ = priv.Set(jwk.KeyIDKey, "test-key")
-	signed, err := jwt.Sign(tok, jwt.WithKey(jwa.RS256, priv))
-	require.NoError(t, err)
-	resp := f.get("/connectors", string(signed))
+	tok := signToken(t, f.privKey, "test-issuer", "wrong-audience", []string{adminapi.RoleViewer}, time.Now().Add(1*time.Hour))
+	resp := f.get("/connectors", tok)
+	assert.Equal(t, http.StatusUnauthorized, resp.StatusCode)
+}
+
+func TestAuth_WrongIssuer_Returns401(t *testing.T) {
+	f := newFixture(t)
+	tok := signToken(t, f.privKey, "evil-realm", "nexus-gateway", []string{adminapi.RoleViewer}, time.Now().Add(1*time.Hour))
+	resp := f.get("/connectors", tok)
 	assert.Equal(t, http.StatusUnauthorized, resp.StatusCode)
 }
 
@@ -245,6 +237,7 @@ func TestAction_Start(t *testing.T) {
 	mgr := &mockManager{}
 	mon := &mockMonitor{}
 	srv := adminapi.New(mgr, mon, f.jwksServer.URL, "nexus-gateway", "test-issuer")
+	t.Cleanup(srv.Shutdown)
 	apiSrv := httptest.NewServer(srv)
 	t.Cleanup(apiSrv.Close)
 
@@ -259,9 +252,10 @@ func TestAction_Start(t *testing.T) {
 
 func TestAction_UnknownConnector_Returns404(t *testing.T) {
 	f := newFixture(t)
-	mgr := &mockManager{err: fmt.Errorf("lifecycle: connector %q not in registry", "ghost")}
+	mgr := &mockManager{err: fmt.Errorf("lifecycle: connector %q: %w", "ghost", lifecycle.ErrConnectorNotFound)}
 	mon := &mockMonitor{}
 	srv := adminapi.New(mgr, mon, f.jwksServer.URL, "nexus-gateway", "test-issuer")
+	t.Cleanup(srv.Shutdown)
 	apiSrv := httptest.NewServer(srv)
 	t.Cleanup(apiSrv.Close)
 
