@@ -29,6 +29,7 @@ import (
 	"nexus-gateway/internal/pointsync"
 	"nexus-gateway/internal/provisioning"
 	"nexus-gateway/internal/storeforward"
+	"nexus-gateway/internal/transport"
 	"nexus-gateway/internal/uplink"
 )
 
@@ -46,7 +47,28 @@ func main() {
 	sfDB := flag.String("sf-db", envOrDefault("SF_DB", "data/storeforward.db"), "Store-and-Forward SQLite database path")
 	sfCap := flag.Int("sf-cap", 100_000, "Store-and-Forward ring buffer capacity (frames)")
 	syncInterval := flag.Duration("point-sync-interval", 10*time.Minute, "Point List poll interval after the initial sync (the list is near-static, ADR-0003)")
+	bosInsecure := flag.Bool("bos-insecure", envOrDefault("BOS_INSECURE", "") == "true", "Dial Building OS over plaintext h2c (no TLS) — dev/CI only (ADR-0007)")
+	bosCA := flag.String("bos-ca", envOrDefault("BOS_CA_FILE", ""), "PEM CA bundle to verify the Building OS server cert (empty = system roots)")
+	bosCert := flag.String("bos-cert", envOrDefault("BOS_CERT_FILE", ""), "Client certificate for mTLS to Building OS (CN/SAN = gateway_id)")
+	bosKey := flag.String("bos-key", envOrDefault("BOS_KEY_FILE", ""), "Client private key for mTLS to Building OS")
+	bosServerName := flag.String("bos-servername", envOrDefault("BOS_SERVER_NAME", ""), "Override the server name verified in the Building OS cert")
 	flag.Parse()
+
+	// Build the gRPC transport credentials for both Building OS links (ADR-0007).
+	bosCreds, err := transport.ClientCredentials(transport.Config{
+		Insecure:   *bosInsecure,
+		CAFile:     *bosCA,
+		CertFile:   *bosCert,
+		KeyFile:    *bosKey,
+		ServerName: *bosServerName,
+	})
+	if err != nil {
+		slog.Error("Building OS transport credentials", "err", err)
+		os.Exit(1)
+	}
+	if *bosInsecure {
+		slog.Warn("Building OS link is plaintext h2c (--bos-insecure) — dev/CI only")
+	}
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -142,7 +164,7 @@ func main() {
 	}()
 
 	// Start Ingress uplink
-	ul, err := uplink.NewIngress(ctx, *bosAddr, *gatewayID, buf, uplink.DefaultConfig)
+	ul, err := uplink.NewIngress(ctx, *bosAddr, *gatewayID, buf, uplink.DefaultConfig, bosCreds)
 	if err != nil {
 		slog.Error("uplink init failed", "err", err)
 		os.Exit(1)
@@ -151,7 +173,7 @@ func main() {
 
 	// Start Egress agent (control path, ADR-0004)
 	d := dispatch.New(nc, resolver, 5*time.Second)
-	egressAgent := egress.New(nc, *bosAddr, *gatewayID, d)
+	egressAgent := egress.New(nc, *bosAddr, *gatewayID, d, bosCreds)
 	go egressAgent.Run(ctx)
 
 	// Start Admin API
