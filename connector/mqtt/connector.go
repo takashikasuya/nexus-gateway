@@ -17,6 +17,7 @@ import (
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 
+	"nexus-gateway/connector/sdk"
 	"nexus-gateway/internal/common"
 )
 
@@ -42,21 +43,8 @@ type Config struct {
 	Points        []PointConfig
 }
 
-// WriteReply is the JSON payload returned by the connector write handler over NATS request-reply.
-// It mirrors dispatch.ConnectorReply and is exported so tests and callers can decode it.
-type WriteReply struct {
-	Success  bool   `json:"success"`
-	Response string `json:"response"`
-}
-
-// writeRequest mirrors dispatch.WriteRequest — kept local to avoid import cycle.
-type writeRequest struct {
-	ControlID string  `json:"control_id"`
-	LocalID   string  `json:"local_id"`
-	DeviceRef string  `json:"device_ref"`
-	Value     float64 `json:"value"`
-	Priority  int32   `json:"priority"`
-}
+// WriteReply is re-exported from connector/sdk for callers that import this package.
+type WriteReply = sdk.WriteReply
 
 // Connector subscribes to an MQTT broker and publishes Common Events to NATS JetStream
 // on subject evt.mqtt.<connector_id> (ADR-0001, ADR-0005).
@@ -68,8 +56,7 @@ type Connector struct {
 	js        jetstream.JetStream
 	readyOnce sync.Once
 	ready     chan struct{}
-	dedupMu   sync.Mutex
-	dedup     map[string]*WriteReply // nil value = in-flight (reserved); non-nil = completed
+	dedup     *sdk.CommandDedup
 }
 
 func New(cfg Config, nc *nats.Conn, js jetstream.JetStream) *Connector {
@@ -78,7 +65,7 @@ func New(cfg Config, nc *nats.Conn, js jetstream.JetStream) *Connector {
 		nc:    nc,
 		js:    js,
 		ready: make(chan struct{}),
-		dedup: make(map[string]*WriteReply),
+		dedup: sdk.NewCommandDedup(1000),
 	}
 }
 
@@ -201,7 +188,7 @@ func (c *Connector) Run(ctx context.Context) {
 }
 
 func (c *Connector) handleWrite(ctx context.Context, cm *autopaho.ConnectionManager, topicMap map[string]PointConfig, msg *nats.Msg) {
-	var req writeRequest
+	var req sdk.WriteRequest
 	if err := json.Unmarshal(msg.Data, &req); err != nil {
 		respond(msg, WriteReply{false, "bad_request"})
 		return
@@ -214,28 +201,22 @@ func (c *Connector) handleWrite(ctx context.Context, cm *autopaho.ConnectionMana
 		return
 	}
 
-	// Reserve the slot atomically. nil = in-flight (first goroutine for this control_id),
-	// non-nil = completed (return cached result). This prevents a concurrent duplicate
-	// goroutine (same control_id) from issuing a second write to the device.
-	c.dedupMu.Lock()
-	if entry, ok := c.dedup[req.ControlID]; ok {
-		c.dedupMu.Unlock()
-		if entry == nil {
-			// Another goroutine is in-flight for this control_id. Return early; the
-			// dispatcher will retry and eventually hit the cached result.
+	// Reserve the slot via CommandDedup. nil-sentinel = in-flight; non-nil = cached.
+	proceed, cached := c.dedup.TryReserve(req.ControlID)
+	if !proceed {
+		if cached == nil {
+			// Another goroutine is in-flight; dispatcher will retry.
 			respond(msg, WriteReply{false, "in_flight"})
 		} else {
-			respond(msg, *entry)
+			respond(msg, *cached)
 		}
 		return
 	}
-	c.dedup[req.ControlID] = nil // reserve slot
-	c.dedupMu.Unlock()
 
 	p, ok := topicMap[req.LocalID]
 	if !ok || !p.Writable || p.CommandTopic == "" {
 		reply := WriteReply{false, "not_writable"}
-		c.cacheDedup(req.ControlID, reply)
+		c.dedup.Complete(req.ControlID, reply)
 		respond(msg, reply)
 		return
 	}
@@ -258,14 +239,8 @@ func (c *Connector) handleWrite(ctx context.Context, cm *autopaho.ConnectionMana
 	} else {
 		reply = WriteReply{true, "ok"}
 	}
-	c.cacheDedup(req.ControlID, reply)
+	c.dedup.Complete(req.ControlID, reply)
 	respond(msg, reply)
-}
-
-func (c *Connector) cacheDedup(controlID string, reply WriteReply) {
-	c.dedupMu.Lock()
-	c.dedup[controlID] = &reply
-	c.dedupMu.Unlock()
 }
 
 func respond(msg *nats.Msg, reply WriteReply) {

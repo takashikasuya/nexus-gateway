@@ -10,6 +10,7 @@ import (
 	"github.com/nats-io/nats.go"
 
 	pb "nexus-gateway/gen"
+	"nexus-gateway/connector/sdk"
 	"nexus-gateway/internal/pointlist"
 )
 
@@ -19,19 +20,12 @@ type Resolver interface {
 }
 
 // ConnectorReply is the JSON payload returned by a connector write handler over NATS.
-type ConnectorReply struct {
-	Success  bool   `json:"success"`
-	Response string `json:"response"`
-}
+// Alias of sdk.WriteReply — connector/sdk is the authoritative definition.
+type ConnectorReply = sdk.WriteReply
 
 // WriteRequest is the JSON payload sent to a connector write handler.
-type WriteRequest struct {
-	ControlID string  `json:"control_id"`
-	LocalID   string  `json:"local_id"`
-	DeviceRef string  `json:"device_ref"`
-	Value     float64 `json:"value"`
-	Priority  int32   `json:"priority"`
-}
+// Alias of sdk.WriteRequest — connector/sdk is the authoritative definition.
+type WriteRequest = sdk.WriteRequest
 
 // Dispatcher routes ControlCommands to connectors via NATS core request-reply (ADR-0004).
 // NATS subject: cmd.<protocol>.<connectorID>
