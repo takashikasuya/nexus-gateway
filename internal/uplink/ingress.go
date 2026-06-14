@@ -66,12 +66,7 @@ func (u *Ingress) runStream(ctx context.Context, client pb.GatewayIngressClient)
 	pollTick := time.NewTicker(50 * time.Millisecond)
 	defer pollTick.Stop()
 
-	// batch tracks frames sent since last checkpoint.
-	type sentFrame struct {
-		seq     int64
-		pointID string
-	}
-	var batch []sentFrame
+	var batch []storeforward.SentFrame
 
 	openStream := func() error {
 		var err error
@@ -87,21 +82,15 @@ func (u *Ingress) runStream(ctx context.Context, client pb.GatewayIngressClient)
 		if err != nil {
 			return fmt.Errorf("checkpoint recv: %w", err)
 		}
-		sent := int64(len(batch))
-		lost := sent - ack.Accepted
-		if lost > 0 {
-			// Guard against negative or out-of-range ack.Accepted from a buggy server.
-			start := int(ack.Accepted)
-			if start < 0 {
-				start = 0
-			}
-			for _, sf := range batch[start:] {
-				u.buf.RecordDrift(sf.pointID, 1)
-			}
-			slog.Warn("ingress: drift", "sent", sent, "accepted", ack.Accepted, "lost", lost)
+		newCursor, drifts := storeforward.ApplyAck(batch, ack.Accepted)
+		for pointID, delta := range drifts {
+			u.buf.RecordDrift(pointID, delta)
+		}
+		if len(drifts) > 0 {
+			slog.Warn("ingress: drift", "sent", len(batch), "accepted", ack.Accepted, "lost", len(drifts))
 		}
 		// Advance cursor past entire batch regardless (best-effort, ADR-0002).
-		cursor = batch[len(batch)-1].seq
+		cursor = newCursor
 		if err := u.buf.Advance(cursor); err != nil {
 			return fmt.Errorf("advance cursor: %w", err)
 		}
@@ -140,7 +129,7 @@ func (u *Ingress) runStream(ctx context.Context, client pb.GatewayIngressClient)
 				if err := stream.Send(sf.Frame); err != nil {
 					return fmt.Errorf("send: %w", err)
 				}
-				batch = append(batch, sentFrame{seq: sf.Seq, pointID: sf.Frame.PointId})
+				batch = append(batch, storeforward.SentFrame{Seq: sf.Seq, PointID: sf.Frame.PointId})
 				cursor = sf.Seq
 				if len(batch) >= u.cfg.CheckpointSize {
 					if err := checkpoint(); err != nil {
