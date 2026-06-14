@@ -15,14 +15,14 @@ import (
 	"nexus-gateway/internal/pointlist"
 )
 
-// outcome classifies a Common Event so the consume loop can drop-and-meter
+// Outcome classifies a Common Event so the consume loop can drop-and-meter
 // poison and point-list-miss events distinctly (ADR-0002 best-effort).
-type outcome int
+type Outcome int
 
 const (
-	outcomeOK     outcome = iota // resolved → emit a TelemetryFrame
-	outcomePoison                // unparseable/permanently invalid → Term + meter
-	outcomeMiss                  // unknown local_id → Term + meter
+	OutcomeOK     Outcome = iota // resolved → emit a TelemetryFrame
+	OutcomePoison                // unparseable/permanently invalid → Term + meter
+	OutcomeMiss                  // unknown local_id → Term + meter
 )
 
 // Normalizer is the single durable pull consumer on evt.> (ADR-0001, ADR-0005).
@@ -69,14 +69,14 @@ func (n *Normalizer) consume(ctx context.Context, cons jetstream.Consumer, resol
 			continue
 		}
 		for msg := range msgs.Messages() {
-			frame, out := normalize(msg.Data(), resolver, gatewayID)
+			frame, out := Normalize(msg.Data(), resolver, gatewayID)
 			switch out {
-			case outcomePoison:
+			case OutcomePoison:
 				// Retrying an unparseable event is pointless; terminate, don't redeliver.
 				metrics.IncNormalizerInvalid()
 				_ = msg.Term()
 				continue
-			case outcomeMiss:
+			case OutcomeMiss:
 				// The Point List is synced before telemetry flows (ADR-0003), so an
 				// unknown local_id is misconfiguration, not a sync race: drop and meter.
 				metrics.IncNormalizerUnresolved()
@@ -97,16 +97,19 @@ func (n *Normalizer) consume(ctx context.Context, cons jetstream.Consumer, resol
 	}
 }
 
-func normalize(data []byte, resolver pointlist.Resolver, gatewayID string) (*pb.TelemetryFrame, outcome) {
+// Normalize maps a raw Common Event payload to a TelemetryFrame.
+// It is a pure function: no I/O, no state. The consume loop calls it and
+// acts on the returned Outcome (ack, term, or nak).
+func Normalize(data []byte, resolver pointlist.Resolver, gatewayID string) (*pb.TelemetryFrame, Outcome) {
 	var evt common.Event
 	if err := json.Unmarshal(data, &evt); err != nil {
 		slog.Warn("normalizer: unmarshal error", "err", err)
-		return nil, outcomePoison
+		return nil, OutcomePoison
 	}
 	pointID, ok := resolver.Resolve(evt.ConnectorID, evt.LocalID)
 	if !ok {
 		slog.Warn("normalizer: unknown local_id", "connector", evt.ConnectorID, "local_id", evt.LocalID)
-		return nil, outcomeMiss
+		return nil, OutcomeMiss
 	}
 	ts := evt.Timestamp
 	if ts == "" {
@@ -117,5 +120,5 @@ func normalize(data []byte, resolver pointlist.Resolver, gatewayID string) (*pb.
 		PointId:   pointID,
 		Value:     evt.Value,
 		Timestamp: ts,
-	}, outcomeOK
+	}, OutcomeOK
 }
