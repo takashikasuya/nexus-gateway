@@ -193,7 +193,8 @@ cd admin-ui && npm run type-check && npm run build
 CI(`.github/workflows/ci.yml`)は PR ごとに Go の build/test と Admin UI の
 type-check/build を実行します。E2E テストは `test/e2e/`(`//go:build e2e`)にあり、
 実シミュレータ / Building OS スタックがある環境で `-tags e2e` + 環境変数を与えて実行
-します。
+します。学術評価（E1〜E7）の実験設計は
+[`docs/evaluation-plan.ja.md`](docs/evaluation-plan.ja.md) を参照してください。
 
 ---
 
