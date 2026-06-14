@@ -3,7 +3,7 @@ version: "3.9"
 services:
   nats:
     image: nats:2.10-alpine
-    command: ["--jetstream", "--store_dir=/data"]
+    command: ["--jetstream", "--store_dir=/data", "-m", "8222"]
     ports:
       - "4222:4222"
       - "8222:8222"
@@ -42,7 +42,7 @@ services:
     volumes:
       - ./fixtures/keycloak:/opt/keycloak/data/import:ro
     healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:8090/realms/nexus-gateway/.well-known/openid-configuration || exit 1"]
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/localhost/8090' 2>/dev/null"]
       interval: 10s
       timeout: 5s
       retries: 12
@@ -63,6 +63,7 @@ services:
       # Issuer must match the iss claim in tokens (uses external hostname seen by browser).
       - KEYCLOAK_ISSUER=http://localhost:8090/realms/nexus-gateway
       - KEYCLOAK_AUDIENCE=account
+      - BOS_INSECURE=true
     ports:
       - "8080:8080"
     volumes:
