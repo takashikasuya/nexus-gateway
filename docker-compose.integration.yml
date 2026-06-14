@@ -29,6 +29,10 @@ services:
     environment:
       - POINT_LIST_FILE=/fixtures/integration/point_list.json
       - DEV_SIM=false
+      - KEYCLOAK_JWKS_URL=  # auth-free in integration tests; admin API not exercised
+    depends_on:
+      keycloak:
+        condition: service_started  # override: don't block gateway on Keycloak health
 
   # ── OPC-UA (profile: opcua) — plain TCP:4840, CI-friendly ────────────────────
   opcua-sim:

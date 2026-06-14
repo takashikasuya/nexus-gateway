@@ -308,7 +308,7 @@ func startBroker(t *testing.T) string {
 func startNATS(t *testing.T) (*nats.Conn, jetstream.JetStream) {
 	t.Helper()
 	ctx := context.Background()
-	opts := &natssrv.Options{Port: -1, JetStream: true}
+	opts := &natssrv.Options{Port: -1, JetStream: true, StoreDir: t.TempDir()}
 	ns, err := natssrv.NewServer(opts)
 	require.NoError(t, err)
 	go ns.Start()
