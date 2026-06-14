@@ -16,19 +16,29 @@ type Config struct {
 }
 
 // Loop polls the provisioning API and keeps a SyncedResolver up to date (ADR-0003).
+// It uses the ETag-based Fetch interface (#224): 304 means no-op, a diff result is
+// applied incrementally, a full result replaces the resolver entirely.
 type Loop struct {
-	client   provisioning.Client
-	resolver *pointlist.SyncedResolver
-	cfg      Config
+	client     provisioning.Client
+	resolver   *pointlist.SyncedResolver
+	cfg        Config
+	revalidate <-chan struct{} // optional push signals (EgressDown.point_list_update)
 }
 
-// New creates a Loop. Load persisted snapshot (if any) before calling Run.
+// New creates a Loop.
 func New(client provisioning.Client, resolver *pointlist.SyncedResolver, cfg Config) *Loop {
 	return &Loop{client: client, resolver: resolver, cfg: cfg}
 }
 
+// WithRevalidate attaches a channel whose sends trigger an immediate re-sync
+// (used by the egress agent on EgressDown.point_list_update). Returns l for chaining.
+func (l *Loop) WithRevalidate(ch <-chan struct{}) *Loop {
+	l.revalidate = ch
+	return l
+}
+
 // Run polls the provisioning API until ctx is cancelled.
-// It fetches the snapshot once on startup and then only when the version token changes.
+// It syncs once on startup (blocking), then re-syncs on the ticker or revalidate signal.
 func (l *Loop) Run(ctx context.Context) {
 	if l.cfg.PersistPath != "" {
 		if err := l.resolver.Load(l.cfg.PersistPath); err != nil {
@@ -36,49 +46,83 @@ func (l *Loop) Run(ctx context.Context) {
 		}
 	}
 
-	var lastVersion string
+	state := &syncState{}
+
+	// Force immediate first sync.
+	l.sync(ctx, state)
 
 	tick := time.NewTicker(l.cfg.Interval)
 	defer tick.Stop()
-
-	// Force immediate first sync
-	l.sync(ctx, &lastVersion)
 
 	for {
 		select {
 		case <-ctx.Done():
 			return
 		case <-tick.C:
-			l.sync(ctx, &lastVersion)
+			l.sync(ctx, state)
+		case _, ok := <-l.revalidate:
+			if !ok {
+				return
+			}
+			l.sync(ctx, state)
 		}
 	}
 }
 
-func (l *Loop) sync(ctx context.Context, lastVersion *string) {
-	ver, err := l.client.VersionToken(ctx)
+// syncState carries the mutable state threaded through sync calls.
+type syncState struct {
+	etag    string
+	entries []pointlist.Entry // cached full list for diff application
+}
+
+func (l *Loop) sync(ctx context.Context, s *syncState) {
+	result, err := l.client.Fetch(ctx, s.etag)
 	if err != nil {
 		if ctx.Err() == nil {
-			slog.Warn("pointsync: version token error", "err", err)
+			slog.Warn("pointsync: fetch error", "err", err)
 		}
 		return
 	}
-	if ver == *lastVersion {
-		return
+	if result == nil {
+		return // 304 — unchanged
 	}
-	entries, err := l.client.Snapshot(ctx)
-	if err != nil {
-		if ctx.Err() == nil {
-			slog.Warn("pointsync: snapshot fetch error", "err", err)
-		}
-		return
+
+	if result.Full {
+		s.entries = result.Entries
+	} else {
+		s.entries = applyDiff(s.entries, result)
 	}
-	l.resolver.Update(entries)
-	*lastVersion = ver
-	slog.Info("pointsync: point list updated", "version", ver, "count", len(entries))
+
+	l.resolver.Update(s.entries)
+	s.etag = result.ETag
+	slog.Info("pointsync: point list updated", "etag", result.ETag, "count", len(s.entries))
 
 	if l.cfg.PersistPath != "" {
 		if err := l.resolver.Persist(l.cfg.PersistPath); err != nil {
 			slog.Warn("pointsync: persist failed", "err", err)
 		}
 	}
+}
+
+// applyDiff merges added/removed/changed into the current entry slice.
+func applyDiff(current []pointlist.Entry, r *provisioning.FetchResult) []pointlist.Entry {
+	// Index by pointID for O(1) lookup.
+	byID := make(map[string]pointlist.Entry, len(current))
+	for _, e := range current {
+		byID[e.PointID] = e
+	}
+	for _, pid := range r.Removed {
+		delete(byID, pid)
+	}
+	for _, e := range r.Added {
+		byID[e.PointID] = e
+	}
+	for _, e := range r.Changed {
+		byID[e.PointID] = e
+	}
+	out := make([]pointlist.Entry, 0, len(byID))
+	for _, e := range byID {
+		out = append(out, e)
+	}
+	return out
 }

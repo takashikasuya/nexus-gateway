@@ -65,7 +65,7 @@ func TestControl_HappyPath(t *testing.T) {
 	bosEgress := startMockEgress(t, results)
 
 	// Start Egress agent
-	agent := egress.New(nc, bosEgress.addr, "gw-001", d, insecureCreds())
+	agent := egress.New(bosEgress.addr, "gw-001", d, insecureCreds(), nil)
 	go agent.Run(ctx)
 
 	// Push command from mock server
@@ -107,7 +107,7 @@ func TestControl_NotWritable(t *testing.T) {
 
 	results := make(chan *pb.ControlResult, 5)
 	bosEgress := startMockEgress(t, results)
-	agent := egress.New(nc, bosEgress.addr, "gw-001", d, insecureCreds())
+	agent := egress.New(bosEgress.addr, "gw-001", d, insecureCreds(), nil)
 	go agent.Run(ctx)
 
 	bosEgress.SendCommand(&pb.ControlCommand{
@@ -150,7 +150,7 @@ func TestControl_EgressReconnect(t *testing.T) {
 
 	results := make(chan *pb.ControlResult, 10)
 	bos := startMockEgress(t, results)
-	agent := egress.New(nc, bos.addr, "gw-001", d, insecureCreds())
+	agent := egress.New(bos.addr, "gw-001", d, insecureCreds(), nil)
 	go agent.Run(ctx)
 
 	// Send first command, verify it works
@@ -199,7 +199,7 @@ func (s *mockEgressServer) Connect(stream pb.GatewayEgress_ConnectServer) error 
 	for {
 		select {
 		case cmd := <-s.commands:
-			if err := stream.Send(&pb.EgressDown{Command: cmd}); err != nil {
+			if err := stream.Send(&pb.EgressDown{M: &pb.EgressDown_Command{Command: cmd}}); err != nil {
 				return err
 			}
 		case <-stream.Context().Done():

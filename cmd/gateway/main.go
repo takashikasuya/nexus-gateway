@@ -115,7 +115,9 @@ func main() {
 	var provClient provisioning.Client
 	switch {
 	case *provURL != "":
-		provClient = provisioning.NewHTTPClient(*provURL)
+		// connectorMap maps protocol names to connector IDs. Default: bacnet → provConnID.
+		// Extend via flags if additional protocols are provisioned from the same API.
+		provClient = provisioning.NewHTTPClient(*provURL, *gatewayID, map[string]string{"bacnet": *provConnID})
 	case *provFile != "":
 		// Fail fast on a bad path rather than spinning the startup wait and then
 		// running with an empty Point List.
@@ -129,13 +131,15 @@ func main() {
 		}
 		provClient = provisioning.NewFileClient(*provFile, *provConnID)
 	}
+	// revalidatePL is signalled by the egress agent on EgressDown.point_list_update (#224/push).
+	revalidatePL := make(chan struct{}, 1)
 	if provClient != nil {
 		// Real sync loop against the provisioning source (ADR-0003)
 		syncLoop := pointsync.New(
 			provClient,
 			resolver,
 			pointsync.Config{Interval: *syncInterval, PersistPath: *plPersist},
-		)
+		).WithRevalidate(revalidatePL)
 		go syncLoop.Run(ctx)
 		// Wait for initial snapshot before starting the pipeline
 		waitCtx, waitCancel := context.WithTimeout(ctx, 30*time.Second)
@@ -193,9 +197,9 @@ func main() {
 	}
 	go ul.Run(ctx)
 
-	// Start Egress agent (control path, ADR-0004)
+	// Start Egress agent (control path, ADR-0004); also signals revalidatePL on PointListUpdate.
 	d := dispatch.New(nc, resolver, 5*time.Second)
-	egressAgent := egress.New(nc, *bosAddr, *gatewayID, d, bosCreds)
+	egressAgent := egress.New(*bosAddr, *gatewayID, d, bosCreds, revalidatePL)
 	go egressAgent.Run(ctx)
 
 	// Start Admin API

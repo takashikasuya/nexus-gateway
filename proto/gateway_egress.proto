@@ -24,7 +24,21 @@ message EgressUp {
 }
 
 message EgressDown {
-  ControlCommand command = 1;
+  // field 1 (command) keeps its number, so a ControlCommand-only EgressDown stays wire-compatible
+  // with existing BOWS clients. point_list_update (#224/push) tells the gateway its shared point list
+  // changed; the gateway revalidates via GET /gateways/{id}/pointlist (If-None-Match / ?since).
+  oneof m {
+    ControlCommand command = 1;
+    PointListUpdate point_list_update = 2;
+  }
+}
+
+// Push signal that a gateway's point list changed. `revision` is the current ETag when known, or
+// empty (the gateway then revalidates with its last-known ETag). It is an invalidation hint, not the
+// authoritative list.
+message PointListUpdate {
+  string gateway_id = 1;
+  string revision = 2;
 }
 
 message Hello {
