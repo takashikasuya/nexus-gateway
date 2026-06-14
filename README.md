@@ -13,6 +13,11 @@ translation**.
 
 ## Why this exists
 
+> 📄 For the full positioning, system comparison (EdgeX / Azure IoT Edge / Kura /
+> Hono / ThingsBoard / EMQX Neuron / OpenRemote), responsibility split with
+> Building OS / SBCO, and the technical-challenge analysis, see
+> **[docs/background.md](docs/background.md)** ([日本語](docs/background.ja.md)).
+
 A building has dozens of equipment protocols — BACnet, OPC-UA, MQTT, Modbus —
 each with its own addressing and semantics. Building OS wants a single,
 canonical telemetry/control contract keyed by `(gateway_id, point_id)`. Something
