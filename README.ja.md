@@ -12,6 +12,11 @@
 
 ## なぜ作ったか
 
+> 📄 詳細な位置づけ、類似システム比較(EdgeX / Azure IoT Edge / Kura / Hono /
+> ThingsBoard / EMQX Neuron / OpenRemote)、Building OS / SBCO との責務分担、
+> 技術課題の分析は **[docs/background.ja.md](docs/background.ja.md)**
+> ([English](docs/background.md))を参照してください。
+
 ビルには BACnet・OPC-UA・MQTT・Modbus など多数の設備プロトコルがあり、それぞれ独自
 のアドレッシングとセマンティクスを持ちます。Building OS は `(gateway_id, point_id)`
 を鍵とする単一の正規 telemetry/control 契約を望みます。このプロトコル多様性をエッジ
