@@ -2,69 +2,27 @@ package provisioning
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
-	"net/http"
 
 	"nexus-gateway/internal/pointlist"
 )
 
-// Client is the interface for the Building OS provisioning API.
-// Develop against MockClient; swap for HTTPClient when gutp-building-os-oss #224 lands.
+// FetchResult is the payload returned by a successful Fetch call.
+// A nil return (with nil error) means the point list is unchanged (304 Not Modified).
+type FetchResult struct {
+	ETag string
+	// Full is true when Entries holds the complete replacement list.
+	// False means only Added/Removed/Changed are populated (delta).
+	Full    bool
+	Entries []pointlist.Entry // populated when Full == true
+	// Delta fields (populated when Full == false):
+	Added   []pointlist.Entry
+	Removed []string // canonical point_ids to remove from the local copy
+	Changed []pointlist.Entry
+}
+
+// Client abstracts the Building OS gateway-scoped Point List provisioning API (#224).
 type Client interface {
-	// VersionToken returns a cheap opaque token; change means the snapshot must be re-fetched.
-	VersionToken(ctx context.Context) (string, error)
-	// Snapshot returns the full authoritative Point List.
-	Snapshot(ctx context.Context) ([]pointlist.Entry, error)
-}
-
-// HTTPClient implements Client against the real provisioning HTTP API.
-type HTTPClient struct {
-	baseURL string
-	http    *http.Client
-}
-
-// NewHTTPClient creates a provisioning client for the given base URL.
-func NewHTTPClient(baseURL string) *HTTPClient {
-	return &HTTPClient{baseURL: baseURL, http: &http.Client{}}
-}
-
-func (c *HTTPClient) VersionToken(ctx context.Context) (string, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.baseURL+"/version", nil)
-	if err != nil {
-		return "", err
-	}
-	resp, err := c.http.Do(req)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("provisioning: version status %d", resp.StatusCode)
-	}
-	var v struct{ Version string `json:"version"` }
-	if err := json.NewDecoder(resp.Body).Decode(&v); err != nil {
-		return "", err
-	}
-	return v.Version, nil
-}
-
-func (c *HTTPClient) Snapshot(ctx context.Context) ([]pointlist.Entry, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.baseURL+"/snapshot", nil)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := c.http.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("provisioning: snapshot status %d", resp.StatusCode)
-	}
-	var entries []pointlist.Entry
-	if err := json.NewDecoder(resp.Body).Decode(&entries); err != nil {
-		return nil, err
-	}
-	return entries, nil
+	// Fetch returns nil when knownETag matches the server's current ETag (304 Not Modified).
+	// Pass empty knownETag for the initial fetch (always returns a full result).
+	Fetch(ctx context.Context, knownETag string) (*FetchResult, error)
 }

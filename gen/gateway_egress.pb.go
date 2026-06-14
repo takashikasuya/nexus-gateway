@@ -104,8 +104,16 @@ func (*EgressUp_Hello) isEgressUp_M() {}
 func (*EgressUp_Result) isEgressUp_M() {}
 
 type EgressDown struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Command       *ControlCommand        `protobuf:"bytes,1,opt,name=command,proto3" json:"command,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// field 1 (command) keeps its number, so a ControlCommand-only EgressDown stays wire-compatible
+	// with existing BOWS clients. point_list_update (#224/push) tells the gateway its shared point list
+	// changed; the gateway revalidates via GET /gateways/{id}/pointlist (If-None-Match / ?since).
+	//
+	// Types that are valid to be assigned to M:
+	//
+	//	*EgressDown_Command
+	//	*EgressDown_PointListUpdate
+	M             isEgressDown_M `protobuf_oneof:"m"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -140,11 +148,100 @@ func (*EgressDown) Descriptor() ([]byte, []int) {
 	return file_gateway_egress_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *EgressDown) GetCommand() *ControlCommand {
+func (x *EgressDown) GetM() isEgressDown_M {
 	if x != nil {
-		return x.Command
+		return x.M
 	}
 	return nil
+}
+
+func (x *EgressDown) GetCommand() *ControlCommand {
+	if x != nil {
+		if x, ok := x.M.(*EgressDown_Command); ok {
+			return x.Command
+		}
+	}
+	return nil
+}
+
+func (x *EgressDown) GetPointListUpdate() *PointListUpdate {
+	if x != nil {
+		if x, ok := x.M.(*EgressDown_PointListUpdate); ok {
+			return x.PointListUpdate
+		}
+	}
+	return nil
+}
+
+type isEgressDown_M interface {
+	isEgressDown_M()
+}
+
+type EgressDown_Command struct {
+	Command *ControlCommand `protobuf:"bytes,1,opt,name=command,proto3,oneof"`
+}
+
+type EgressDown_PointListUpdate struct {
+	PointListUpdate *PointListUpdate `protobuf:"bytes,2,opt,name=point_list_update,json=pointListUpdate,proto3,oneof"`
+}
+
+func (*EgressDown_Command) isEgressDown_M() {}
+
+func (*EgressDown_PointListUpdate) isEgressDown_M() {}
+
+// Push signal that a gateway's point list changed. `revision` is the current ETag when known, or
+// empty (the gateway then revalidates with its last-known ETag). It is an invalidation hint, not the
+// authoritative list.
+type PointListUpdate struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	GatewayId     string                 `protobuf:"bytes,1,opt,name=gateway_id,json=gatewayId,proto3" json:"gateway_id,omitempty"`
+	Revision      string                 `protobuf:"bytes,2,opt,name=revision,proto3" json:"revision,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PointListUpdate) Reset() {
+	*x = PointListUpdate{}
+	mi := &file_gateway_egress_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PointListUpdate) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PointListUpdate) ProtoMessage() {}
+
+func (x *PointListUpdate) ProtoReflect() protoreflect.Message {
+	mi := &file_gateway_egress_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PointListUpdate.ProtoReflect.Descriptor instead.
+func (*PointListUpdate) Descriptor() ([]byte, []int) {
+	return file_gateway_egress_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *PointListUpdate) GetGatewayId() string {
+	if x != nil {
+		return x.GatewayId
+	}
+	return ""
+}
+
+func (x *PointListUpdate) GetRevision() string {
+	if x != nil {
+		return x.Revision
+	}
+	return ""
 }
 
 type Hello struct {
@@ -156,7 +253,7 @@ type Hello struct {
 
 func (x *Hello) Reset() {
 	*x = Hello{}
-	mi := &file_gateway_egress_proto_msgTypes[2]
+	mi := &file_gateway_egress_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -168,7 +265,7 @@ func (x *Hello) String() string {
 func (*Hello) ProtoMessage() {}
 
 func (x *Hello) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_egress_proto_msgTypes[2]
+	mi := &file_gateway_egress_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -181,7 +278,7 @@ func (x *Hello) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Hello.ProtoReflect.Descriptor instead.
 func (*Hello) Descriptor() ([]byte, []int) {
-	return file_gateway_egress_proto_rawDescGZIP(), []int{2}
+	return file_gateway_egress_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *Hello) GetGatewayId() string {
@@ -203,7 +300,7 @@ type ControlCommand struct {
 
 func (x *ControlCommand) Reset() {
 	*x = ControlCommand{}
-	mi := &file_gateway_egress_proto_msgTypes[3]
+	mi := &file_gateway_egress_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -215,7 +312,7 @@ func (x *ControlCommand) String() string {
 func (*ControlCommand) ProtoMessage() {}
 
 func (x *ControlCommand) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_egress_proto_msgTypes[3]
+	mi := &file_gateway_egress_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -228,7 +325,7 @@ func (x *ControlCommand) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ControlCommand.ProtoReflect.Descriptor instead.
 func (*ControlCommand) Descriptor() ([]byte, []int) {
-	return file_gateway_egress_proto_rawDescGZIP(), []int{3}
+	return file_gateway_egress_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *ControlCommand) GetControlId() string {
@@ -270,7 +367,7 @@ type ControlResult struct {
 
 func (x *ControlResult) Reset() {
 	*x = ControlResult{}
-	mi := &file_gateway_egress_proto_msgTypes[4]
+	mi := &file_gateway_egress_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -282,7 +379,7 @@ func (x *ControlResult) String() string {
 func (*ControlResult) ProtoMessage() {}
 
 func (x *ControlResult) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_egress_proto_msgTypes[4]
+	mi := &file_gateway_egress_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -295,7 +392,7 @@ func (x *ControlResult) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ControlResult.ProtoReflect.Descriptor instead.
 func (*ControlResult) Descriptor() ([]byte, []int) {
-	return file_gateway_egress_proto_rawDescGZIP(), []int{4}
+	return file_gateway_egress_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *ControlResult) GetControlId() string {
@@ -327,10 +424,16 @@ const file_gateway_egress_proto_rawDesc = "" +
 	"\bEgressUp\x12,\n" +
 	"\x05hello\x18\x01 \x01(\v2\x14.gatewaybridge.HelloH\x00R\x05hello\x126\n" +
 	"\x06result\x18\x02 \x01(\v2\x1c.gatewaybridge.ControlResultH\x00R\x06resultB\x03\n" +
-	"\x01m\"E\n" +
+	"\x01m\"\x9a\x01\n" +
 	"\n" +
-	"EgressDown\x127\n" +
-	"\acommand\x18\x01 \x01(\v2\x1d.gatewaybridge.ControlCommandR\acommand\"&\n" +
+	"EgressDown\x129\n" +
+	"\acommand\x18\x01 \x01(\v2\x1d.gatewaybridge.ControlCommandH\x00R\acommand\x12L\n" +
+	"\x11point_list_update\x18\x02 \x01(\v2\x1e.gatewaybridge.PointListUpdateH\x00R\x0fpointListUpdateB\x03\n" +
+	"\x01m\"L\n" +
+	"\x0fPointListUpdate\x12\x1d\n" +
+	"\n" +
+	"gateway_id\x18\x01 \x01(\tR\tgatewayId\x12\x1a\n" +
+	"\brevision\x18\x02 \x01(\tR\brevision\"&\n" +
 	"\x05Hello\x12\x1d\n" +
 	"\n" +
 	"gateway_id\x18\x01 \x01(\tR\tgatewayId\"\xc6\x01\n" +
@@ -360,25 +463,27 @@ func file_gateway_egress_proto_rawDescGZIP() []byte {
 	return file_gateway_egress_proto_rawDescData
 }
 
-var file_gateway_egress_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_gateway_egress_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_gateway_egress_proto_goTypes = []any{
-	(*EgressUp)(nil),       // 0: gatewaybridge.EgressUp
-	(*EgressDown)(nil),     // 1: gatewaybridge.EgressDown
-	(*Hello)(nil),          // 2: gatewaybridge.Hello
-	(*ControlCommand)(nil), // 3: gatewaybridge.ControlCommand
-	(*ControlResult)(nil),  // 4: gatewaybridge.ControlResult
+	(*EgressUp)(nil),        // 0: gatewaybridge.EgressUp
+	(*EgressDown)(nil),      // 1: gatewaybridge.EgressDown
+	(*PointListUpdate)(nil), // 2: gatewaybridge.PointListUpdate
+	(*Hello)(nil),           // 3: gatewaybridge.Hello
+	(*ControlCommand)(nil),  // 4: gatewaybridge.ControlCommand
+	(*ControlResult)(nil),   // 5: gatewaybridge.ControlResult
 }
 var file_gateway_egress_proto_depIdxs = []int32{
-	2, // 0: gatewaybridge.EgressUp.hello:type_name -> gatewaybridge.Hello
-	4, // 1: gatewaybridge.EgressUp.result:type_name -> gatewaybridge.ControlResult
-	3, // 2: gatewaybridge.EgressDown.command:type_name -> gatewaybridge.ControlCommand
-	0, // 3: gatewaybridge.GatewayEgress.Connect:input_type -> gatewaybridge.EgressUp
-	1, // 4: gatewaybridge.GatewayEgress.Connect:output_type -> gatewaybridge.EgressDown
-	4, // [4:5] is the sub-list for method output_type
-	3, // [3:4] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	3, // 0: gatewaybridge.EgressUp.hello:type_name -> gatewaybridge.Hello
+	5, // 1: gatewaybridge.EgressUp.result:type_name -> gatewaybridge.ControlResult
+	4, // 2: gatewaybridge.EgressDown.command:type_name -> gatewaybridge.ControlCommand
+	2, // 3: gatewaybridge.EgressDown.point_list_update:type_name -> gatewaybridge.PointListUpdate
+	0, // 4: gatewaybridge.GatewayEgress.Connect:input_type -> gatewaybridge.EgressUp
+	1, // 5: gatewaybridge.GatewayEgress.Connect:output_type -> gatewaybridge.EgressDown
+	5, // [5:6] is the sub-list for method output_type
+	4, // [4:5] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_gateway_egress_proto_init() }
@@ -390,13 +495,17 @@ func file_gateway_egress_proto_init() {
 		(*EgressUp_Hello)(nil),
 		(*EgressUp_Result)(nil),
 	}
+	file_gateway_egress_proto_msgTypes[1].OneofWrappers = []any{
+		(*EgressDown_Command)(nil),
+		(*EgressDown_PointListUpdate)(nil),
+	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_gateway_egress_proto_rawDesc), len(file_gateway_egress_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

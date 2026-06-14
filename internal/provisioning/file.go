@@ -18,6 +18,9 @@ import (
 // (HTTPClient, gutp-building-os-oss #224), so the gateway can sync from a file
 // during dev/E2E and switch to the authoritative API without code changes. Per
 // ADR-0003 a provisioning snapshot always overrides any local bootstrap.
+//
+// FileClient always returns a full result; diffs are not supported for files.
+// The ETag is the SHA-256 content hash, so Fetch returns nil when the file is unchanged.
 type FileClient struct {
 	path        string
 	connectorID string // used to stamp BACnet CSV entries
@@ -25,27 +28,32 @@ type FileClient struct {
 
 // NewFileClient serves the Point List from path. A .csv file is parsed via
 // LoadCSV (BACnet native-address projection); a .json file is parsed as a JSON
-// array of pointlist.Entry. Any other extension is rejected by Snapshot.
+// array of pointlist.Entry. Any other extension is rejected.
 func NewFileClient(path, connectorID string) *FileClient {
 	return &FileClient{path: path, connectorID: connectorID}
 }
 
-// VersionToken returns a content hash of the backing file; it changes whenever
-// the file content changes, triggering a re-fetch in the sync loop.
-func (c *FileClient) VersionToken(_ context.Context) (string, error) {
-	data, err := os.ReadFile(c.path)
-	if err != nil {
-		return "", fmt.Errorf("provisioning: read %q: %w", c.path, err)
-	}
-	return fmt.Sprintf("%x", sha256.Sum256(data)), nil
-}
-
-// Snapshot parses the backing file into Point List entries.
-func (c *FileClient) Snapshot(_ context.Context) ([]pointlist.Entry, error) {
+// Fetch implements Client. Returns nil when knownETag matches the file's content hash (304).
+// Always returns a full result (no delta support for file sources).
+func (c *FileClient) Fetch(_ context.Context, knownETag string) (*FetchResult, error) {
 	data, err := os.ReadFile(c.path)
 	if err != nil {
 		return nil, fmt.Errorf("provisioning: read %q: %w", c.path, err)
 	}
+
+	etag := fmt.Sprintf("%x", sha256.Sum256(data))
+	if etag == knownETag {
+		return nil, nil // 304 — unchanged
+	}
+
+	entries, err := c.parse(data)
+	if err != nil {
+		return nil, err
+	}
+	return &FetchResult{ETag: etag, Full: true, Entries: entries}, nil
+}
+
+func (c *FileClient) parse(data []byte) ([]pointlist.Entry, error) {
 	lower := strings.ToLower(c.path)
 	switch {
 	case strings.HasSuffix(lower, ".csv"):

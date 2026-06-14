@@ -13,57 +13,124 @@ import (
 	"nexus-gateway/internal/provisioning"
 )
 
-// TestLoop_NoFetchWhenVersionUnchanged verifies that the mock API is called
-// for version check but NOT for snapshot when the token hasn't changed.
-func TestLoop_NoFetchWhenVersionUnchanged(t *testing.T) {
+// TestLoop_InitialFetch_LoadsResolver verifies the first sync always calls Fetch
+// with empty knownETag and updates the resolver.
+func TestLoop_InitialFetch_LoadsResolver(t *testing.T) {
 	mock := provisioning.NewMock([]pointlist.Entry{
 		{ConnectorID: "c1", Protocol: "sim", LocalID: "l1", PointID: "p1"},
 	})
 
 	resolver := pointlist.NewSynced(nil)
-	cfg := pointsync.Config{Interval: 20 * time.Millisecond, PersistPath: ""}
-	loop := pointsync.New(mock, resolver, cfg)
-
-	ctx, cancel := context.WithTimeout(context.Background(), 150*time.Millisecond)
-	defer cancel()
-	loop.Run(ctx)
-
-	// Version was fetched multiple times but snapshot only once (on first load)
-	assert.GreaterOrEqual(t, mock.VersionCalls(), 2, "should poll version multiple times")
-	assert.Equal(t, 1, mock.SnapshotCalls(), "snapshot fetched only once (first load)")
-}
-
-// TestLoop_FetchOnVersionChange verifies reconvergence when version token changes.
-func TestLoop_FetchOnVersionChange(t *testing.T) {
-	mock := provisioning.NewMock([]pointlist.Entry{
-		{ConnectorID: "c1", Protocol: "sim", LocalID: "l1", PointID: "p1"},
-	})
-	resolver := pointlist.NewSynced(nil)
-	cfg := pointsync.Config{Interval: 20 * time.Millisecond, PersistPath: ""}
-	loop := pointsync.New(mock, resolver, cfg)
-
+	cfg := pointsync.Config{Interval: 100 * time.Millisecond}
 	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Millisecond)
 	defer cancel()
 
-	// Run loop briefly so first snapshot is loaded
-	go loop.Run(ctx)
+	loop := pointsync.New(mock, resolver, cfg)
+	loop.Run(ctx)
+
+	pid, ok := resolver.Resolve("c1", "l1")
+	require.True(t, ok, "resolver must be populated after first sync")
+	assert.Equal(t, "p1", pid)
+}
+
+// TestLoop_NoUpdateWhenETagUnchanged verifies the resolver is not touched when
+// Fetch returns nil (304 — ETag unchanged between polls).
+func TestLoop_NoUpdateWhenETagUnchanged(t *testing.T) {
+	mock := provisioning.NewMock([]pointlist.Entry{
+		{ConnectorID: "c1", Protocol: "sim", LocalID: "l1", PointID: "p1"},
+	})
+	resolver := pointlist.NewSynced(nil)
+	cfg := pointsync.Config{Interval: 20 * time.Millisecond}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 150*time.Millisecond)
+	defer cancel()
+	pointsync.New(mock, resolver, cfg).Run(ctx)
+
+	// First call fetches (empty ETag → full), subsequent calls get 304 (nil).
+	// Total Fetch calls ≥ 2, but resolver still has the original entries.
+	assert.GreaterOrEqual(t, mock.FetchCalls(), 2, "must poll multiple times")
+	pid, ok := resolver.Resolve("c1", "l1")
+	require.True(t, ok)
+	assert.Equal(t, "p1", pid)
+}
+
+// TestLoop_UpdatesResolverOnETagChange verifies reconvergence when ETag changes.
+func TestLoop_UpdatesResolverOnETagChange(t *testing.T) {
+	mock := provisioning.NewMock([]pointlist.Entry{
+		{ConnectorID: "c1", Protocol: "sim", LocalID: "l1", PointID: "p1"},
+	})
+	resolver := pointlist.NewSynced(nil)
+	cfg := pointsync.Config{Interval: 20 * time.Millisecond}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
+	defer cancel()
+
+	go pointsync.New(mock, resolver, cfg).Run(ctx)
+
 	require.Eventually(t, func() bool {
 		_, ok := resolver.Resolve("c1", "l1")
 		return ok
-	}, 500*time.Millisecond, 10*time.Millisecond, "initial mapping must load")
+	}, 200*time.Millisecond, 5*time.Millisecond, "initial mapping must load")
 
-	// Update snapshot and bump version
-	mock.SetSnapshot([]pointlist.Entry{
+	mock.SetEntries([]pointlist.Entry{
 		{ConnectorID: "c1", Protocol: "sim", LocalID: "l1", PointID: "p1-updated"},
 	})
 
-	// Wait for loop to pick up the change
 	require.Eventually(t, func() bool {
 		pid, _ := resolver.Resolve("c1", "l1")
 		return pid == "p1-updated"
-	}, 500*time.Millisecond, 10*time.Millisecond, "resolver must reconverge after version bump")
+	}, 300*time.Millisecond, 5*time.Millisecond, "resolver must reconverge after ETag change")
+}
 
-	assert.Equal(t, 2, mock.SnapshotCalls(), "snapshot fetched twice: initial + after version change")
+// TestLoop_AppliesDiff verifies that a delta (Added/Removed/Changed) is correctly
+// merged into the resolver. The mock returns the initial full list on the first Fetch,
+// then the diff on the second Fetch — mirroring the real #224 poll sequence.
+func TestLoop_AppliesDiff(t *testing.T) {
+	initial := []pointlist.Entry{
+		{ConnectorID: "c1", Protocol: "sim", LocalID: "l1", PointID: "p1"},
+		{ConnectorID: "c1", Protocol: "sim", LocalID: "l2", PointID: "p2"},
+	}
+	diff := &provisioning.FetchResult{
+		ETag: "etag-v2",
+		Full: false,
+		Added: []pointlist.Entry{
+			{ConnectorID: "c1", Protocol: "sim", LocalID: "l3", PointID: "p3"},
+		},
+		Removed: []string{"p2"},
+		Changed: []pointlist.Entry{
+			{ConnectorID: "c1", Protocol: "sim", LocalID: "l1", PointID: "p1-renamed"},
+		},
+	}
+	// two-stage mock: first Fetch → full initial; second Fetch → diff; subsequent → nil.
+	m := &twoStageMock{initialEntries: initial, initialETag: "etag-v1", diffResult: diff}
+
+	resolver := pointlist.NewSynced(nil)
+	// Use a short interval so the loop polls at least twice within the timeout.
+	cfg := pointsync.Config{Interval: 10 * time.Millisecond}
+	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Millisecond)
+	defer cancel()
+
+	go pointsync.New(m, resolver, cfg).Run(ctx)
+
+	// Wait until the diff has been applied (p3 is the newly added point).
+	require.Eventually(t, func() bool {
+		_, ok := resolver.Resolve("c1", "l3")
+		return ok
+	}, 250*time.Millisecond, 5*time.Millisecond, "diff must be applied: l3/p3 must appear")
+
+	// p3 added
+	pid, ok := resolver.Resolve("c1", "l3")
+	require.True(t, ok)
+	assert.Equal(t, "p3", pid)
+
+	// p2 removed
+	_, ok = resolver.ResolveReverse("p2")
+	assert.False(t, ok, "removed point p2 must not be in resolver")
+
+	// p1 changed (l1 now maps to p1-renamed)
+	pid, ok = resolver.Resolve("c1", "l1")
+	require.True(t, ok, "changed entry l1 must still be in resolver")
+	assert.Equal(t, "p1-renamed", pid)
 }
 
 // TestLoop_PersistsAndLoadsOnRestart verifies that synced state survives restart.
@@ -73,26 +140,80 @@ func TestLoop_PersistsAndLoadsOnRestart(t *testing.T) {
 		{ConnectorID: "c1", Protocol: "sim", LocalID: "l1", PointID: "p1"},
 	})
 
-	// First run: load and persist
+	// First run: load and persist.
 	r1 := pointlist.NewSynced(nil)
 	cfg := pointsync.Config{Interval: 20 * time.Millisecond, PersistPath: path}
-	loop1 := pointsync.New(mock, r1, cfg)
 	ctx1, cancel1 := context.WithTimeout(context.Background(), 100*time.Millisecond)
 	defer cancel1()
-	loop1.Run(ctx1)
+	pointsync.New(mock, r1, cfg).Run(ctx1)
 
 	pid, ok := r1.Resolve("c1", "l1")
 	require.True(t, ok)
 	assert.Equal(t, "p1", pid)
 
-	// Second run: resolver should load persisted state before first poll
+	// Simulate restart: new resolver, load persisted file.
 	r2 := pointlist.NewSynced(nil)
-	loop2 := pointsync.New(mock, r2, cfg)
-	_ = loop2 // loaded on New or on first Run before polling
-
-	// Simulate "gateway restart" — Load persisted file
 	require.NoError(t, r2.Load(path))
 	pid2, ok2 := r2.Resolve("c1", "l1")
 	require.True(t, ok2)
 	assert.Equal(t, "p1", pid2)
+}
+
+// TestLoop_RevalidatesOnPush verifies that a push signal triggers an immediate sync.
+func TestLoop_RevalidatesOnPush(t *testing.T) {
+	initial := []pointlist.Entry{
+		{ConnectorID: "c1", Protocol: "sim", LocalID: "l1", PointID: "p1"},
+	}
+	mock := provisioning.NewMock(initial)
+	resolver := pointlist.NewSynced(nil)
+
+	// Use a very long interval so only the push triggers a re-sync.
+	revalidate := make(chan struct{}, 1)
+	cfg := pointsync.Config{Interval: 10 * time.Second}
+	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
+	defer cancel()
+
+	go pointsync.New(mock, resolver, cfg).WithRevalidate(revalidate).Run(ctx)
+
+	// Wait for initial sync.
+	require.Eventually(t, func() bool {
+		_, ok := resolver.Resolve("c1", "l1")
+		return ok
+	}, 200*time.Millisecond, 5*time.Millisecond, "initial mapping must load")
+
+	// Update entries and send push signal.
+	mock.SetEntries([]pointlist.Entry{
+		{ConnectorID: "c1", Protocol: "sim", LocalID: "l1", PointID: "p1-pushed"},
+	})
+	revalidate <- struct{}{}
+
+	require.Eventually(t, func() bool {
+		pid, _ := resolver.Resolve("c1", "l1")
+		return pid == "p1-pushed"
+	}, 300*time.Millisecond, 5*time.Millisecond, "push signal must trigger immediate re-sync")
+}
+
+// ── helpers ─────────────────────────────────────────────────────────────────
+
+// twoStageMock simulates the real #224 poll sequence:
+//   call 1 (knownETag=""): full initial list
+//   call 2 (knownETag=initialETag): diff result
+//   call 3+: nil (304 — unchanged)
+type twoStageMock struct {
+	initialEntries []pointlist.Entry
+	initialETag    string
+	diffResult     *provisioning.FetchResult
+	calls          int
+}
+
+func (m *twoStageMock) Fetch(_ context.Context, _ string) (*provisioning.FetchResult, error) {
+	m.calls++
+	switch m.calls {
+	case 1:
+		return &provisioning.FetchResult{ETag: m.initialETag, Full: true, Entries: m.initialEntries}, nil
+	case 2:
+		return m.diffResult, nil
+	default:
+		return nil, nil
+	}
 }
