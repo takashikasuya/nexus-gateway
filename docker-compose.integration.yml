@@ -91,7 +91,7 @@ services:
       context: connector/bacnet
     environment:
       - CONNECTOR_ID=bacnet-01
-      - NATS_URL=nats://localhost:4222 # host networking: nats is published on the host
+      - NATS_URL=nats://localhost:14222 # host networking: nexus NATS is on host port 14222
       - BACNET_ADDRESS=127.0.0.1
       - BACNET_DEVICE_ID=1001 # bbc-sim device_id (config/simulator.yaml)
       - BACNET_LOCAL_ADDRESS=0.0.0.0

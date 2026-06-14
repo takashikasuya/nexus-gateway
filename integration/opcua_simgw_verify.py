@@ -9,7 +9,7 @@ Usage:
   cd ../opcua-sim-gateway && uv run python ../nexus-gateway/integration/opcua_simgw_verify.py
 
   # With NATS running (full flow):
-  NATS_URL=nats://localhost:4222 uv run python ../nexus-gateway/integration/opcua_simgw_verify.py
+  NATS_URL=nats://localhost:14222 uv run python ../nexus-gateway/integration/opcua_simgw_verify.py
 
   # Docker full stack:
   docker compose -f docker-compose.yml -f docker-compose.opcua-simgw.yml up
