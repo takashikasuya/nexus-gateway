@@ -264,7 +264,7 @@ func main() {
 
 	var adminSrv *adminapi.Server
 	if *jwksURL != "" {
-		adminSrv = adminapi.New(connMgr, healthMon, *jwksURL, *adminAudience, *adminIssuer)
+		adminSrv = adminapi.NewWithCatalog(connMgr, catalogInstaller, catalogSrc, healthMon, *jwksURL, *adminAudience, *adminIssuer)
 	} else {
 		slog.Warn("admin: JWT auth disabled — set KEYCLOAK_JWKS_URL before exposing this port")
 		adminSrv = adminapi.NewNoAuthWithInstaller(connMgr, catalogInstaller, healthMon, catalogSrc)

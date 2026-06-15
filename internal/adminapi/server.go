@@ -65,6 +65,15 @@ func New(mgr ConnectorManager, monitor HealthSnapshotter, jwksURL, audience, iss
 	return s
 }
 
+// NewWithCatalog creates a JWT-authenticated Server with a Catalog installer and
+// source wired in. Use this in production when both auth and catalog are configured.
+func NewWithCatalog(mgr ConnectorManager, installer ConnectorInstaller, catalogSrc CatalogSource, monitor HealthSnapshotter, jwksURL, audience, issuer string) *Server {
+	ctx, cancel := context.WithCancel(context.Background())
+	s := newServer(mgr, installer, catalogSrc, monitor, newURLKeyFetcher(ctx, jwksURL), audience, issuer)
+	s.shutdown = cancel
+	return s
+}
+
 // NewNoAuth creates a Server with authentication disabled (dev/local use only).
 func NewNoAuth(mgr ConnectorManager, monitor HealthSnapshotter) *Server {
 	return NewNoAuthWithInstaller(mgr, nil, monitor)

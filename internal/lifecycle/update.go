@@ -199,11 +199,16 @@ func (m *Manager) Rollback(ctx context.Context, id string) error {
 	prevImage := current.Spec.PrevImage
 	currentContainerID := current.ContainerID
 
-	if err := m.doStop(ctx, id); err != nil {
+	// Use a background context for all Docker operations: if the HTTP request
+	// context is cancelled (client disconnect, server timeout), the rollback must
+	// still complete rather than leaving the connector in a stopped state.
+	dCtx := context.Background()
+
+	if err := m.doStop(dCtx, id); err != nil {
 		return fmt.Errorf("lifecycle: rollback %q: stop: %w", id, err)
 	}
 	if currentContainerID != "" {
-		if err := m.docker.ContainerRemove(ctx, currentContainerID, containerRemoveOpts()); err != nil {
+		if err := m.docker.ContainerRemove(dCtx, currentContainerID, containerRemoveOpts()); err != nil {
 			slog.Warn("lifecycle: rollback: remove current container failed (continuing)", "id", id, "err", err)
 		}
 	}
@@ -217,7 +222,7 @@ func (m *Manager) Rollback(ctx context.Context, id string) error {
 		Permissions: current.Spec.Permissions,
 	})
 
-	if err := m.doStart(ctx, id); err != nil {
+	if err := m.doStart(dCtx, id); err != nil {
 		return fmt.Errorf("lifecycle: rollback %q: start: %w", id, err)
 	}
 

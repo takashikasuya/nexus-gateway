@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
 import type { CatalogEntry, ConnectorItem } from "@/lib/api";
 
@@ -12,8 +12,11 @@ export default function CatalogPage() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const fetchingRef = useRef(false);
 
   const fetchData = useCallback(async () => {
+    if (fetchingRef.current) return;
+    fetchingRef.current = true;
     try {
       const [catRes, connRes] = await Promise.all([
         fetch("/api/gateway/catalog"),
@@ -21,13 +24,16 @@ export default function CatalogPage() {
       ]);
       if (!catRes.ok) throw new Error(`catalog: ${catRes.status}`);
       if (!connRes.ok) throw new Error(`connectors: ${connRes.status}`);
-      setCatalog(await catRes.json());
-      setInstalled(await connRes.json());
+      // Parse both atomically to avoid partial state from a throw on the second await.
+      const [catData, connData] = await Promise.all([catRes.json(), connRes.json()]);
+      setCatalog(catData);
+      setInstalled(connData);
       setError(null);
     } catch (e) {
       setError(String(e));
     } finally {
       setLoading(false);
+      fetchingRef.current = false;
     }
   }, []);
 
@@ -122,7 +128,7 @@ export default function CatalogPage() {
                 <td style={{ padding: "0.5rem 0.75rem", fontWeight: 600 }}>{entry.name}</td>
                 <td style={{ padding: "0.5rem 0.75rem", color: "#374151" }}>{entry.version}</td>
                 <td style={{ padding: "0.5rem 0.75rem", fontFamily: "monospace", fontSize: "0.75rem", color: "#6b7280" }}>
-                  <span title={catalogDigest}>{catalogDigest.slice(7, 19)}…</span>
+                  <span title={catalogDigest}>{shortDigest(catalogDigest)}</span>
                 </td>
                 <td style={{ padding: "0.5rem 0.75rem" }}>
                   {entry.signature_required ? (
@@ -181,6 +187,13 @@ export default function CatalogPage() {
 function digestFromRef(ref: string): string | null {
   const idx = ref.indexOf("@");
   return idx >= 0 ? ref.slice(idx + 1) : null;
+}
+
+/** Returns a safe short display string for an OCI digest (e.g. "abc123ef…"). */
+function shortDigest(d: string): string {
+  if (!d) return "—";
+  const hex = d.startsWith("sha256:") ? d.slice(7) : d.includes(":") ? d.slice(d.indexOf(":") + 1) : d;
+  return hex.length >= 12 ? `${hex.slice(0, 12)}…` : hex || "—";
 }
 
 function ActionBtn({

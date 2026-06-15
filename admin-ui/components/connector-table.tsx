@@ -60,7 +60,7 @@ export function ConnectorTable({ data, isOperator, onRefresh }: Props) {
             <span>{short}</span>
             {digest && (
               <span style={{ marginLeft: "0.4rem", fontFamily: "monospace", fontSize: "0.75em", color: "#6b7280" }}>
-                {digest.slice(7, 19)}…
+                {shortDigest(digest)}
               </span>
             )}
           </span>
@@ -161,6 +161,12 @@ export function ConnectorTable({ data, isOperator, onRefresh }: Props) {
       </table>
     </div>
   );
+}
+
+function shortDigest(d: string): string {
+  if (!d) return "—";
+  const hex = d.startsWith("sha256:") ? d.slice(7) : d.includes(":") ? d.slice(d.indexOf(":") + 1) : d;
+  return hex.length >= 12 ? `${hex.slice(0, 12)}…` : hex || "—";
 }
 
 type Variant = "default" | "danger";
