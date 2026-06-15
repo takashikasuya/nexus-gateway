@@ -154,6 +154,57 @@ func TestUpdate_RollbackNoPull(t *testing.T) {
 		"rollback must NOT pull the previous image (already local)")
 }
 
+// TestUpdate_RollbackRemovesFailedContainer verifies that rollback removes the
+// failed new container before starting the previous one, so that the fixed
+// container name "nexus-<id>" is not already in use by Docker.
+func TestUpdate_RollbackRemovesFailedContainer(t *testing.T) {
+	ctx := context.Background()
+	mock := newMockDocker("ctr-v1")
+	mock.setInspectRunning(true)
+	reg := lifecycle.NewRegistry()
+	reg.Register(installedSpec(digestV1))
+	reg.SetRunning("opcua-connector", "ctr-v1", true)
+	mgr := lifecycle.NewManager(mock, reg)
+
+	mock.setNextID("ctr-v2")
+	mock.setInspectRunning(false)
+	mock.setLockRunning(true) // trigger rollback via failed soak
+
+	_ = mgr.Update(ctx, "opcua-connector", v2Manifest(), catalog.NoopVerifier{},
+		[]string{"ghcr.io/myorg"}, "1.0.0", 100*time.Millisecond)
+
+	// remove count: 1 for old (v1) container during update + 1 for failed (v2) container during rollback
+	assert.GreaterOrEqual(t, mock.calls("remove"), 2,
+		"rollback must remove the failed container before restarting previous image")
+}
+
+// TestUpdater_SkipsWrongManifestName verifies that the Updater drops a catalog
+// response whose Name field does not match the requested connector ID.
+func TestUpdater_SkipsWrongManifestName(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
+	defer cancel()
+
+	mock := newMockDocker("ctr-v1")
+	mock.setInspectRunning(true)
+	reg := lifecycle.NewRegistry()
+	reg.Register(installedSpec(digestV1))
+	reg.SetRunning("opcua-connector", "ctr-v1", true)
+	mgr := lifecycle.NewManager(mock, reg)
+
+	// Catalog returns a manifest whose Name is a different connector.
+	wrong := v2Manifest()
+	wrong.Name = "different-connector"
+	cat := &staticCatalogClient{manifest: wrong}
+	updater := lifecycle.NewUpdater(mgr, reg, cat, catalog.NoopVerifier{},
+		[]string{"ghcr.io/myorg"}, "1.0.0",
+		lifecycle.UpdaterConfig{SoakWindow: 10 * time.Millisecond})
+	go updater.Run(ctx, 20*time.Millisecond)
+
+	<-ctx.Done()
+	assert.Equal(t, 0, mock.calls("pull"),
+		"updater must not apply an update when catalog returns wrong manifest name")
+}
+
 // TestUpdate_UnknownConnector verifies that Update returns an error for an
 // unregistered connector ID.
 func TestUpdate_UnknownConnector(t *testing.T) {

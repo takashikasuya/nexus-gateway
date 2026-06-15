@@ -55,6 +55,21 @@ func (m *Manager) lockConn(id string) func() {
 	return mu.Unlock
 }
 
+// tryLockConn attempts to acquire the per-connector mutex without blocking.
+// Returns (unlock, true) on success, (nil, false) if the mutex is already held.
+func (m *Manager) tryLockConn(id string) (func(), bool) {
+	m.mu.Lock()
+	if _, ok := m.connLock[id]; !ok {
+		m.connLock[id] = &sync.Mutex{}
+	}
+	mu := m.connLock[id]
+	m.mu.Unlock()
+	if !mu.TryLock() {
+		return nil, false
+	}
+	return mu.Unlock, true
+}
+
 // Start creates and starts a container for the given connector ID.
 func (m *Manager) Start(ctx context.Context, id string) error {
 	unlock := m.lockConn(id)
@@ -155,8 +170,8 @@ func (m *Manager) Upgrade(ctx context.Context, id, newImage string) error {
 		_ = m.docker.ContainerRemove(ctx, oldContainerID, container.RemoveOptions{})
 	}
 
-	// Update spec with new image and start.
-	m.registry.Register(ConnectorSpec{ID: id, Image: newImage, Env: env})
+	// Update spec with new image; preserve PrevImage for rollback chain.
+	m.registry.Register(ConnectorSpec{ID: id, Image: newImage, PrevImage: status.Spec.Image, Env: env})
 	return m.doStart(ctx, id)
 }
 
@@ -185,7 +200,11 @@ func (m *Manager) Watch(ctx context.Context, interval time.Duration) {
 					continue // healthy
 				}
 				slog.Warn("lifecycle: connector container stopped — restarting", "id", status.Spec.ID)
-				unlock := m.lockConn(status.Spec.ID)
+				unlock, ok := m.tryLockConn(status.Spec.ID)
+				if !ok {
+					// Connector is being updated; skip this tick.
+					continue
+				}
 				m.registry.SetRunning(status.Spec.ID, "", false)
 				if restartErr := m.doStart(ctx, status.Spec.ID); restartErr != nil {
 					slog.Error("lifecycle: restart failed", "id", status.Spec.ID, "err", restartErr)

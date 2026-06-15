@@ -112,17 +112,29 @@ func (m *Manager) Update(
 
 // rollback restores the previous image without a pull (it is already local).
 // It always returns a non-nil error wrapping both the original failure and any rollback error.
-func (m *Manager) rollback(ctx context.Context, id, prevImage string, cause error) error {
+// Uses context.Background() so Docker calls succeed even when the parent ctx is cancelled
+// (e.g., during gateway shutdown while a soak window was in progress).
+func (m *Manager) rollback(_ context.Context, id, prevImage string, cause error) error {
+	rCtx := context.Background()
 	slog.Warn("lifecycle: update failed — rolling back", "id", id, "prev_image", prevImage, "cause", cause)
 
-	// Stop the new (failed) container if it is running.
-	_ = m.doStop(ctx, id)
-
-	// Restore the previous spec and start without a pull.
 	prev, ok := m.registry.Get(id)
 	if !ok || prevImage == "" {
 		return fmt.Errorf("lifecycle: update %q: rollback: no previous image available: %w", id, cause)
 	}
+	// Capture the failed container ID before doStop clears it from the registry.
+	failedContainerID := prev.ContainerID
+
+	// Stop the new (failed) container if it is still running.
+	_ = m.doStop(rCtx, id)
+	// Remove the failed container so doStart can reuse the fixed name "nexus-<id>".
+	if failedContainerID != "" {
+		if err := m.docker.ContainerRemove(rCtx, failedContainerID, containerRemoveOpts()); err != nil {
+			slog.Warn("lifecycle: rollback: remove failed container failed (continuing)", "id", id, "err", err)
+		}
+	}
+
+	// Restore the previous spec and start without a pull.
 	rollbackSpec := ConnectorSpec{
 		ID:          id,
 		Image:       prevImage,
@@ -132,7 +144,7 @@ func (m *Manager) rollback(ctx context.Context, id, prevImage string, cause erro
 	}
 	m.registry.Register(rollbackSpec)
 
-	if startErr := m.doStart(ctx, id); startErr != nil {
+	if startErr := m.doStart(rCtx, id); startErr != nil {
 		return fmt.Errorf("lifecycle: update %q: rollback failed (connector is stopped): %w; original: %v", id, startErr, cause)
 	}
 
@@ -141,17 +153,16 @@ func (m *Manager) rollback(ctx context.Context, id, prevImage string, cause erro
 }
 
 // soakCheck polls ContainerInspect until soakWindow elapses or the container exits.
+// Inspects before sleeping so every tick — including the one that crosses the deadline
+// boundary — always gets a health check.
 func (m *Manager) soakCheck(ctx context.Context, containerID string, soakWindow time.Duration) error {
 	if containerID == "" || soakWindow <= 0 {
 		return nil
 	}
+	ticker := time.NewTicker(50 * time.Millisecond)
+	defer ticker.Stop()
 	deadline := time.Now().Add(soakWindow)
-	for time.Now().Before(deadline) {
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
-		case <-time.After(50 * time.Millisecond):
-		}
+	for {
 		resp, err := m.docker.ContainerInspect(ctx, containerID)
 		if err != nil {
 			return fmt.Errorf("health soak: inspect failed: %w", err)
@@ -159,8 +170,15 @@ func (m *Manager) soakCheck(ctx context.Context, containerID string, soakWindow 
 		if resp.ContainerJSONBase == nil || resp.State == nil || !resp.State.Running {
 			return fmt.Errorf("health soak: container exited within soak window")
 		}
+		if !time.Now().Before(deadline) {
+			return nil
+		}
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-ticker.C:
+		}
 	}
-	return nil
 }
 
 // digestFromRef extracts "sha256:…" from "registry/img@sha256:…".
@@ -227,6 +245,12 @@ func (u *Updater) poll(ctx context.Context) {
 		manifest, err := u.catalog.Fetch(ctx, status.Spec.ID)
 		if err != nil {
 			slog.Warn("updater: catalog fetch failed", "id", status.Spec.ID, "err", err)
+			continue
+		}
+		// Guard against misbehaving catalog servers returning a manifest for a
+		// different connector than requested (HTTPClient path does not validate this).
+		if manifest.Name != status.Spec.ID {
+			slog.Warn("updater: catalog returned unexpected manifest name", "requested", status.Spec.ID, "got", manifest.Name)
 			continue
 		}
 		if err := u.mgr.Update(ctx, status.Spec.ID, manifest, u.verifier, u.allowlist, u.gwVersion, u.cfg.SoakWindow); err != nil {
