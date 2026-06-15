@@ -14,10 +14,10 @@ import (
 	"nexus-gateway/internal/pointlist"
 )
 
-// Resolver is the subset of pointlist.SyncedResolver needed by the Dispatcher.
-type Resolver interface {
-	ResolveReverse(pointID string) (pointlist.Entry, bool)
-}
+// Resolver is the reverse Point List seam the Dispatcher dispatches against.
+// It is an alias of pointlist.ReverseResolver: the interface is owned by the
+// pointlist package (its only implementation), not redeclared here.
+type Resolver = pointlist.ReverseResolver
 
 // ConnectorReply is the JSON payload returned by a connector write handler over NATS.
 // Alias of sdk.WriteReply — connector/sdk is the authoritative definition.

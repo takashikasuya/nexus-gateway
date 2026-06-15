@@ -271,10 +271,11 @@ func main() {
 	}
 	var adminSrv *adminapi.Server
 	if *jwksURL != "" {
-		adminSrv = adminapi.NewWithOptions(connMgr, healthMon, adminOpts, *jwksURL, *adminAudience, *adminIssuer)
+		adminSrv = adminapi.NewSecureServer(connMgr, healthMon, adminOpts,
+			adminapi.JWTConfig{JWKSURL: *jwksURL, Audience: *adminAudience, Issuer: *adminIssuer})
 	} else {
 		slog.Warn("admin: JWT auth disabled — set KEYCLOAK_JWKS_URL before exposing this port")
-		adminSrv = adminapi.NewNoAuthWithOptions(connMgr, healthMon, adminOpts)
+		adminSrv = adminapi.NewServer(connMgr, healthMon, adminOpts)
 	}
 	httpSrv := &http.Server{Addr: *adminAddr, Handler: adminSrv}
 	go func() {

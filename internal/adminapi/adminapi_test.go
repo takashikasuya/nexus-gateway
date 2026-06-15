@@ -385,6 +385,36 @@ func TestTelemetry_NilSource_Returns404(t *testing.T) {
 	assert.Equal(t, http.StatusNotFound, resp.StatusCode)
 }
 
+// ── canonical constructor tests (NewServer / NewSecureServer) ─────────────────
+
+// NewServer is the no-auth constructor: optional sources via ServerOptions,
+// every endpoint open. It must register optional routes from the options.
+func TestNewServer_RegistersOptionalRoutes(t *testing.T) {
+	src := &mockTelemetrySource{drifts: map[string]int64{"p1": 1}, depth: 7}
+	srv := adminapi.NewServer(&mockManager{}, &mockMonitor{}, adminapi.ServerOptions{Telemetry: src})
+	apiSrv := httptest.NewServer(srv)
+	t.Cleanup(apiSrv.Close)
+
+	resp, err := http.Get(apiSrv.URL + "/telemetry")
+	require.NoError(t, err)
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+}
+
+// NewSecureServer is the JWT constructor: operator endpoints reject requests
+// that carry no bearer token.
+func TestNewSecureServer_RejectsUnauthenticated(t *testing.T) {
+	f := newFixture(t)
+	srv := adminapi.NewSecureServer(&mockManager{}, &mockMonitor{}, adminapi.ServerOptions{},
+		adminapi.JWTConfig{JWKSURL: f.jwksServer.URL, Audience: "nexus-gateway", Issuer: "test-issuer"})
+	t.Cleanup(srv.Shutdown)
+	apiSrv := httptest.NewServer(srv)
+	t.Cleanup(apiSrv.Close)
+
+	resp, err := http.Get(apiSrv.URL + "/connectors")
+	require.NoError(t, err)
+	assert.Equal(t, http.StatusUnauthorized, resp.StatusCode)
+}
+
 // ── logs tests ───────────────────────────────────────────────────────────────
 
 type mockConnectorLogger struct {

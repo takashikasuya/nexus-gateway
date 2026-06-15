@@ -1,0 +1,113 @@
+package uplink
+
+import (
+	"context"
+	"fmt"
+	"log/slog"
+	"time"
+
+	pb "nexus-gateway/gen"
+	"nexus-gateway/internal/storeforward"
+)
+
+// FrameSink is the transport seam for the telemetry uplink. Frames are sent one
+// at a time (immediately as they arrive, ADR-0002); Checkpoint half-closes the
+// current batch and returns the cumulative accepted count, after which the sink
+// is ready to start a fresh batch. The gRPC client-streaming transport is one
+// adapter; tests inject an in-memory fake.
+type FrameSink interface {
+	Send(ctx context.Context, frame *pb.TelemetryFrame) error
+	Checkpoint(ctx context.Context) (accepted int64, err error)
+}
+
+// Forwarder owns the best-effort store-and-forward delivery policy (ADR-0002):
+// read frames from the Buffer, send them through a FrameSink immediately, and on
+// every CheckpointSize frames or CheckpointAge — whichever first — half-close to
+// collect the StreamAck, advance the cursor past the whole batch (never resend
+// rejects), and record any accepted<sent shortfall as per-point_id drift.
+//
+// It depends only on the Buffer and the FrameSink, so the whole policy is testable
+// in-process with no gRPC stack.
+type Forwarder struct {
+	buf  *storeforward.Buffer
+	sink FrameSink
+	cfg  Config
+}
+
+// NewForwarder creates a Forwarder over buf, delivering through sink under cfg.
+func NewForwarder(buf *storeforward.Buffer, sink FrameSink, cfg Config) *Forwarder {
+	return &Forwarder{buf: buf, sink: sink, cfg: cfg}
+}
+
+// Run drives one forwarding session until ctx is cancelled (returns nil) or the
+// sink fails (returns the error so the caller can reconnect). On a sink failure
+// the cursor is left un-advanced, so the un-acked batch is replayed on the next
+// session — the bounded duplicate window of ADR-0002.
+func (f *Forwarder) Run(ctx context.Context) error {
+	cursor := f.buf.Cursor()
+	tick := time.NewTicker(f.cfg.CheckpointAge)
+	defer tick.Stop()
+	pollTick := time.NewTicker(50 * time.Millisecond)
+	defer pollTick.Stop()
+
+	var batch []storeforward.SentFrame
+
+	checkpoint := func() error {
+		if len(batch) == 0 {
+			return nil
+		}
+		accepted, err := f.sink.Checkpoint(ctx)
+		if err != nil {
+			return fmt.Errorf("checkpoint: %w", err)
+		}
+		newCursor, drifts := storeforward.ApplyAck(batch, accepted)
+		for pointID, delta := range drifts {
+			f.buf.RecordDrift(pointID, delta)
+		}
+		if len(drifts) > 0 {
+			slog.Warn("ingress: drift", "sent", len(batch), "accepted", accepted, "lost", len(drifts))
+		}
+		// Advance past the whole batch regardless of accepted (best-effort, ADR-0002).
+		cursor = newCursor
+		if err := f.buf.Advance(cursor); err != nil {
+			return fmt.Errorf("advance cursor: %w", err)
+		}
+		batch = batch[:0]
+		tick.Reset(f.cfg.CheckpointAge)
+		return nil
+	}
+
+	for {
+		select {
+		case <-ctx.Done():
+			if len(batch) > 0 {
+				_, _ = f.sink.Checkpoint(ctx)
+			}
+			return nil
+
+		case <-tick.C:
+			if err := checkpoint(); err != nil {
+				return err
+			}
+
+		case <-pollTick.C:
+			frames, err := f.buf.ReadBatch(cursor, 32)
+			if err != nil {
+				slog.Warn("ingress: buffer read error", "err", err)
+				continue
+			}
+			for _, sf := range frames {
+				if err := f.sink.Send(ctx, sf.Frame); err != nil {
+					return fmt.Errorf("send: %w", err)
+				}
+				batch = append(batch, storeforward.SentFrame{Seq: sf.Seq, PointID: sf.Frame.PointId})
+				cursor = sf.Seq
+				if len(batch) >= f.cfg.CheckpointSize {
+					if err := checkpoint(); err != nil {
+						return err
+					}
+				}
+			}
+		}
+	}
+}

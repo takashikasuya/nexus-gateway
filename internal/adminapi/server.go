@@ -61,13 +61,23 @@ type ConnectorLogger interface {
 }
 
 // ServerOptions holds all optional feature sources. A nil field disables the
-// corresponding endpoints. Use with NewNoAuthWithOptions or NewWithOptions.
+// corresponding endpoints. Use with NewServer (no auth) or NewSecureServer (JWT).
 type ServerOptions struct {
 	Installer ConnectorInstaller
 	Catalog   CatalogSource
 	PointList PointListSource
 	Telemetry TelemetrySource
 	Logger    ConnectorLogger
+}
+
+// JWTConfig configures bearer-token authentication for the Admin API. The token
+// is validated against the JWKS at JWKSURL, and Audience and Issuer are enforced
+// on every operator request. Keycloak/OIDC authenticates human operators here —
+// a separate concern from the machine mTLS link to Building OS (ADR-0007).
+type JWTConfig struct {
+	JWKSURL  string
+	Audience string
+	Issuer   string
 }
 
 
@@ -90,85 +100,21 @@ type Server struct {
 	shutdown  context.CancelFunc // stops the JWKS cache refresh goroutine
 }
 
-// New creates a Server. jwksURL is fetched for JWKS key validation; audience
-// and issuer are enforced on every token. Call Shutdown() to stop background goroutines.
-func New(mgr ConnectorManager, monitor HealthSnapshotter, jwksURL, audience, issuer string) *Server {
+// NewServer creates an Admin API Server with authentication DISABLED — for
+// dev/local use only. Optional feature sources are supplied via opts; a nil
+// field disables the corresponding endpoints.
+func NewServer(mgr ConnectorManager, monitor HealthSnapshotter, opts ServerOptions) *Server {
+	return buildServer(mgr, monitor, opts, &JWTMiddleware{}, false)
+}
+
+// NewSecureServer creates an Admin API Server that authenticates every operator
+// request against jwt (JWKS validation + audience/issuer). Optional feature
+// sources are supplied via opts. Call Shutdown() to stop the background JWKS refresh.
+func NewSecureServer(mgr ConnectorManager, monitor HealthSnapshotter, opts ServerOptions, jwt JWTConfig) *Server {
 	ctx, cancel := context.WithCancel(context.Background())
-	s := newServer(mgr, nil, nil, monitor, newURLKeyFetcher(ctx, jwksURL), audience, issuer)
+	auth := &JWTMiddleware{keys: newURLKeyFetcher(ctx, jwt.JWKSURL), audience: jwt.Audience, issuer: jwt.Issuer}
+	s := buildServer(mgr, monitor, opts, auth, true)
 	s.shutdown = cancel
-	return s
-}
-
-// NewWithCatalog creates a JWT-authenticated Server with a Catalog installer and
-// source wired in. Use this in production when both auth and catalog are configured.
-func NewWithCatalog(mgr ConnectorManager, installer ConnectorInstaller, catalogSrc CatalogSource, monitor HealthSnapshotter, jwksURL, audience, issuer string) *Server {
-	ctx, cancel := context.WithCancel(context.Background())
-	s := newServer(mgr, installer, catalogSrc, monitor, newURLKeyFetcher(ctx, jwksURL), audience, issuer)
-	s.shutdown = cancel
-	return s
-}
-
-// NewWithOptions creates a JWT-authenticated Server with all optional sources.
-func NewWithOptions(mgr ConnectorManager, monitor HealthSnapshotter, opts ServerOptions, jwksURL, audience, issuer string) *Server {
-	ctx, cancel := context.WithCancel(context.Background())
-	keys := newURLKeyFetcher(ctx, jwksURL)
-	s := &Server{
-		mux:       http.NewServeMux(),
-		auth:      &JWTMiddleware{keys: keys, audience: audience, issuer: issuer},
-		mgr:       mgr,
-		installer: opts.Installer,
-		catalog:   opts.Catalog,
-		devices:   opts.PointList,
-		telemetry: opts.Telemetry,
-		logger:    opts.Logger,
-		monitor:   monitor,
-		shutdown:  cancel,
-	}
-	s.registerRoutes(true)
-	return s
-}
-
-// NewNoAuth creates a Server with authentication disabled (dev/local use only).
-func NewNoAuth(mgr ConnectorManager, monitor HealthSnapshotter) *Server {
-	return NewNoAuthWithInstaller(mgr, nil, monitor)
-}
-
-// NewNoAuthWithOptions creates a no-auth Server with the full set of optional sources.
-func NewNoAuthWithOptions(mgr ConnectorManager, monitor HealthSnapshotter, opts ServerOptions) *Server {
-	noAuth := &JWTMiddleware{}
-	s := &Server{
-		mux:       http.NewServeMux(),
-		auth:      noAuth,
-		mgr:       mgr,
-		installer: opts.Installer,
-		catalog:   opts.Catalog,
-		devices:   opts.PointList,
-		telemetry: opts.Telemetry,
-		logger:    opts.Logger,
-		monitor:   monitor,
-	}
-	s.registerRoutes(false)
-	return s
-}
-
-
-// NewNoAuthWithInstaller creates a Server with auth disabled, a Catalog installer,
-// and an optional CatalogSource for browsing and updates.
-func NewNoAuthWithInstaller(mgr ConnectorManager, installer ConnectorInstaller, monitor HealthSnapshotter, catalogSrc ...CatalogSource) *Server {
-	var src CatalogSource
-	if len(catalogSrc) > 0 {
-		src = catalogSrc[0]
-	}
-	noAuth := &JWTMiddleware{}
-	s := &Server{
-		mux:       http.NewServeMux(),
-		auth:      noAuth,
-		mgr:       mgr,
-		installer: installer,
-		catalog:   src,
-		monitor:   monitor,
-	}
-	s.registerRoutes(false)
 	return s
 }
 
@@ -179,17 +125,58 @@ func (s *Server) Shutdown() {
 	}
 }
 
-func newServer(mgr ConnectorManager, installer ConnectorInstaller, catalogSrc CatalogSource, monitor HealthSnapshotter, keys KeyFetcher, audience, issuer string) *Server {
+// buildServer is the single construction path: it wires the options and registers
+// routes. authenticated controls whether operator routes go through the JWT middleware.
+func buildServer(mgr ConnectorManager, monitor HealthSnapshotter, opts ServerOptions, auth *JWTMiddleware, authenticated bool) *Server {
 	s := &Server{
 		mux:       http.NewServeMux(),
-		auth:      &JWTMiddleware{keys: keys, audience: audience, issuer: issuer},
+		auth:      auth,
 		mgr:       mgr,
-		installer: installer,
-		catalog:   catalogSrc,
+		installer: opts.Installer,
+		catalog:   opts.Catalog,
+		devices:   opts.PointList,
+		telemetry: opts.Telemetry,
+		logger:    opts.Logger,
 		monitor:   monitor,
 	}
-	s.registerRoutes(true)
+	s.registerRoutes(authenticated)
 	return s
+}
+
+// ── deprecated constructors (thin wrappers over the two canonical ones) ───────
+
+// Deprecated: use NewSecureServer with ServerOptions and JWTConfig.
+func New(mgr ConnectorManager, monitor HealthSnapshotter, jwksURL, audience, issuer string) *Server {
+	return NewSecureServer(mgr, monitor, ServerOptions{}, JWTConfig{jwksURL, audience, issuer})
+}
+
+// Deprecated: use NewSecureServer with ServerOptions{Installer, Catalog} and JWTConfig.
+func NewWithCatalog(mgr ConnectorManager, installer ConnectorInstaller, catalogSrc CatalogSource, monitor HealthSnapshotter, jwksURL, audience, issuer string) *Server {
+	return NewSecureServer(mgr, monitor, ServerOptions{Installer: installer, Catalog: catalogSrc}, JWTConfig{jwksURL, audience, issuer})
+}
+
+// Deprecated: use NewSecureServer.
+func NewWithOptions(mgr ConnectorManager, monitor HealthSnapshotter, opts ServerOptions, jwksURL, audience, issuer string) *Server {
+	return NewSecureServer(mgr, monitor, opts, JWTConfig{jwksURL, audience, issuer})
+}
+
+// Deprecated: use NewServer with an empty ServerOptions.
+func NewNoAuth(mgr ConnectorManager, monitor HealthSnapshotter) *Server {
+	return NewServer(mgr, monitor, ServerOptions{})
+}
+
+// Deprecated: use NewServer.
+func NewNoAuthWithOptions(mgr ConnectorManager, monitor HealthSnapshotter, opts ServerOptions) *Server {
+	return NewServer(mgr, monitor, opts)
+}
+
+// Deprecated: use NewServer with ServerOptions{Installer, Catalog}.
+func NewNoAuthWithInstaller(mgr ConnectorManager, installer ConnectorInstaller, monitor HealthSnapshotter, catalogSrc ...CatalogSource) *Server {
+	var src CatalogSource
+	if len(catalogSrc) > 0 {
+		src = catalogSrc[0]
+	}
+	return NewServer(mgr, monitor, ServerOptions{Installer: installer, Catalog: src})
 }
 
 func (s *Server) registerRoutes(authenticated bool) {

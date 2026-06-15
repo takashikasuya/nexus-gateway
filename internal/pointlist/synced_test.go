@@ -12,6 +12,14 @@ import (
 	"nexus-gateway/internal/pointlist"
 )
 
+// SyncedResolver must satisfy both resolution seams: forward (Normalizer) and
+// reverse (control dispatch). The reverse seam is named in the pointlist package
+// so the Dispatcher consumes it instead of redeclaring its own interface.
+var (
+	_ pointlist.Resolver        = (*pointlist.SyncedResolver)(nil)
+	_ pointlist.ReverseResolver = (*pointlist.SyncedResolver)(nil)
+)
+
 func TestSynced_BasicResolve(t *testing.T) {
 	r := pointlist.NewSynced(nil)
 	r.Update([]pointlist.Entry{

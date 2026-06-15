@@ -195,6 +195,50 @@ func TestHealth_ContainsGatewayAndConnectors(t *testing.T) {
 	assert.True(t, h.Connectors[0].Running)
 }
 
+// ── Health seam tests ────────────────────────────────────────────────────────
+
+// TestConnectorProber_ReflectsLiveState: the prober reports a connector running
+// when the container daemon confirms it.
+func TestConnectorProber_ReflectsLiveState(t *testing.T) {
+	mock := newMockDocker("ctr-1")
+	mock.setInspectRunning(true)
+	prober := lifecycle.NewConnectorProber(mock)
+
+	health := prober.Probe(context.Background(), []lifecycle.ConnectorStatus{
+		{Spec: lifecycle.ConnectorSpec{ID: "c1", Image: "img:v1"}, ContainerID: "ctr-1", Running: true},
+	})
+	require.Len(t, health, 1)
+	assert.Equal(t, "c1", health[0].ID)
+	assert.Equal(t, "img:v1", health[0].Image)
+	assert.True(t, health[0].Running)
+}
+
+// TestConnectorProber_DeadContainerOverridesRegistry: even if the registry still
+// marks a connector running, a dead container is reported not-running.
+func TestConnectorProber_DeadContainerOverridesRegistry(t *testing.T) {
+	mock := newMockDocker("ctr-1")
+	mock.setInspectRunning(false)
+	prober := lifecycle.NewConnectorProber(mock)
+
+	health := prober.Probe(context.Background(), []lifecycle.ConnectorStatus{
+		{Spec: lifecycle.ConnectorSpec{ID: "c1"}, ContainerID: "ctr-1", Running: true},
+	})
+	require.Len(t, health, 1)
+	assert.False(t, health[0].Running, "dead container must override the registry's stale Running flag")
+}
+
+// TestGatewayMetrics_SampleReportsUptime: the metrics seam samples host stats
+// without touching the Registry or Docker.
+func TestGatewayMetrics_SampleReportsUptime(t *testing.T) {
+	m := lifecycle.NewGatewayMetrics()
+	s := m.Sample()
+	assert.Greater(t, s.UptimeSeconds, 0.0)
+	assert.GreaterOrEqual(t, s.DiskTotalMB, 0.0)
+	if s.DiskTotalMB > 0 {
+		assert.LessOrEqual(t, s.DiskUsedMB, s.DiskTotalMB)
+	}
+}
+
 // ── mock Docker client ────────────────────────────────────────────────────────
 
 type mockDocker struct {
