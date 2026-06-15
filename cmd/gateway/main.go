@@ -219,6 +219,7 @@ func main() {
 
 	// Build the Connector Catalog installer if a catalog source is configured (ADR-0006).
 	var catalogInstaller adminapi.ConnectorInstaller
+	var catalogSrc adminapi.CatalogSource
 	{
 		var catalogClient catalog.Client
 		switch {
@@ -230,13 +231,15 @@ func main() {
 		if catalogClient != nil {
 			allowlist := splitComma(*catalogAllowlist)
 			verifier := catalog.Verifier(catalog.NoopVerifier{}) // replace with CosignVerifier in production
-			catalogInstaller = &gatewayInstaller{
+			gi := &gatewayInstaller{
 				mgr:       connMgr,
 				client:    catalogClient,
 				verifier:  verifier,
 				allowlist: allowlist,
 				gwVersion: "0.1.0",
 			}
+			catalogInstaller = gi
+			catalogSrc = gi
 			// Start the background update loop (ADR-0006 poll-only model).
 			updater := lifecycle.NewUpdater(connMgr, connRegistry, catalogClient, verifier, allowlist, "0.1.0",
 				lifecycle.UpdaterConfig{SoakWindow: 30 * time.Second})
@@ -250,7 +253,7 @@ func main() {
 		adminSrv = adminapi.New(connMgr, healthMon, *jwksURL, *adminAudience, *adminIssuer)
 	} else {
 		slog.Warn("admin: JWT auth disabled — set KEYCLOAK_JWKS_URL before exposing this port")
-		adminSrv = adminapi.NewNoAuthWithInstaller(connMgr, catalogInstaller, healthMon)
+		adminSrv = adminapi.NewNoAuthWithInstaller(connMgr, catalogInstaller, healthMon, catalogSrc)
 	}
 	httpSrv := &http.Server{Addr: *adminAddr, Handler: adminSrv}
 	go func() {
@@ -348,4 +351,18 @@ func (gi *gatewayInstaller) Install(ctx context.Context, name string) error {
 		return err
 	}
 	return gi.mgr.Install(ctx, m, gi.verifier, gi.allowlist, gi.gwVersion)
+}
+
+// ListAll satisfies adminapi.CatalogSource — lists all connectors available in the catalog.
+func (gi *gatewayInstaller) ListAll(ctx context.Context) ([]catalog.Manifest, error) {
+	return gi.client.List(ctx)
+}
+
+// Update satisfies adminapi.CatalogSource — fetches the latest manifest and applies it.
+func (gi *gatewayInstaller) Update(ctx context.Context, id string) error {
+	m, err := gi.client.Fetch(ctx, id)
+	if err != nil {
+		return err
+	}
+	return gi.mgr.Update(ctx, id, m, gi.verifier, gi.allowlist, gi.gwVersion, 30*time.Second)
 }

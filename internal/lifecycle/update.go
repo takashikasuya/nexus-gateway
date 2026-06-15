@@ -181,6 +181,50 @@ func (m *Manager) soakCheck(ctx context.Context, containerID string, soakWindow 
 	}
 }
 
+// Rollback restores the connector to its previous image without a pull
+// (the previous image is already local — ADR-0006). Returns an error if the
+// connector has no previous image recorded in the registry.
+func (m *Manager) Rollback(ctx context.Context, id string) error {
+	unlock := m.lockConn(id)
+	defer unlock()
+
+	current, ok := m.registry.Get(id)
+	if !ok {
+		return fmt.Errorf("lifecycle: rollback %q: %w", id, ErrConnectorNotFound)
+	}
+	if current.Spec.PrevImage == "" {
+		return fmt.Errorf("lifecycle: rollback %q: no previous image available", id)
+	}
+
+	prevImage := current.Spec.PrevImage
+	currentContainerID := current.ContainerID
+
+	if err := m.doStop(ctx, id); err != nil {
+		return fmt.Errorf("lifecycle: rollback %q: stop: %w", id, err)
+	}
+	if currentContainerID != "" {
+		if err := m.docker.ContainerRemove(ctx, currentContainerID, containerRemoveOpts()); err != nil {
+			slog.Warn("lifecycle: rollback: remove current container failed (continuing)", "id", id, "err", err)
+		}
+	}
+
+	// Swap current↔prev so the old "current" becomes recoverable via a second rollback.
+	m.registry.Register(ConnectorSpec{
+		ID:          id,
+		Image:       prevImage,
+		PrevImage:   current.Spec.Image,
+		Env:         current.Spec.Env,
+		Permissions: current.Spec.Permissions,
+	})
+
+	if err := m.doStart(ctx, id); err != nil {
+		return fmt.Errorf("lifecycle: rollback %q: start: %w", id, err)
+	}
+
+	slog.Info("lifecycle: connector rolled back", "id", id, "image", prevImage)
+	return nil
+}
+
 // digestFromRef extracts "sha256:…" from "registry/img@sha256:…".
 func digestFromRef(ref string) string {
 	if idx := strings.Index(ref, "@"); idx >= 0 {

@@ -10,9 +10,11 @@ import (
 
 // ConnectorHealth is the liveness status of one connector.
 type ConnectorHealth struct {
-	ID      string
-	Image   string
-	Running bool
+	ID          string
+	Image       string
+	PrevImage   string // previous digest-pinned image, set if rollback is available (ADR-0006)
+	ContainerID string
+	Running     bool
 }
 
 // GatewayHealth is a point-in-time health snapshot.
@@ -61,7 +63,13 @@ func (h *HealthMonitor) Snapshot(ctx context.Context) GatewayHealth {
 	connectors := make([]ConnectorHealth, len(statuses))
 	var wg sync.WaitGroup
 	for i, status := range statuses {
-		connectors[i] = ConnectorHealth{ID: status.Spec.ID, Image: status.Spec.Image, Running: status.Running}
+		connectors[i] = ConnectorHealth{
+			ID:          status.Spec.ID,
+			Image:       status.Spec.Image,
+			PrevImage:   status.Spec.PrevImage,
+			ContainerID: status.ContainerID,
+			Running:     status.Running,
+		}
 		if status.ContainerID != "" && h.docker != nil {
 			wg.Add(1)
 			go func(idx int, containerID string) {

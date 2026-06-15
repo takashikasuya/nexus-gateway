@@ -137,6 +137,10 @@ func (m *mockManager) Upgrade(_ context.Context, id, _ string) error {
 	m.lastAction, m.lastID = "upgrade", id
 	return m.err
 }
+func (m *mockManager) Rollback(_ context.Context, id string) error {
+	m.lastAction, m.lastID = "rollback", id
+	return m.err
+}
 
 type mockMonitor struct{}
 
