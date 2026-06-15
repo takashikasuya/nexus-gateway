@@ -59,6 +59,42 @@ export async function listCatalog(token: string): Promise<CatalogEntry[]> {
   return res.json();
 }
 
+export type PointEntry = {
+  connector_id: string;
+  protocol: string;
+  local_id: string;
+  point_id: string;
+  unit?: string;
+  writable?: boolean;
+  device_ref?: string;
+};
+
+export type TelemetryStats = {
+  buffer_depth: number;
+  drifts: Record<string, number>;
+};
+
+export type ConnectorLogs = {
+  connector_id: string;
+  lines: string[];
+};
+
+export async function listDevices(token: string): Promise<PointEntry[]> {
+  const res = await adminFetch("/devices", token);
+  return res.json();
+}
+
+export async function getTelemetry(token: string): Promise<TelemetryStats> {
+  const res = await adminFetch("/telemetry", token);
+  return res.json();
+}
+
+export async function getConnectorLogs(token: string, id: string, tail = 100): Promise<ConnectorLogs> {
+  const res = await adminFetch(`/logs/${encodeURIComponent(id)}?tail=${tail}`, token);
+  return res.json();
+}
+
+
 export async function connectorAction(
   token: string,
   id: string,

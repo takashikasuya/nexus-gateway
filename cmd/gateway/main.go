@@ -262,12 +262,19 @@ func main() {
 		}
 	}
 
+	adminOpts := adminapi.ServerOptions{
+		Installer: catalogInstaller,
+		Catalog:   catalogSrc,
+		PointList: resolver,
+		Telemetry: buf,
+		Logger:    connMgr,
+	}
 	var adminSrv *adminapi.Server
 	if *jwksURL != "" {
-		adminSrv = adminapi.NewWithCatalog(connMgr, catalogInstaller, catalogSrc, healthMon, *jwksURL, *adminAudience, *adminIssuer)
+		adminSrv = adminapi.NewWithOptions(connMgr, healthMon, adminOpts, *jwksURL, *adminAudience, *adminIssuer)
 	} else {
 		slog.Warn("admin: JWT auth disabled — set KEYCLOAK_JWKS_URL before exposing this port")
-		adminSrv = adminapi.NewNoAuthWithInstaller(connMgr, catalogInstaller, healthMon, catalogSrc)
+		adminSrv = adminapi.NewNoAuthWithOptions(connMgr, healthMon, adminOpts)
 	}
 	httpSrv := &http.Server{Addr: *adminAddr, Handler: adminSrv}
 	go func() {

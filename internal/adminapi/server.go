@@ -11,6 +11,7 @@ import (
 	"nexus-gateway/internal/catalog"
 	"nexus-gateway/internal/lifecycle"
 	"nexus-gateway/internal/metrics"
+	"nexus-gateway/internal/pointlist"
 )
 
 const (
@@ -40,6 +41,36 @@ type CatalogSource interface {
 	Update(ctx context.Context, connectorID string) error
 }
 
+// PointListSource provides a snapshot of the synced Point List.
+// A nil PointListSource disables GET /devices.
+type PointListSource interface {
+	Snapshot() []pointlist.Entry
+}
+
+// TelemetrySource exposes Store-and-Forward telemetry counters.
+// A nil TelemetrySource disables GET /telemetry.
+type TelemetrySource interface {
+	Drifts() map[string]int64
+	Depth() int64
+}
+
+// ConnectorLogger provides recent log lines for a connector container.
+// A nil ConnectorLogger disables GET /logs/{id}.
+type ConnectorLogger interface {
+	Logs(ctx context.Context, connectorID string, tail int) ([]string, error)
+}
+
+// ServerOptions holds all optional feature sources. A nil field disables the
+// corresponding endpoints. Use with NewNoAuthWithOptions or NewWithOptions.
+type ServerOptions struct {
+	Installer ConnectorInstaller
+	Catalog   CatalogSource
+	PointList PointListSource
+	Telemetry TelemetrySource
+	Logger    ConnectorLogger
+}
+
+
 // HealthSnapshotter produces gateway health snapshots.
 type HealthSnapshotter interface {
 	Snapshot(ctx context.Context) lifecycle.GatewayHealth
@@ -52,6 +83,9 @@ type Server struct {
 	mgr       ConnectorManager
 	installer ConnectorInstaller // nil if catalog is not configured
 	catalog   CatalogSource      // nil if catalog browsing/update is not configured
+	devices   PointListSource    // nil if point list is not configured
+	telemetry TelemetrySource    // nil if S&F telemetry is not configured
+	logger    ConnectorLogger    // nil if log streaming is not configured
 	monitor   HealthSnapshotter
 	shutdown  context.CancelFunc // stops the JWKS cache refresh goroutine
 }
@@ -74,10 +108,49 @@ func NewWithCatalog(mgr ConnectorManager, installer ConnectorInstaller, catalogS
 	return s
 }
 
+// NewWithOptions creates a JWT-authenticated Server with all optional sources.
+func NewWithOptions(mgr ConnectorManager, monitor HealthSnapshotter, opts ServerOptions, jwksURL, audience, issuer string) *Server {
+	ctx, cancel := context.WithCancel(context.Background())
+	keys := newURLKeyFetcher(ctx, jwksURL)
+	s := &Server{
+		mux:       http.NewServeMux(),
+		auth:      &JWTMiddleware{keys: keys, audience: audience, issuer: issuer},
+		mgr:       mgr,
+		installer: opts.Installer,
+		catalog:   opts.Catalog,
+		devices:   opts.PointList,
+		telemetry: opts.Telemetry,
+		logger:    opts.Logger,
+		monitor:   monitor,
+		shutdown:  cancel,
+	}
+	s.registerRoutes(true)
+	return s
+}
+
 // NewNoAuth creates a Server with authentication disabled (dev/local use only).
 func NewNoAuth(mgr ConnectorManager, monitor HealthSnapshotter) *Server {
 	return NewNoAuthWithInstaller(mgr, nil, monitor)
 }
+
+// NewNoAuthWithOptions creates a no-auth Server with the full set of optional sources.
+func NewNoAuthWithOptions(mgr ConnectorManager, monitor HealthSnapshotter, opts ServerOptions) *Server {
+	noAuth := &JWTMiddleware{}
+	s := &Server{
+		mux:       http.NewServeMux(),
+		auth:      noAuth,
+		mgr:       mgr,
+		installer: opts.Installer,
+		catalog:   opts.Catalog,
+		devices:   opts.PointList,
+		telemetry: opts.Telemetry,
+		logger:    opts.Logger,
+		monitor:   monitor,
+	}
+	s.registerRoutes(false)
+	return s
+}
+
 
 // NewNoAuthWithInstaller creates a Server with auth disabled, a Catalog installer,
 // and an optional CatalogSource for browsing and updates.
@@ -136,6 +209,59 @@ func (s *Server) registerRoutes(authenticated bool) {
 	if s.catalog != nil {
 		s.mux.HandleFunc("GET /catalog", require(RoleViewer, s.handleListCatalog))
 	}
+	if s.devices != nil {
+		s.mux.HandleFunc("GET /devices", require(RoleViewer, s.handleListDevices))
+	}
+	if s.telemetry != nil {
+		s.mux.HandleFunc("GET /telemetry", require(RoleViewer, s.handleTelemetry))
+	}
+	if s.logger != nil {
+		s.mux.HandleFunc("GET /logs/{id}", require(RoleViewer, s.handleLogs))
+	}
+}
+
+func (s *Server) handleListDevices(w http.ResponseWriter, _ *http.Request) {
+	writeJSON(w, s.devices.Snapshot())
+}
+
+type logResponse struct {
+	ConnectorID string   `json:"connector_id"`
+	Lines       []string `json:"lines"`
+}
+
+func (s *Server) handleLogs(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	tail := 100
+	if q := r.URL.Query().Get("tail"); q != "" {
+		if n, err := fmt.Sscanf(q, "%d", &tail); n != 1 || err != nil || tail <= 0 {
+			tail = 100
+		}
+	}
+	lines, err := s.logger.Logs(r.Context(), id, tail)
+	if err != nil {
+		if errors.Is(err, lifecycle.ErrConnectorNotFound) {
+			http.Error(w, err.Error(), http.StatusNotFound)
+			return
+		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if lines == nil {
+		lines = []string{}
+	}
+	writeJSON(w, logResponse{ConnectorID: id, Lines: lines})
+}
+
+type telemetryResponse struct {
+	BufferDepth int64            `json:"buffer_depth"`
+	Drifts      map[string]int64 `json:"drifts"`
+}
+
+func (s *Server) handleTelemetry(w http.ResponseWriter, _ *http.Request) {
+	writeJSON(w, telemetryResponse{
+		BufferDepth: s.telemetry.Depth(),
+		Drifts:      s.telemetry.Drifts(),
+	})
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {

@@ -21,6 +21,7 @@ import (
 	"nexus-gateway/internal/adminapi"
 	"nexus-gateway/internal/catalog"
 	"nexus-gateway/internal/lifecycle"
+	"nexus-gateway/internal/pointlist"
 )
 
 // ── helpers ──────────────────────────────────────────────────────────────────
@@ -142,6 +143,13 @@ func (m *mockManager) Rollback(_ context.Context, id string) error {
 	m.lastAction, m.lastID = "rollback", id
 	return m.err
 }
+
+type mockPointListSource struct {
+	entries []pointlist.Entry
+}
+
+func (m *mockPointListSource) Snapshot() []pointlist.Entry { return m.entries }
+
 
 type mockCatalogSource struct {
 	manifests  []catalog.Manifest
@@ -300,6 +308,134 @@ func TestAction_UnknownAction_Returns400(t *testing.T) {
 	tok := f.signToken(t, []string{adminapi.RoleOperator}, time.Now().Add(1*time.Hour))
 	resp := f.post("/connectors/mqtt-01/explode", tok)
 	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+}
+
+// ── devices tests ────────────────────────────────────────────────────────────
+
+func TestDevices_ListAll(t *testing.T) {
+	src := &mockPointListSource{entries: []pointlist.Entry{
+		{ConnectorID: "bacnet-01", Protocol: "bacnet", LocalID: "AHU-1/sup_temp", PointID: "p-001", Unit: "Cel", DeviceRef: "ahu-01"},
+		{ConnectorID: "bacnet-01", Protocol: "bacnet", LocalID: "AHU-1/fan_run", PointID: "p-002", Writable: true, DeviceRef: "ahu-01"},
+	}}
+	srv := adminapi.NewNoAuthWithOptions(&mockManager{}, &mockMonitor{}, adminapi.ServerOptions{PointList: src})
+	apiSrv := httptest.NewServer(srv)
+	t.Cleanup(apiSrv.Close)
+
+	resp, err := http.Get(apiSrv.URL + "/devices")
+	require.NoError(t, err)
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+	assert.Equal(t, "application/json", resp.Header.Get("Content-Type"))
+
+	var items []map[string]any
+	require.NoError(t, json.NewDecoder(resp.Body).Decode(&items))
+	require.Len(t, items, 2)
+	assert.Equal(t, "p-001", items[0]["point_id"])
+	assert.Equal(t, "bacnet-01", items[0]["connector_id"])
+	assert.Equal(t, "Cel", items[0]["unit"])
+	assert.Equal(t, true, items[1]["writable"])
+}
+
+func TestDevices_NilSource_Returns404(t *testing.T) {
+	srv := adminapi.NewNoAuthWithOptions(&mockManager{}, &mockMonitor{}, adminapi.ServerOptions{})
+	apiSrv := httptest.NewServer(srv)
+	t.Cleanup(apiSrv.Close)
+
+	resp, _ := http.Get(apiSrv.URL + "/devices")
+	assert.Equal(t, http.StatusNotFound, resp.StatusCode)
+}
+
+// ── telemetry tests ──────────────────────────────────────────────────────────
+
+type mockTelemetrySource struct {
+	drifts map[string]int64
+	depth  int64
+}
+
+func (m *mockTelemetrySource) Drifts() map[string]int64 { return m.drifts }
+func (m *mockTelemetrySource) Depth() int64              { return m.depth }
+
+func TestTelemetry_ReturnsDriftAndDepth(t *testing.T) {
+	src := &mockTelemetrySource{
+		drifts: map[string]int64{"p-001": 3, "p-002": 0},
+		depth:  42,
+	}
+	srv := adminapi.NewNoAuthWithOptions(&mockManager{}, &mockMonitor{}, adminapi.ServerOptions{Telemetry: src})
+	apiSrv := httptest.NewServer(srv)
+	t.Cleanup(apiSrv.Close)
+
+	resp, err := http.Get(apiSrv.URL + "/telemetry")
+	require.NoError(t, err)
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+	var body map[string]any
+	require.NoError(t, json.NewDecoder(resp.Body).Decode(&body))
+	assert.Equal(t, float64(42), body["buffer_depth"])
+	drifts, ok := body["drifts"].(map[string]any)
+	require.True(t, ok)
+	assert.Equal(t, float64(3), drifts["p-001"])
+	assert.Equal(t, float64(0), drifts["p-002"])
+}
+
+func TestTelemetry_NilSource_Returns404(t *testing.T) {
+	srv := adminapi.NewNoAuthWithOptions(&mockManager{}, &mockMonitor{}, adminapi.ServerOptions{})
+	apiSrv := httptest.NewServer(srv)
+	t.Cleanup(apiSrv.Close)
+
+	resp, _ := http.Get(apiSrv.URL + "/telemetry")
+	assert.Equal(t, http.StatusNotFound, resp.StatusCode)
+}
+
+// ── logs tests ───────────────────────────────────────────────────────────────
+
+type mockConnectorLogger struct {
+	lines map[string][]string
+	err   error
+}
+
+func (m *mockConnectorLogger) Logs(_ context.Context, id string, _ int) ([]string, error) {
+	return m.lines[id], m.err
+}
+
+func TestLogs_ReturnsLinesForConnector(t *testing.T) {
+	lg := &mockConnectorLogger{
+		lines: map[string][]string{
+			"bacnet-01": {"2026-06-15 INFO starting", "2026-06-15 WARN reconnecting"},
+		},
+	}
+	srv := adminapi.NewNoAuthWithOptions(&mockManager{}, &mockMonitor{}, adminapi.ServerOptions{Logger: lg})
+	apiSrv := httptest.NewServer(srv)
+	t.Cleanup(apiSrv.Close)
+
+	resp, err := http.Get(apiSrv.URL + "/logs/bacnet-01")
+	require.NoError(t, err)
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+	var body map[string]any
+	require.NoError(t, json.NewDecoder(resp.Body).Decode(&body))
+	assert.Equal(t, "bacnet-01", body["connector_id"])
+	lines, ok := body["lines"].([]any)
+	require.True(t, ok)
+	assert.Len(t, lines, 2)
+	assert.Equal(t, "2026-06-15 INFO starting", lines[0])
+}
+
+func TestLogs_UnknownConnector_Returns404(t *testing.T) {
+	lg := &mockConnectorLogger{err: fmt.Errorf("lifecycle: connector %q: %w", "ghost", lifecycle.ErrConnectorNotFound)}
+	srv := adminapi.NewNoAuthWithOptions(&mockManager{}, &mockMonitor{}, adminapi.ServerOptions{Logger: lg})
+	apiSrv := httptest.NewServer(srv)
+	t.Cleanup(apiSrv.Close)
+
+	resp, _ := http.Get(apiSrv.URL + "/logs/ghost")
+	assert.Equal(t, http.StatusNotFound, resp.StatusCode)
+}
+
+func TestLogs_NilSource_Returns404(t *testing.T) {
+	srv := adminapi.NewNoAuthWithOptions(&mockManager{}, &mockMonitor{}, adminapi.ServerOptions{})
+	apiSrv := httptest.NewServer(srv)
+	t.Cleanup(apiSrv.Close)
+
+	resp, _ := http.Get(apiSrv.URL + "/logs/bacnet-01")
+	assert.Equal(t, http.StatusNotFound, resp.StatusCode)
 }
 
 // ── catalog tests ────────────────────────────────────────────────────────────

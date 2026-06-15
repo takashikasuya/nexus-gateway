@@ -117,6 +117,15 @@ func (b *Buffer) Cursor() int64 {
 	return seq
 }
 
+// Depth returns the number of frames currently stored in the buffer.
+func (b *Buffer) Depth() int64 {
+	var n int64
+	if err := b.db.QueryRow(`SELECT COUNT(*) FROM frames`).Scan(&n); err != nil {
+		slog.Warn("storeforward: depth query error", "err", err)
+	}
+	return n
+}
+
 // RecordDrift increments the in-memory drift counter for pointID by delta.
 func (b *Buffer) RecordDrift(pointID string, delta int64) {
 	b.mu.Lock()
