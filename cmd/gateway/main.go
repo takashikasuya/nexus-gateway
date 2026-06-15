@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strings"
 	"sync"
 	"syscall"
 	"time"
@@ -21,6 +22,7 @@ import (
 
 	"nexus-gateway/connector/sim"
 	"nexus-gateway/internal/adminapi"
+	"nexus-gateway/internal/catalog"
 	"nexus-gateway/internal/dispatch"
 	"nexus-gateway/internal/egress"
 	"nexus-gateway/internal/lifecycle"
@@ -55,6 +57,9 @@ func main() {
 	bosCert := flag.String("bos-cert", envOrDefault("BOS_CERT_FILE", ""), "Client certificate for mTLS to Building OS (CN/SAN = gateway_id)")
 	bosKey := flag.String("bos-key", envOrDefault("BOS_KEY_FILE", ""), "Client private key for mTLS to Building OS")
 	bosServerName := flag.String("bos-servername", envOrDefault("BOS_SERVER_NAME", ""), "Override the server name verified in the Building OS cert")
+	catalogFile := flag.String("catalog-file", envOrDefault("CATALOG_FILE", ""), "File-backed Connector Catalog (JSON []Manifest); enables POST /connectors/{name}/install")
+	catalogURL := flag.String("catalog-url", envOrDefault("CATALOG_URL", ""), "Remote Connector Catalog base URL; overrides --catalog-file when set")
+	catalogAllowlist := flag.String("catalog-allowlist", envOrDefault("CATALOG_ALLOWLIST", "ghcr.io"), "Comma-separated list of allowed OCI registries (ADR-0006)")
 	flag.Parse()
 
 	// Build the gRPC transport credentials for both Building OS links (ADR-0007).
@@ -210,12 +215,36 @@ func main() {
 	}
 	connMgr := lifecycle.NewManager(dockerCC, connRegistry)
 	healthMon := lifecycle.NewHealthMonitor(dockerCC, connRegistry)
+
+	// Build the Connector Catalog installer if a catalog source is configured (ADR-0006).
+	var catalogInstaller adminapi.ConnectorInstaller
+	{
+		var catalogClient catalog.Client
+		switch {
+		case *catalogURL != "":
+			catalogClient = catalog.NewHTTPClient(*catalogURL)
+		case *catalogFile != "":
+			catalogClient = catalog.NewFileClient(*catalogFile)
+		}
+		if catalogClient != nil {
+			allowlist := splitComma(*catalogAllowlist)
+			catalogInstaller = &gatewayInstaller{
+				mgr:       connMgr,
+				client:    catalogClient,
+				verifier:  catalog.NoopVerifier{}, // replace with CosignVerifier in production
+				allowlist: allowlist,
+				gwVersion: "0.1.0",
+			}
+			slog.Info("catalog: connector install enabled", "allowlist", allowlist)
+		}
+	}
+
 	var adminSrv *adminapi.Server
 	if *jwksURL != "" {
 		adminSrv = adminapi.New(connMgr, healthMon, *jwksURL, *adminAudience, *adminIssuer)
 	} else {
 		slog.Warn("admin: JWT auth disabled — set KEYCLOAK_JWKS_URL before exposing this port")
-		adminSrv = adminapi.NewNoAuth(connMgr, healthMon)
+		adminSrv = adminapi.NewNoAuthWithInstaller(connMgr, catalogInstaller, healthMon)
 	}
 	httpSrv := &http.Server{Addr: *adminAddr, Handler: adminSrv}
 	go func() {
@@ -285,4 +314,32 @@ func envOrDefault(key, def string) string {
 		return v
 	}
 	return def
+}
+
+func splitComma(s string) []string {
+	var out []string
+	for _, p := range strings.Split(s, ",") {
+		if t := strings.TrimSpace(p); t != "" {
+			out = append(out, t)
+		}
+	}
+	return out
+}
+
+// gatewayInstaller implements adminapi.ConnectorInstaller by fetching a manifest
+// from the Connector Catalog and delegating to lifecycle.Manager.Install.
+type gatewayInstaller struct {
+	mgr       *lifecycle.Manager
+	client    catalog.Client
+	verifier  catalog.Verifier
+	allowlist []string
+	gwVersion string
+}
+
+func (gi *gatewayInstaller) Install(ctx context.Context, name string) error {
+	m, err := gi.client.Fetch(ctx, name)
+	if err != nil {
+		return err
+	}
+	return gi.mgr.Install(ctx, m, gi.verifier, gi.allowlist, gi.gwVersion)
 }

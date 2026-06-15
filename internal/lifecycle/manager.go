@@ -197,12 +197,17 @@ func (m *Manager) Watch(ctx context.Context, interval time.Duration) {
 }
 
 func (m *Manager) create(ctx context.Context, spec ConnectorSpec) (string, error) {
+	hc := &container.HostConfig{}
+	for _, mount := range spec.Permissions.Mounts {
+		hc.Binds = append(hc.Binds, mount+":"+mount+":ro")
+	}
+
 	resp, err := m.docker.ContainerCreate(ctx,
 		&container.Config{
 			Image: spec.Image,
 			Env:   spec.Env,
 		},
-		&container.HostConfig{},
+		hc,
 		nil, nil,
 		"nexus-"+spec.ID,
 	)
