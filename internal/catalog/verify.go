@@ -12,15 +12,28 @@ type Verifier interface {
 }
 
 // CosignVerifier calls the cosign CLI to verify the image signature.
-// KeyPath is the path to a cosign public key; leave empty for keyless verification.
+//
+// Key-based:    set KeyPath to a cosign public key file.
+// Keyless OIDC: leave KeyPath empty and set Identity + OIDCIssuer
+//               (e.g., Identity = GitHub Actions workflow URL,
+//                       OIDCIssuer = "https://token.actions.githubusercontent.com").
 type CosignVerifier struct {
-	KeyPath string
+	KeyPath    string // path to cosign public key; empty = keyless
+	Identity   string // expected certificate identity (keyless only)
+	OIDCIssuer string // expected OIDC issuer (keyless only)
 }
 
 func (v CosignVerifier) Verify(ctx context.Context, imageRef string) error {
 	args := []string{"verify"}
 	if v.KeyPath != "" {
 		args = append(args, "--key", v.KeyPath)
+	} else {
+		if v.Identity != "" {
+			args = append(args, "--certificate-identity", v.Identity)
+		}
+		if v.OIDCIssuer != "" {
+			args = append(args, "--certificate-oidc-issuer", v.OIDCIssuer)
+		}
 	}
 	args = append(args, imageRef)
 	out, err := exec.CommandContext(ctx, "cosign", args...).CombinedOutput()
