@@ -127,16 +127,22 @@ with the proven per-protocol OSS stacks underneath: **Eclipse Milo** (OPC-UA),
 ## Quickstart
 
 ```bash
-# Full stack: NATS + mock Building OS + gateway + Keycloak + Admin UI
+# 1. Full stack: NATS + mock Building OS + gateway + Keycloak + Admin UI
 docker compose up --build
+
+# 2. Verify healthy (all services should reach "healthy" within ~60 s)
+docker compose ps
 ```
 
-- Admin UI: http://localhost:3000 (Keycloak realm `nexus-gateway`; users
-  `operator`/`operator`, `viewer`/`viewer`)
-- Gateway Admin API: http://localhost:8080 (`/health`, `/metrics`, `/connectors`)
-- Keycloak: http://localhost:8090
+| Endpoint | URL | Notes |
+|----------|-----|-------|
+| Admin UI | http://localhost:13000 | Keycloak realm `nexus-gateway`; users `operator`/`operator`, `viewer`/`viewer` |
+| Gateway Admin API | http://localhost:18080 | `/health`, `/metrics`, `/connectors` |
+| Keycloak | http://localhost:18090 | Admin: `admin`/`admin` |
+| mock Building OS (gRPC) | `localhost:15051` | `GatewayIngressService` stub for dev |
+| NATS | `localhost:14222` | NATS client port; monitoring at `:18222` |
 
-Run the gateway binary directly:
+Run the gateway binary directly (no Docker):
 
 ```bash
 go run ./cmd/gateway --dev-sim   # in-process sim connector for a no-equipment smoke run
@@ -149,13 +155,24 @@ go run ./cmd/gateway --dev-sim   # in-process sim connector for a no-equipment s
 | `--nats` | `NATS_URL` | `nats://localhost:4222` | NATS URL |
 | `--bos` | `BOS_ADDR` | `localhost:50051` | Building OS gRPC address |
 | `--gateway-id` | `GATEWAY_ID` | `gw-001` | Gateway identity (also the mTLS cert CN/SAN) |
-| `--bos-insecure` | `BOS_INSECURE` | `false` | Plaintext h2c to Building OS — dev/CI only (ADR-0007) |
-| `--bos-ca` / `--bos-cert` / `--bos-key` | `BOS_CA_FILE` / … | – | TLS/mTLS material |
+| `--admin-addr` | `ADMIN_ADDR` | `:8080` | Admin API listen address |
+| `--admin-jwks-url` | `KEYCLOAK_JWKS_URL` | – | Keycloak JWKS URL (empty = auth disabled) |
+| `--admin-audience` | `KEYCLOAK_AUDIENCE` | `account` | Expected JWT audience |
+| `--admin-issuer` | `KEYCLOAK_ISSUER` | – | Expected JWT issuer |
+| `--point-list` | `POINT_LIST_FILE` | `fixtures/point_list.json` | Bootstrap fixture (used when no provisioning source) |
+| `--point-list-persist` | `POINT_LIST_PERSIST` | `data/point_list.json` | Path to persist the synced Point List across restarts |
 | `--provisioning-url` | `PROVISIONING_URL` | – | Building OS Point List provisioning API |
 | `--provisioning-file` | `PROVISIONING_FILE` | – | File/CSV-backed Point List (dev/E2E) |
+| `--provisioning-connector-id` | `PROVISIONING_CONNECTOR_ID` | `bacnet-01` | Connector ID stamped on CSV-loaded entries |
 | `--point-sync-interval` | – | `10m` | Point List poll interval after initial sync |
-| `--admin-jwks-url` | `KEYCLOAK_JWKS_URL` | – | Keycloak JWKS (empty = Admin API auth disabled) |
-| `--dev-sim` | `DEV_SIM` | `false` | Run the in-process sim connector (non-production) |
+| `--sf-db` | `SF_DB` | `data/storeforward.db` | Store-and-Forward SQLite database path |
+| `--sf-cap` | – | `100000` | Store-and-Forward ring buffer capacity (frames) |
+| `--bos-insecure` | `BOS_INSECURE` | `false` | Plaintext h2c to Building OS — dev/CI only (ADR-0007) |
+| `--bos-ca` | `BOS_CA_FILE` | – | PEM CA bundle to verify the Building OS server cert |
+| `--bos-cert` | `BOS_CERT_FILE` | – | Client certificate for mTLS to Building OS |
+| `--bos-key` | `BOS_KEY_FILE` | – | Client private key for mTLS to Building OS |
+| `--bos-servername` | `BOS_SERVER_NAME` | – | Override server name in Building OS cert verification |
+| `--dev-sim` | `DEV_SIM` | `false` | Run the in-process sim connector (non-production, ADR-0001) |
 
 ### Simulator integration (no equipment)
 
@@ -164,8 +181,31 @@ standard-compliant BACnet/IP and OPC-UA simulators. See
 [`fixtures/integration/`](fixtures/integration/README.md):
 
 ```bash
+# OPC-UA E2E (CI-friendly, plain TCP)
 docker compose -f docker-compose.yml -f docker-compose.integration.yml --profile opcua up
+
+# BACnet E2E (requires host networking for Who-Is/I-Am broadcast)
+docker compose -f docker-compose.yml -f docker-compose.integration.yml --profile bacnet up
 ```
+
+### Running with a live Building OS
+
+Point the gateway at the real Building OS stack instead of mock-bos:
+
+```bash
+# Building OS OSS stack (see github.com/takashikasuya/gutp-building-os-oss)
+docker compose -f /path/to/gutp-building-os-oss/docker-compose.oss.yaml up -d
+
+# Start gateway with BOS ingress + egress addresses and the SoS Point List
+GATEWAY_ID=GW-SOS-001 \
+BOS_ADDR=localhost:5051 \
+BOS_INSECURE=true \
+PROVISIONING_FILE=/path/to/mvp-pointlist.csv \
+go run ./cmd/gateway
+```
+
+For the full E2E test suite against Building OS, see
+**[`docs/e2e-test-overview.md`](docs/e2e-test-overview.md)**.
 
 ---
 
