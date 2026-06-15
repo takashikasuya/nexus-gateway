@@ -20,7 +20,20 @@ export type ConnectorHealth = {
 export type ConnectorItem = {
   id: string;
   image: string;
+  prev_image?: string;
+  container_id?: string;
   running: boolean;
+};
+
+export type CatalogEntry = {
+  name: string;
+  version: string;
+  image: string;
+  digest: string;
+  min_gateway_version: string;
+  signature_required: boolean;
+  network?: string[];
+  mounts?: string[];
 };
 
 async function adminFetch(path: string, token: string | undefined, init?: RequestInit) {
@@ -38,6 +51,11 @@ export async function getHealth(token?: string): Promise<GatewayHealth> {
 
 export async function listConnectors(token: string): Promise<ConnectorItem[]> {
   const res = await adminFetch("/connectors", token);
+  return res.json();
+}
+
+export async function listCatalog(token: string): Promise<CatalogEntry[]> {
+  const res = await adminFetch("/catalog", token);
   return res.json();
 }
 

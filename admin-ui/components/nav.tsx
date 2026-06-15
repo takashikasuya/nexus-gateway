@@ -13,6 +13,7 @@ export function Nav() {
       <span style={{ fontWeight: 700, marginRight: "1rem" }}>nexus-gateway</span>
       <Link href="/dashboard" style={{ fontWeight: path === "/dashboard" ? 700 : 400 }}>Dashboard</Link>
       <Link href="/connectors" style={{ fontWeight: path === "/connectors" ? 700 : 400 }}>Connectors</Link>
+      <Link href="/catalog" style={{ fontWeight: path === "/catalog" ? 700 : 400 }}>Catalog</Link>
       <span style={{ marginLeft: "auto", fontSize: "0.875rem", color: "#6b7280" }}>{session?.user?.email}</span>
       <button onClick={() => signOut()} style={{ cursor: "pointer" }}>Logout</button>
     </nav>

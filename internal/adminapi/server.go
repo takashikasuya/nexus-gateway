@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strings"
 
+	"nexus-gateway/internal/catalog"
 	"nexus-gateway/internal/lifecycle"
 	"nexus-gateway/internal/metrics"
 )
@@ -23,12 +24,20 @@ type ConnectorManager interface {
 	Stop(ctx context.Context, id string) error
 	Restart(ctx context.Context, id string) error
 	Upgrade(ctx context.Context, id, newImage string) error
+	Rollback(ctx context.Context, id string) error
 }
 
 // ConnectorInstaller installs a connector from the Connector Catalog (ADR-0006).
 // A nil Installer disables the /connectors/{name}/install endpoint.
 type ConnectorInstaller interface {
 	Install(ctx context.Context, name string) error
+}
+
+// CatalogSource provides catalog browsing and catalog-driven update operations (ADR-0006).
+// A nil CatalogSource disables the /catalog and /connectors/{id}/update endpoints.
+type CatalogSource interface {
+	ListAll(ctx context.Context) ([]catalog.Manifest, error)
+	Update(ctx context.Context, connectorID string) error
 }
 
 // HealthSnapshotter produces gateway health snapshots.
@@ -42,6 +51,7 @@ type Server struct {
 	auth      *JWTMiddleware
 	mgr       ConnectorManager
 	installer ConnectorInstaller // nil if catalog is not configured
+	catalog   CatalogSource      // nil if catalog browsing/update is not configured
 	monitor   HealthSnapshotter
 	shutdown  context.CancelFunc // stops the JWKS cache refresh goroutine
 }
@@ -50,7 +60,16 @@ type Server struct {
 // and issuer are enforced on every token. Call Shutdown() to stop background goroutines.
 func New(mgr ConnectorManager, monitor HealthSnapshotter, jwksURL, audience, issuer string) *Server {
 	ctx, cancel := context.WithCancel(context.Background())
-	s := newServer(mgr, nil, monitor, newURLKeyFetcher(ctx, jwksURL), audience, issuer)
+	s := newServer(mgr, nil, nil, monitor, newURLKeyFetcher(ctx, jwksURL), audience, issuer)
+	s.shutdown = cancel
+	return s
+}
+
+// NewWithCatalog creates a JWT-authenticated Server with a Catalog installer and
+// source wired in. Use this in production when both auth and catalog are configured.
+func NewWithCatalog(mgr ConnectorManager, installer ConnectorInstaller, catalogSrc CatalogSource, monitor HealthSnapshotter, jwksURL, audience, issuer string) *Server {
+	ctx, cancel := context.WithCancel(context.Background())
+	s := newServer(mgr, installer, catalogSrc, monitor, newURLKeyFetcher(ctx, jwksURL), audience, issuer)
 	s.shutdown = cancel
 	return s
 }
@@ -60,14 +79,20 @@ func NewNoAuth(mgr ConnectorManager, monitor HealthSnapshotter) *Server {
 	return NewNoAuthWithInstaller(mgr, nil, monitor)
 }
 
-// NewNoAuthWithInstaller creates a Server with auth disabled and a Catalog installer.
-func NewNoAuthWithInstaller(mgr ConnectorManager, installer ConnectorInstaller, monitor HealthSnapshotter) *Server {
+// NewNoAuthWithInstaller creates a Server with auth disabled, a Catalog installer,
+// and an optional CatalogSource for browsing and updates.
+func NewNoAuthWithInstaller(mgr ConnectorManager, installer ConnectorInstaller, monitor HealthSnapshotter, catalogSrc ...CatalogSource) *Server {
+	var src CatalogSource
+	if len(catalogSrc) > 0 {
+		src = catalogSrc[0]
+	}
 	noAuth := &JWTMiddleware{}
 	s := &Server{
 		mux:       http.NewServeMux(),
 		auth:      noAuth,
 		mgr:       mgr,
 		installer: installer,
+		catalog:   src,
 		monitor:   monitor,
 	}
 	s.registerRoutes(false)
@@ -81,12 +106,13 @@ func (s *Server) Shutdown() {
 	}
 }
 
-func newServer(mgr ConnectorManager, installer ConnectorInstaller, monitor HealthSnapshotter, keys KeyFetcher, audience, issuer string) *Server {
+func newServer(mgr ConnectorManager, installer ConnectorInstaller, catalogSrc CatalogSource, monitor HealthSnapshotter, keys KeyFetcher, audience, issuer string) *Server {
 	s := &Server{
 		mux:       http.NewServeMux(),
 		auth:      &JWTMiddleware{keys: keys, audience: audience, issuer: issuer},
 		mgr:       mgr,
 		installer: installer,
+		catalog:   catalogSrc,
 		monitor:   monitor,
 	}
 	s.registerRoutes(true)
@@ -107,6 +133,9 @@ func (s *Server) registerRoutes(authenticated bool) {
 	if s.installer != nil {
 		s.mux.HandleFunc("POST /connectors/{name}/install", require(RoleOperator, s.handleInstall))
 	}
+	if s.catalog != nil {
+		s.mux.HandleFunc("GET /catalog", require(RoleViewer, s.handleListCatalog))
+	}
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -118,16 +147,24 @@ func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {
 }
 
 type connectorItem struct {
-	ID      string `json:"id"`
-	Image   string `json:"image"`
-	Running bool   `json:"running"`
+	ID          string `json:"id"`
+	Image       string `json:"image"`
+	PrevImage   string `json:"prev_image,omitempty"`
+	ContainerID string `json:"container_id,omitempty"`
+	Running     bool   `json:"running"`
 }
 
 func (s *Server) handleListConnectors(w http.ResponseWriter, r *http.Request) {
 	h := s.monitor.Snapshot(r.Context())
 	items := make([]connectorItem, 0, len(h.Connectors))
 	for _, c := range h.Connectors {
-		items = append(items, connectorItem{ID: c.ID, Image: c.Image, Running: c.Running})
+		items = append(items, connectorItem{
+			ID:          c.ID,
+			Image:       c.Image,
+			PrevImage:   c.PrevImage,
+			ContainerID: c.ContainerID,
+			Running:     c.Running,
+		})
 	}
 	writeJSON(w, items)
 }
@@ -151,6 +188,14 @@ func (s *Server) handleAction(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		err = s.mgr.Upgrade(r.Context(), id, newImage)
+	case "rollback":
+		err = s.mgr.Rollback(r.Context(), id)
+	case "update":
+		if s.catalog == nil {
+			http.Error(w, "catalog not configured", http.StatusNotImplemented)
+			return
+		}
+		err = s.catalog.Update(r.Context(), id)
 	default:
 		http.Error(w, "unknown action", http.StatusBadRequest)
 		return
@@ -174,6 +219,40 @@ func (s *Server) handleInstall(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)
+}
+
+// catalogEntry is the public representation of a catalog manifest.
+type catalogEntry struct {
+	Name              string   `json:"name"`
+	Version           string   `json:"version"`
+	Image             string   `json:"image"`
+	Digest            string   `json:"digest"`
+	MinGatewayVersion string   `json:"min_gateway_version"`
+	SignatureRequired bool     `json:"signature_required"`
+	Network           []string `json:"network,omitempty"`
+	Mounts            []string `json:"mounts,omitempty"`
+}
+
+func (s *Server) handleListCatalog(w http.ResponseWriter, r *http.Request) {
+	manifests, err := s.catalog.ListAll(r.Context())
+	if err != nil {
+		http.Error(w, fmt.Sprintf("catalog: %v", err), http.StatusBadGateway)
+		return
+	}
+	entries := make([]catalogEntry, len(manifests))
+	for i, m := range manifests {
+		entries[i] = catalogEntry{
+			Name:              m.Name,
+			Version:           m.Version,
+			Image:             m.Image,
+			Digest:            m.Digest,
+			MinGatewayVersion: m.MinGatewayVersion,
+			SignatureRequired: m.SignatureRequired,
+			Network:           m.Permissions.Network,
+			Mounts:            m.Permissions.Mounts,
+		}
+	}
+	writeJSON(w, entries)
 }
 
 func (s *Server) handleMetrics(w http.ResponseWriter, r *http.Request) {

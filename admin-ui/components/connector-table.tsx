@@ -30,7 +30,10 @@ export function ConnectorTable({ data, isOperator, onRefresh }: Props) {
           ? `/api/gateway/connectors/${encodeURIComponent(id)}/${action}?image=${encodeURIComponent(image)}`
           : `/api/gateway/connectors/${encodeURIComponent(id)}/${action}`;
         const res = await fetch(url, { method: "POST" });
-        if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(text || `${res.status} ${res.statusText}`);
+        }
         onRefresh();
       } catch (e) {
         setError(String(e));
@@ -44,19 +47,22 @@ export function ConnectorTable({ data, isOperator, onRefresh }: Props) {
   const columns = useMemo(() => [
     col.accessor("id", { header: "ID" }),
     col.accessor("image", {
-      header: "Image / Version",
+      header: "Image / Digest",
       cell: (info) => {
         const img = info.getValue();
         if (!img) return "—";
-        // Extract the tag from the part after the last '/'; skip digest refs.
-        const afterSlash = img.slice(img.lastIndexOf("/") + 1);
-        const tag = !afterSlash.includes("@") && afterSlash.includes(":")
-          ? afterSlash.slice(afterSlash.lastIndexOf(":") + 1)
-          : "";
+        const atIdx = img.indexOf("@");
+        const digest = atIdx >= 0 ? img.slice(atIdx + 1) : null;
+        const base = atIdx >= 0 ? img.slice(0, atIdx) : img;
+        const short = base.slice(base.lastIndexOf("/") + 1);
         return (
           <span title={img}>
-            {img.length > 40 ? `…${img.slice(-37)}` : img}
-            {tag && <span style={{ marginLeft: "0.25rem", color: "#6b7280", fontSize: "0.8em" }}>{tag}</span>}
+            <span>{short}</span>
+            {digest && (
+              <span style={{ marginLeft: "0.4rem", fontFamily: "monospace", fontSize: "0.75em", color: "#6b7280" }}>
+                {shortDigest(digest)}
+              </span>
+            )}
           </span>
         );
       },
@@ -73,15 +79,14 @@ export function ConnectorTable({ data, isOperator, onRefresh }: Props) {
       id: "actions",
       header: "Actions",
       cell: (info) => {
-        const id = info.row.original.id;
-        const running = info.row.original.running;
+        const { id, running, prev_image } = info.row.original;
         const isBusy = busy?.startsWith(`${id}:`);
 
         if (!isOperator) {
           return <span style={{ color: "#9ca3af", fontSize: "0.875rem" }}>viewer</span>;
         }
         return (
-          <span style={{ display: "flex", gap: "0.5rem" }}>
+          <span style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>
             {running ? (
               <>
                 <ActionBtn label="Stop" disabled={!!isBusy} onClick={() => doAction(id, "stop")} />
@@ -98,6 +103,18 @@ export function ConnectorTable({ data, isOperator, onRefresh }: Props) {
                 if (image) doAction(id, "upgrade", image);
               }}
             />
+            {prev_image && (
+              <ActionBtn
+                label="Rollback"
+                disabled={!!isBusy}
+                onClick={() => {
+                  if (window.confirm(`Roll back ${id} to:\n${prev_image}\n\nProceed?`)) {
+                    doAction(id, "rollback");
+                  }
+                }}
+                variant="danger"
+              />
+            )}
           </span>
         );
       },
@@ -146,7 +163,21 @@ export function ConnectorTable({ data, isOperator, onRefresh }: Props) {
   );
 }
 
-function ActionBtn({ label, disabled, onClick }: { label: string; disabled: boolean; onClick: () => void }) {
+function shortDigest(d: string): string {
+  if (!d) return "—";
+  const hex = d.startsWith("sha256:") ? d.slice(7) : d.includes(":") ? d.slice(d.indexOf(":") + 1) : d;
+  return hex.length >= 12 ? `${hex.slice(0, 12)}…` : hex || "—";
+}
+
+type Variant = "default" | "danger";
+
+function ActionBtn({
+  label, disabled, onClick, variant = "default",
+}: {
+  label: string; disabled: boolean; onClick: () => void; variant?: Variant;
+}) {
+  const borderColor = variant === "danger" ? "#dc2626" : "#d1d5db";
+  const color = variant === "danger" ? "#dc2626" : undefined;
   return (
     <button
       disabled={disabled}
@@ -156,9 +187,10 @@ function ActionBtn({ label, disabled, onClick }: { label: string; disabled: bool
         fontSize: "0.8rem",
         cursor: disabled ? "not-allowed" : "pointer",
         opacity: disabled ? 0.5 : 1,
-        border: "1px solid #d1d5db",
+        border: `1px solid ${borderColor}`,
         borderRadius: "0.25rem",
         background: "#fff",
+        color,
       }}
     >
       {label}

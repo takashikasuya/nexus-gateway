@@ -19,6 +19,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"nexus-gateway/internal/adminapi"
+	"nexus-gateway/internal/catalog"
 	"nexus-gateway/internal/lifecycle"
 )
 
@@ -135,6 +136,34 @@ func (m *mockManager) Restart(_ context.Context, id string) error {
 }
 func (m *mockManager) Upgrade(_ context.Context, id, _ string) error {
 	m.lastAction, m.lastID = "upgrade", id
+	return m.err
+}
+func (m *mockManager) Rollback(_ context.Context, id string) error {
+	m.lastAction, m.lastID = "rollback", id
+	return m.err
+}
+
+type mockCatalogSource struct {
+	manifests  []catalog.Manifest
+	lastUpdate string
+	err        error
+}
+
+func (m *mockCatalogSource) ListAll(_ context.Context) ([]catalog.Manifest, error) {
+	return m.manifests, m.err
+}
+func (m *mockCatalogSource) Update(_ context.Context, id string) error {
+	m.lastUpdate = id
+	return m.err
+}
+
+type mockInstaller struct {
+	lastInstall string
+	err         error
+}
+
+func (m *mockInstaller) Install(_ context.Context, name string) error {
+	m.lastInstall = name
 	return m.err
 }
 
@@ -271,6 +300,79 @@ func TestAction_UnknownAction_Returns400(t *testing.T) {
 	tok := f.signToken(t, []string{adminapi.RoleOperator}, time.Now().Add(1*time.Hour))
 	resp := f.post("/connectors/mqtt-01/explode", tok)
 	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+}
+
+// ── catalog tests ────────────────────────────────────────────────────────────
+
+func TestCatalog_ListAll_NoAuth(t *testing.T) {
+	src := &mockCatalogSource{
+		manifests: []catalog.Manifest{
+			{Name: "sim-connector", Version: "1.0.0", Image: "ghcr.io/org/sim-connector:v1.0.0", Digest: "sha256:abc123"},
+		},
+	}
+	srv := adminapi.NewNoAuthWithInstaller(&mockManager{}, &mockInstaller{}, &mockMonitor{}, src)
+	apiSrv := httptest.NewServer(srv)
+	t.Cleanup(apiSrv.Close)
+
+	resp, err := http.Get(apiSrv.URL + "/catalog")
+	require.NoError(t, err)
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+	var entries []map[string]any
+	require.NoError(t, json.NewDecoder(resp.Body).Decode(&entries))
+	require.Len(t, entries, 1)
+	assert.Equal(t, "sim-connector", entries[0]["name"])
+	assert.Equal(t, "1.0.0", entries[0]["version"])
+	assert.Equal(t, "sha256:abc123", entries[0]["digest"])
+}
+
+func TestCatalog_NilSource_Returns404(t *testing.T) {
+	srv := adminapi.NewNoAuthWithInstaller(&mockManager{}, nil, &mockMonitor{})
+	apiSrv := httptest.NewServer(srv)
+	t.Cleanup(apiSrv.Close)
+
+	resp, _ := http.Get(apiSrv.URL + "/catalog")
+	assert.Equal(t, http.StatusNotFound, resp.StatusCode)
+}
+
+func TestCatalog_UpdateAction_CallsCatalogSource(t *testing.T) {
+	src := &mockCatalogSource{}
+	srv := adminapi.NewNoAuthWithInstaller(&mockManager{}, &mockInstaller{}, &mockMonitor{}, src)
+	apiSrv := httptest.NewServer(srv)
+	t.Cleanup(apiSrv.Close)
+
+	req, _ := http.NewRequestWithContext(context.Background(), http.MethodPost, apiSrv.URL+"/connectors/sim-connector/update", nil)
+	resp, err := http.DefaultClient.Do(req)
+	require.NoError(t, err)
+	assert.Equal(t, http.StatusNoContent, resp.StatusCode)
+	assert.Equal(t, "sim-connector", src.lastUpdate)
+}
+
+func TestCatalog_JWTPath_ListAll(t *testing.T) {
+	f := newFixture(t)
+	src := &mockCatalogSource{
+		manifests: []catalog.Manifest{
+			{Name: "bacnet-connector", Version: "2.0.0", Image: "ghcr.io/org/bacnet:v2.0.0", Digest: "sha256:deadbeef"},
+		},
+	}
+	mgr := &mockManager{}
+	mon := &mockMonitor{}
+	srv := adminapi.NewWithCatalog(mgr, &mockInstaller{}, src, mon, f.jwksServer.URL, "nexus-gateway", "test-issuer")
+	t.Cleanup(srv.Shutdown)
+	apiSrv := httptest.NewServer(srv)
+	t.Cleanup(apiSrv.Close)
+
+	tok := f.signToken(t, []string{adminapi.RoleViewer}, time.Now().Add(1*time.Hour))
+	req, _ := http.NewRequestWithContext(context.Background(), http.MethodGet, apiSrv.URL+"/catalog", nil)
+	req.Header.Set("Authorization", "Bearer "+tok)
+	resp, err := http.DefaultClient.Do(req)
+	require.NoError(t, err)
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+	var entries []map[string]any
+	require.NoError(t, json.NewDecoder(resp.Body).Decode(&entries))
+	require.Len(t, entries, 1)
+	assert.Equal(t, "bacnet-connector", entries[0]["name"])
 }
 
 func TestMetrics_NoAuthRequired(t *testing.T) {

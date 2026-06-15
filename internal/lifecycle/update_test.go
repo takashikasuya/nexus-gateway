@@ -283,3 +283,7 @@ type staticCatalogClient struct {
 func (c *staticCatalogClient) Fetch(_ context.Context, _ string) (catalog.Manifest, error) {
 	return c.manifest, nil
 }
+
+func (c *staticCatalogClient) List(_ context.Context) ([]catalog.Manifest, error) {
+	return []catalog.Manifest{c.manifest}, nil
+}
