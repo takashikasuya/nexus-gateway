@@ -60,6 +60,7 @@ func main() {
 	catalogFile := flag.String("catalog-file", envOrDefault("CATALOG_FILE", ""), "File-backed Connector Catalog (JSON []Manifest); enables POST /connectors/{name}/install")
 	catalogURL := flag.String("catalog-url", envOrDefault("CATALOG_URL", ""), "Remote Connector Catalog base URL; overrides --catalog-file when set")
 	catalogAllowlist := flag.String("catalog-allowlist", envOrDefault("CATALOG_ALLOWLIST", "ghcr.io"), "Comma-separated list of allowed OCI registries (ADR-0006)")
+	catalogPollInterval := flag.Duration("catalog-poll-interval", 10*time.Minute, "How often the Updater polls the catalog for new connector versions (ADR-0006)")
 	flag.Parse()
 
 	// Build the gRPC transport credentials for both Building OS links (ADR-0007).
@@ -228,14 +229,19 @@ func main() {
 		}
 		if catalogClient != nil {
 			allowlist := splitComma(*catalogAllowlist)
+			verifier := catalog.Verifier(catalog.NoopVerifier{}) // replace with CosignVerifier in production
 			catalogInstaller = &gatewayInstaller{
 				mgr:       connMgr,
 				client:    catalogClient,
-				verifier:  catalog.NoopVerifier{}, // replace with CosignVerifier in production
+				verifier:  verifier,
 				allowlist: allowlist,
 				gwVersion: "0.1.0",
 			}
-			slog.Info("catalog: connector install enabled", "allowlist", allowlist)
+			// Start the background update loop (ADR-0006 poll-only model).
+			updater := lifecycle.NewUpdater(connMgr, connRegistry, catalogClient, verifier, allowlist, "0.1.0",
+				lifecycle.UpdaterConfig{SoakWindow: 30 * time.Second})
+			go updater.Run(ctx, *catalogPollInterval)
+			slog.Info("catalog: connector install + update enabled", "allowlist", allowlist, "poll_interval", *catalogPollInterval)
 		}
 	}
 
