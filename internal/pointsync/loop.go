@@ -23,11 +23,19 @@ type Loop struct {
 	resolver   *pointlist.SyncedResolver
 	cfg        Config
 	revalidate <-chan struct{} // optional push signals (EgressDown.point_list_update)
+	ready      chan struct{}   // closed when first sync attempt completes
 }
 
 // New creates a Loop.
 func New(client provisioning.Client, resolver *pointlist.SyncedResolver, cfg Config) *Loop {
-	return &Loop{client: client, resolver: resolver, cfg: cfg}
+	return &Loop{client: client, resolver: resolver, cfg: cfg, ready: make(chan struct{})}
+}
+
+// Ready returns a channel that is closed after the first sync attempt completes,
+// whether it succeeded or not. Callers can select on this instead of polling
+// resolver.Snapshot(), and combine with time.After for a startup timeout.
+func (l *Loop) Ready() <-chan struct{} {
+	return l.ready
 }
 
 // WithRevalidate attaches a channel whose sends trigger an immediate re-sync
@@ -48,8 +56,9 @@ func (l *Loop) Run(ctx context.Context) {
 
 	state := &syncState{}
 
-	// Force immediate first sync.
+	// Force immediate first sync; signal Ready() after it completes (success or error).
 	l.sync(ctx, state)
+	close(l.ready)
 
 	tick := time.NewTicker(l.cfg.Interval)
 	defer tick.Stop()

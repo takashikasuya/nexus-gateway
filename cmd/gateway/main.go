@@ -141,14 +141,10 @@ func main() {
 			pointsync.Config{Interval: *syncInterval, PersistPath: *plPersist},
 		).WithRevalidate(revalidatePL)
 		go syncLoop.Run(ctx)
-		// Wait for initial snapshot before starting the pipeline
-		waitCtx, waitCancel := context.WithTimeout(ctx, 30*time.Second)
-		defer waitCancel()
-		for {
-			if len(resolver.Snapshot()) > 0 || waitCtx.Err() != nil {
-				break
-			}
-			time.Sleep(100 * time.Millisecond)
+		// Wait for the first sync to complete (Ready() closes on success or failure).
+		select {
+		case <-syncLoop.Ready():
+		case <-time.After(30 * time.Second):
 		}
 		if len(resolver.Snapshot()) == 0 {
 			// Proceeding with an empty resolver means every Common Event resolves to a

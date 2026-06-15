@@ -2,6 +2,7 @@ package pointsync_test
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
@@ -131,6 +132,65 @@ func TestLoop_AppliesDiff(t *testing.T) {
 	pid, ok = resolver.Resolve("c1", "l1")
 	require.True(t, ok, "changed entry l1 must still be in resolver")
 	assert.Equal(t, "p1-renamed", pid)
+}
+
+// TestLoop_ReadyCloses_AfterFirstSync verifies that Ready() closes as soon as the
+// first Fetch completes successfully, so callers can wait on a channel instead of
+// polling resolver.Snapshot().
+func TestLoop_ReadyCloses_AfterFirstSync(t *testing.T) {
+	mock := provisioning.NewMock([]pointlist.Entry{
+		{ConnectorID: "c1", Protocol: "sim", LocalID: "l1", PointID: "p1"},
+	})
+	resolver := pointlist.NewSynced(nil)
+	cfg := pointsync.Config{Interval: time.Minute} // long interval; only first sync matters
+
+	loop := pointsync.New(mock, resolver, cfg)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	go loop.Run(ctx)
+
+	select {
+	case <-loop.Ready():
+		// success
+	case <-time.After(3 * time.Second):
+		t.Fatal("Ready() did not close within 3s after first sync")
+	}
+
+	pid, ok := resolver.Resolve("c1", "l1")
+	require.True(t, ok, "resolver must be populated when Ready() closes")
+	assert.Equal(t, "p1", pid)
+}
+
+// TestLoop_ReadyCloses_AfterFirstSync_Error verifies that Ready() closes even when
+// the first Fetch returns an error, so callers can detect the timeout via time.After
+// rather than waiting indefinitely.
+func TestLoop_ReadyCloses_AfterFirstSync_Error(t *testing.T) {
+	errMock := &alwaysErrorMock{}
+	resolver := pointlist.NewSynced(nil)
+	cfg := pointsync.Config{Interval: time.Minute}
+
+	loop := pointsync.New(errMock, resolver, cfg)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	go loop.Run(ctx)
+
+	select {
+	case <-loop.Ready():
+		// closed fast — resolver is empty but caller decides what to do
+	case <-time.After(3 * time.Second):
+		t.Fatal("Ready() must close even after a failed first sync")
+	}
+
+	assert.Empty(t, resolver.Snapshot(), "resolver must be empty after failed first sync")
+}
+
+// alwaysErrorMock is a provisioning.Client that always returns an error.
+type alwaysErrorMock struct{}
+
+func (m *alwaysErrorMock) Fetch(_ context.Context, _ string) (*provisioning.FetchResult, error) {
+	return nil, fmt.Errorf("network unavailable")
 }
 
 // TestLoop_PersistsAndLoadsOnRestart verifies that synced state survives restart.
