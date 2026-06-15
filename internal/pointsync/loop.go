@@ -106,10 +106,13 @@ func (l *Loop) sync(ctx context.Context, s *syncState) {
 
 // applyDiff merges added/removed/changed into the current entry slice.
 func applyDiff(current []pointlist.Entry, r *provisioning.FetchResult) []pointlist.Entry {
-	// Index by pointID for O(1) lookup.
+	// Index by pointID for O(1) lookup. Also build a secondary index by
+	// (connectorID, localID) so we can remove stale entries when a PointID is renamed.
 	byID := make(map[string]pointlist.Entry, len(current))
+	byLocal := make(map[string]string, len(current)) // connectorID+"\x00"+localID → pointID
 	for _, e := range current {
 		byID[e.PointID] = e
+		byLocal[e.ConnectorID+"\x00"+e.LocalID] = e.PointID
 	}
 	for _, pid := range r.Removed {
 		delete(byID, pid)
@@ -118,6 +121,12 @@ func applyDiff(current []pointlist.Entry, r *provisioning.FetchResult) []pointli
 		byID[e.PointID] = e
 	}
 	for _, e := range r.Changed {
+		// If the PointID was renamed, delete the old entry so the resolver does not
+		// see two entries for the same (connectorID, localID) with different pointIDs
+		// (map iteration order is non-deterministic → flaky Resolve results).
+		if oldPID := byLocal[e.ConnectorID+"\x00"+e.LocalID]; oldPID != "" && oldPID != e.PointID {
+			delete(byID, oldPID)
+		}
 		byID[e.PointID] = e
 	}
 	out := make([]pointlist.Entry, 0, len(byID))
