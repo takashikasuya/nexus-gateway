@@ -68,11 +68,15 @@ func TestE2E_BosControlGate(t *testing.T) {
 //	  go test ./integration/... -run TestE2E_BosEgressDispatch -v -timeout 60s
 //
 // The test skips automatically when E2E_BOS_EGRESS_ADDR is unset.
+//
+// Prerequisites on the Building OS side:
+//   - building-os.gateway-bridge running (port 5052, docker-compose.oss.yaml)
+//   - building-os.api configured with GatewayConnectionTypes__Map__GW-SOS-001=bacnet-sim
 func TestE2E_BosEgressDispatch(t *testing.T) {
 	bosAddr := os.Getenv("E2E_BOS_EGRESS_ADDR")
 	if bosAddr == "" {
-		t.Skip("E2E_BOS_EGRESS_ADDR not set — Building OS GatewayEgressService not yet deployed; " +
-			"in-process dispatch is covered by integration/control_test.go")
+		t.Skip("E2E_BOS_EGRESS_ADDR not set — requires building-os.gateway-bridge:5052 " +
+			"and GatewayConnectionTypes__Map__GW-SOS-001=bacnet-sim on the API server")
 	}
 	apiBase := os.Getenv("E2E_BOS_API_URL")
 	if apiBase == "" {
