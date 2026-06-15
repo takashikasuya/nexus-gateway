@@ -198,11 +198,12 @@ func TestHealth_ContainsGatewayAndConnectors(t *testing.T) {
 // ── mock Docker client ────────────────────────────────────────────────────────
 
 type mockDocker struct {
-	mu             sync.Mutex
-	nextID         string
-	inspectRunning bool
-	callCount      map[string]int
-	pullErr        error
+	mu              sync.Mutex
+	nextID          string
+	inspectRunning  bool
+	lockRunning     bool // when true, ContainerStart does NOT set inspectRunning=true
+	callCount       map[string]int
+	pullErr         error
 }
 
 func newMockDocker(initialID string) *mockDocker {
@@ -221,6 +222,14 @@ func (m *mockDocker) setNextID(id string) {
 func (m *mockDocker) setInspectRunning(v bool) {
 	m.mu.Lock()
 	m.inspectRunning = v
+	m.mu.Unlock()
+}
+
+// setLockRunning prevents ContainerStart from overriding inspectRunning.
+// Use this to simulate a container that starts but immediately crashes.
+func (m *mockDocker) setLockRunning(v bool) {
+	m.mu.Lock()
+	m.lockRunning = v
 	m.mu.Unlock()
 }
 
@@ -245,7 +254,9 @@ func (m *mockDocker) ContainerStart(_ context.Context, _ string, _ container.Sta
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	m.inc("start")
-	m.inspectRunning = true
+	if !m.lockRunning {
+		m.inspectRunning = true
+	}
 	return nil
 }
 

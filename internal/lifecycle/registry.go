@@ -11,7 +11,8 @@ var ErrConnectorNotFound = errors.New("lifecycle: connector not found")
 // ConnectorSpec describes a connector installation.
 type ConnectorSpec struct {
 	ID          string   // unique connector ID, e.g. "mqtt-01"
-	Image       string   // OCI image reference, digest-pinned when installed via catalog
+	Image       string   // current digest-pinned image reference (e.g. "reg/img@sha256:…")
+	PrevImage   string   // previous digest-pinned image, retained for rollback (ADR-0006); "" if none
 	Env         []string // environment variables to inject into the container
 	Permissions ConnectorPermissions
 }
