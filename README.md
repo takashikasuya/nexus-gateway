@@ -197,10 +197,11 @@ cd admin-ui && npm run type-check && npm run build
 CI (`.github/workflows/ci.yml`) runs the Go build/test and the Admin UI
 type-check/build on every PR.
 
-E2E tests (`test/e2e/`, `//go:build e2e`) require a live stack and skip
-without the relevant `E2E_*` env vars. See
-[`docs/evaluation-plan.md`](docs/evaluation-plan.md) for the full experiment
-design (E1–E7) used for the academic evaluation.
+E2E tests in `integration/` require a live stack and skip automatically
+without the relevant `E2E_*` env vars (ADR-0004). See
+**[`docs/e2e-test-overview.md`](docs/e2e-test-overview.md)** for the full
+test landscape — in-process CI tests, live connector stack tests, and
+Building OS integration tests (#43–#46).
 
 ---
 
