@@ -198,12 +198,13 @@ func TestHealth_ContainsGatewayAndConnectors(t *testing.T) {
 // ── mock Docker client ────────────────────────────────────────────────────────
 
 type mockDocker struct {
-	mu              sync.Mutex
-	nextID          string
-	inspectRunning  bool
-	lockRunning     bool // when true, ContainerStart does NOT set inspectRunning=true
-	callCount       map[string]int
-	pullErr         error
+	mu             sync.Mutex
+	nextID         string
+	inspectRunning bool
+	lockRunning    bool // when true, ContainerStart does NOT set inspectRunning=true
+	callCount      map[string]int
+	pullErr        error
+	logLines       []string
 }
 
 func newMockDocker(initialID string) *mockDocker {
@@ -293,4 +294,47 @@ func (m *mockDocker) ImagePull(_ context.Context, _ string, _ image.PullOptions)
 		return nil, m.pullErr
 	}
 	return io.NopCloser(strings.NewReader("")), nil
+}
+
+func (m *mockDocker) ContainerLogs(_ context.Context, _ string, _ container.LogsOptions) (io.ReadCloser, error) {
+	m.mu.Lock()
+	lines := m.logLines
+	m.mu.Unlock()
+	// Docker multiplexed stream: each frame is an 8-byte header + payload.
+	// Header: [stream_type(1), 0,0,0, size_big_endian(4)]
+	var buf strings.Builder
+	for _, line := range lines {
+		payload := line + "\n"
+		size := len(payload)
+		buf.WriteByte(1) // stdout
+		buf.Write([]byte{0, 0, 0,
+			byte(size >> 24), byte(size >> 16), byte(size >> 8), byte(size)})
+		buf.WriteString(payload)
+	}
+	return io.NopCloser(strings.NewReader(buf.String())), nil
+}
+
+// ── Logs tests ───────────────────────────────────────────────────────────────
+
+func TestManager_LogsReturnsLinesForRunningConnector(t *testing.T) {
+	docker := newMockDocker("cid-001")
+	docker.logLines = []string{"INFO starting", "WARN retry"}
+	reg := lifecycle.NewRegistry()
+	reg.Register(lifecycle.ConnectorSpec{ID: "bacnet-01", Image: "img:v1"})
+	reg.SetRunning("bacnet-01", "cid-001", true)
+
+	mgr := lifecycle.NewManager(docker, reg)
+	lines, err := mgr.Logs(context.Background(), "bacnet-01", 50)
+	require.NoError(t, err)
+	assert.Equal(t, []string{"INFO starting", "WARN retry"}, lines)
+}
+
+func TestManager_LogsReturnsErrForUnknownConnector(t *testing.T) {
+	docker := newMockDocker("")
+	reg := lifecycle.NewRegistry()
+	mgr := lifecycle.NewManager(docker, reg)
+
+	_, err := mgr.Logs(context.Background(), "ghost", 50)
+	require.Error(t, err)
+	assert.ErrorIs(t, err, lifecycle.ErrConnectorNotFound)
 }

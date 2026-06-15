@@ -87,6 +87,19 @@ func TestBuffer_DriftCounter(t *testing.T) {
 	assert.Equal(t, int64(0), drifts["hum"])
 }
 
+func TestBuffer_Depth(t *testing.T) {
+	buf, err := storeforward.Open(t.TempDir()+"/sf.db", 100)
+	require.NoError(t, err)
+	defer buf.Close()
+
+	assert.Equal(t, int64(0), buf.Depth())
+
+	for range 3 {
+		require.NoError(t, buf.Write(&pb.TelemetryFrame{PointId: "p1", Value: 1.0, Timestamp: "t"}))
+	}
+	assert.Equal(t, int64(3), buf.Depth())
+}
+
 func TestBuffer_PersistsCursor(t *testing.T) {
 	dir := t.TempDir()
 	dbPath := dir + "/sf.db"
