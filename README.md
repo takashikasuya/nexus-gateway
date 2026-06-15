@@ -173,6 +173,9 @@ go run ./cmd/gateway --dev-sim   # in-process sim connector for a no-equipment s
 | `--bos-key` | `BOS_KEY_FILE` | – | Client private key for mTLS to Building OS |
 | `--bos-servername` | `BOS_SERVER_NAME` | – | Override server name in Building OS cert verification |
 | `--dev-sim` | `DEV_SIM` | `false` | Run the in-process sim connector (non-production, ADR-0001) |
+| `--catalog-file` | `CATALOG_FILE` | – | File-backed Connector Catalog (JSON `[]Manifest`); enables `POST /connectors/{name}/install` |
+| `--catalog-url` | `CATALOG_URL` | – | Remote Connector Catalog base URL (overrides `--catalog-file`) |
+| `--catalog-allowlist` | `CATALOG_ALLOWLIST` | `ghcr.io` | Comma-separated list of allowed OCI registries (ADR-0006) |
 
 ### Simulator integration (no equipment)
 

@@ -25,6 +25,12 @@ type ConnectorManager interface {
 	Upgrade(ctx context.Context, id, newImage string) error
 }
 
+// ConnectorInstaller installs a connector from the Connector Catalog (ADR-0006).
+// A nil Installer disables the /connectors/{name}/install endpoint.
+type ConnectorInstaller interface {
+	Install(ctx context.Context, name string) error
+}
+
 // HealthSnapshotter produces gateway health snapshots.
 type HealthSnapshotter interface {
 	Snapshot(ctx context.Context) lifecycle.GatewayHealth
@@ -32,35 +38,39 @@ type HealthSnapshotter interface {
 
 // Server is the Admin HTTP API server.
 type Server struct {
-	mux      *http.ServeMux
-	auth     *JWTMiddleware
-	mgr      ConnectorManager
-	monitor  HealthSnapshotter
-	shutdown context.CancelFunc // stops the JWKS cache refresh goroutine
+	mux       *http.ServeMux
+	auth      *JWTMiddleware
+	mgr       ConnectorManager
+	installer ConnectorInstaller // nil if catalog is not configured
+	monitor   HealthSnapshotter
+	shutdown  context.CancelFunc // stops the JWKS cache refresh goroutine
 }
 
 // New creates a Server. jwksURL is fetched for JWKS key validation; audience
 // and issuer are enforced on every token. Call Shutdown() to stop background goroutines.
 func New(mgr ConnectorManager, monitor HealthSnapshotter, jwksURL, audience, issuer string) *Server {
 	ctx, cancel := context.WithCancel(context.Background())
-	s := newServer(mgr, monitor, newURLKeyFetcher(ctx, jwksURL), audience, issuer)
+	s := newServer(mgr, nil, monitor, newURLKeyFetcher(ctx, jwksURL), audience, issuer)
 	s.shutdown = cancel
 	return s
 }
 
 // NewNoAuth creates a Server with authentication disabled (dev/local use only).
 func NewNoAuth(mgr ConnectorManager, monitor HealthSnapshotter) *Server {
+	return NewNoAuthWithInstaller(mgr, nil, monitor)
+}
+
+// NewNoAuthWithInstaller creates a Server with auth disabled and a Catalog installer.
+func NewNoAuthWithInstaller(mgr ConnectorManager, installer ConnectorInstaller, monitor HealthSnapshotter) *Server {
 	noAuth := &JWTMiddleware{}
 	s := &Server{
-		mux:     http.NewServeMux(),
-		auth:    noAuth,
-		mgr:     mgr,
-		monitor: monitor,
+		mux:       http.NewServeMux(),
+		auth:      noAuth,
+		mgr:       mgr,
+		installer: installer,
+		monitor:   monitor,
 	}
-	s.mux.HandleFunc("GET /health", s.handleHealth)
-	s.mux.HandleFunc("GET /metrics", s.handleMetrics)
-	s.mux.HandleFunc("GET /connectors", s.handleListConnectors)
-	s.mux.HandleFunc("POST /connectors/{id}/{action}", s.handleAction)
+	s.registerRoutes(false)
 	return s
 }
 
@@ -71,18 +81,32 @@ func (s *Server) Shutdown() {
 	}
 }
 
-func newServer(mgr ConnectorManager, monitor HealthSnapshotter, keys KeyFetcher, audience, issuer string) *Server {
+func newServer(mgr ConnectorManager, installer ConnectorInstaller, monitor HealthSnapshotter, keys KeyFetcher, audience, issuer string) *Server {
 	s := &Server{
-		mux:     http.NewServeMux(),
-		auth:    &JWTMiddleware{keys: keys, audience: audience, issuer: issuer},
-		mgr:     mgr,
-		monitor: monitor,
+		mux:       http.NewServeMux(),
+		auth:      &JWTMiddleware{keys: keys, audience: audience, issuer: issuer},
+		mgr:       mgr,
+		installer: installer,
+		monitor:   monitor,
+	}
+	s.registerRoutes(true)
+	return s
+}
+
+func (s *Server) registerRoutes(authenticated bool) {
+	require := func(role string, h http.HandlerFunc) http.HandlerFunc {
+		if !authenticated {
+			return h
+		}
+		return s.auth.require(role, h)
 	}
 	s.mux.HandleFunc("GET /health", s.handleHealth)
 	s.mux.HandleFunc("GET /metrics", s.handleMetrics)
-	s.mux.HandleFunc("GET /connectors", s.auth.require(RoleViewer, s.handleListConnectors))
-	s.mux.HandleFunc("POST /connectors/{id}/{action}", s.auth.require(RoleOperator, s.handleAction))
-	return s
+	s.mux.HandleFunc("GET /connectors", require(RoleViewer, s.handleListConnectors))
+	s.mux.HandleFunc("POST /connectors/{id}/{action}", require(RoleOperator, s.handleAction))
+	if s.installer != nil {
+		s.mux.HandleFunc("POST /connectors/{name}/install", require(RoleOperator, s.handleInstall))
+	}
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -137,6 +161,15 @@ func (s *Server) handleAction(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusNotFound)
 			return
 		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func (s *Server) handleInstall(w http.ResponseWriter, r *http.Request) {
+	name := r.PathValue("name")
+	if err := s.installer.Install(r.Context(), name); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

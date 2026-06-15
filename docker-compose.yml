@@ -79,6 +79,9 @@ services:
       - BOS_ADDR=mock-bos:50051
       - POINT_LIST_FILE=/fixtures/point_list.json
       - ADMIN_ADDR=:8080
+      # Connector Catalog (ADR-0006): file-backed for dev; replace with CATALOG_URL in production.
+      - CATALOG_FILE=/fixtures/catalog.json
+      - CATALOG_ALLOWLIST=ghcr.io
       # When KEYCLOAK_JWKS_URL is set, tokens are validated; omit for auth-free dev.
       - KEYCLOAK_JWKS_URL=http://keycloak:8090/realms/nexus-gateway/protocol/openid-connect/certs
       # Issuer must match the iss claim in tokens (uses external hostname seen by browser).
