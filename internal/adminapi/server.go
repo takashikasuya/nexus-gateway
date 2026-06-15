@@ -70,6 +70,7 @@ type ServerOptions struct {
 	Logger    ConnectorLogger
 }
 
+
 // HealthSnapshotter produces gateway health snapshots.
 type HealthSnapshotter interface {
 	Snapshot(ctx context.Context) lifecycle.GatewayHealth
@@ -149,6 +150,7 @@ func NewNoAuthWithOptions(mgr ConnectorManager, monitor HealthSnapshotter, opts 
 	s.registerRoutes(false)
 	return s
 }
+
 
 // NewNoAuthWithInstaller creates a Server with auth disabled, a Catalog installer,
 // and an optional CatalogSource for browsing and updates.

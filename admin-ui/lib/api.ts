@@ -94,6 +94,7 @@ export async function getConnectorLogs(token: string, id: string, tail = 100): P
   return res.json();
 }
 
+
 export async function connectorAction(
   token: string,
   id: string,

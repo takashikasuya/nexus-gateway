@@ -150,6 +150,7 @@ type mockPointListSource struct {
 
 func (m *mockPointListSource) Snapshot() []pointlist.Entry { return m.entries }
 
+
 type mockCatalogSource struct {
 	manifests  []catalog.Manifest
 	lastUpdate string
