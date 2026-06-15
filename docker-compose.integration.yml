@@ -98,7 +98,7 @@ services:
       - NATS_URL=nats://localhost:14222 # host networking: nexus NATS is on host port 14222
       - BACNET_ADDRESS=127.0.0.1
       - BACNET_DEVICE_ID=1001 # bbc-sim device_id (config/simulator.yaml)
-      - BACNET_LOCAL_ADDRESS=0.0.0.0
+      - BACNET_LOCAL_ADDRESS=0.0.0.0:47809
       - BACNET_POLL_INTERVAL=5
       # Object type,instance pairs match bbc-sim's objects and the shared Point List.
       - |

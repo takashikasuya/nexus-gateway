@@ -46,3 +46,7 @@ async def _run(cfg: Config) -> None:
 def main() -> None:
     cfg = Config.from_env()
     asyncio.run(_run(cfg))
+
+
+if __name__ == "__main__":
+    main()

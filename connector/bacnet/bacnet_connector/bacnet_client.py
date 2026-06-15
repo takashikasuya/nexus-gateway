@@ -5,18 +5,11 @@ import asyncio
 import logging
 from typing import Callable, Awaitable
 
-from bacpypes3.app import Application
+from bacpypes3.app import Application, DeviceObject, NetworkPortObject
+from bacpypes3.apdu import ErrorRejectAbortNack
 from bacpypes3.basetypes import ErrorType
-from bacpypes3.constructeddata import AnyAtomic
 from bacpypes3.pdu import Address
-from bacpypes3.primitivedata import ObjectIdentifier, Null
-from bacpypes3.apdu import (
-    ReadAccessSpecification,
-    PropertyReference,
-    PropertyIdentifier,
-)
-from bacpypes3.primitivedata import Real
-from bacpypes3.vendor import VendorInfo
+from bacpypes3.primitivedata import ObjectIdentifier, Null, Real
 
 from bacnet_connector.connector import BACnetClient
 
@@ -43,10 +36,19 @@ class Bacpypes3Client(BACnetClient):
 
     @classmethod
     async def create(cls, local_address: str) -> "Bacpypes3Client":
-        app = await Application.create(
-            local_address=local_address,
-            device_object=None,  # client-only, no device object needed
+        dev = DeviceObject(
+            objectIdentifier=("device", 599),
+            objectName="nexus-bacnet-client",
+            vendorIdentifier=999,
+            maxApduLengthAccepted=1476,
+            segmentationSupported="noSegmentation",
         )
+        net = NetworkPortObject(
+            local_address,
+            objectIdentifier=("network-port", 1),
+            objectName="NP-1",
+        )
+        app = Application.from_object_list([dev, net])
         return cls(app)
 
     async def read_property_multiple(
@@ -55,35 +57,30 @@ class Bacpypes3Client(BACnetClient):
         device_id: int,
         requests: list[tuple[str, str]],
     ) -> list[tuple[str, float | None, str | None]]:
-        specs = [
-            ReadAccessSpecification(
-                objectIdentifier=ObjectIdentifier(obj_id),
-                listOfPropertyReferences=[
-                    PropertyReference(propertyIdentifier=PropertyIdentifier(prop_id))
-                ],
-            )
-            for obj_id, prop_id in requests
-        ]
+        # bacpypes3 API: flat alternating list [obj_id, [props], obj_id, [props], ...]
+        parameter_list = []
+        for obj_id, prop_id in requests:
+            parameter_list.append(obj_id)
+            parameter_list.append([prop_id])
+        # ErrorRejectAbortNack is a BaseException (not Exception) so catch it explicitly.
+        try:
+            raw = await self._app.read_property_multiple(Address(address), parameter_list)
+        except ErrorRejectAbortNack as exc:
+            logger.warning("bacnet: device error from %s: %s", address, exc)
+            return [(obj_id, None, None) for obj_id, _ in requests]
 
-        result_list = await self._app.read_property_multiple(Address(address), specs)
+        # Index results by normalized obj_id for lookup
+        results_by_obj: dict[str, float | None] = {}
+        if raw and not isinstance(raw, ErrorRejectAbortNack):
+            for obj_id_result, _prop_id, _index, value in raw:
+                key = str(obj_id_result)
+                results_by_obj[key] = _to_float(value)
 
         out = []
-        for obj_id, prop_id in requests:
-            val = None
-            status = None
-            if result_list:
-                for item in result_list:
-                    if str(item.objectIdentifier) == obj_id:
-                        for result in item.listOfResults:
-                            if str(result.propertyIdentifier) == prop_id:
-                                pv = result.propertyValue
-                                if isinstance(pv, AnyAtomic):
-                                    val = _to_float(pv.cast_out(None))
-                                elif hasattr(pv, "errorCode"):
-                                    status = str(pv.errorCode)
-                                break
-                        break  # found the matching object; stop searching
-            out.append((obj_id, val, status))
+        for obj_id, _prop_id in requests:
+            normalized = str(ObjectIdentifier(obj_id))
+            val = results_by_obj.get(normalized)
+            out.append((obj_id, val, None))
         return out
 
     async def subscribe_cov(
@@ -117,16 +114,17 @@ class Bacpypes3Client(BACnetClient):
 
         while True:
             try:
-                # bacpypes3 provides an async context manager for COV subscriptions.
                 async with self._app.change_of_value(addr, oid, lifetime=lifetime) as cov:
-                    async for notification in cov:
-                        value = _to_float(notification.presentValue)
-                        status = str(notification.statusFlags) if notification.statusFlags else None
-                        if value is not None:
-                            await callback(obj_id, value, status or "")
+                    while True:
+                        # get_value() decodes the next PropertyValue from the queue.
+                        prop_id, prop_value = await cov.get_value()
+                        if str(prop_id) == "present-value":
+                            v = _to_float(prop_value)
+                            if v is not None:
+                                await callback(obj_id, v, "")
             except asyncio.CancelledError:
                 return
-            except Exception as exc:
+            except (Exception, ErrorRejectAbortNack) as exc:
                 logger.warning("bacnet: COV loop error for %s: %s — retrying", obj_id, exc)
                 await asyncio.sleep(5)
 
@@ -139,13 +137,16 @@ class Bacpypes3Client(BACnetClient):
         value: float,
         priority: int,
     ) -> None:
-        await self._app.write_property(
-            Address(address),
-            ObjectIdentifier(obj_id),
-            PropertyIdentifier(prop_id),
-            Real(value),
-            priority=priority,
-        )
+        try:
+            await self._app.write_property(
+                address,
+                obj_id,
+                prop_id,
+                Real(value),
+                priority=priority,
+            )
+        except ErrorRejectAbortNack as exc:
+            raise RuntimeError(f"BACnet write rejected: {exc}") from exc
 
     async def close(self) -> None:
         for task in self._cov_tasks.values():
