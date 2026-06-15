@@ -39,6 +39,12 @@ services:
     depends_on:
       nats:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "echo > /dev/tcp/localhost/50051 2>/dev/null && echo ok || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
 
   keycloak:
     image: quay.io/keycloak/keycloak:24.0
@@ -89,9 +95,15 @@ services:
       nats:
         condition: service_healthy
       mock-bos:
-        condition: service_started
+        condition: service_healthy
       keycloak:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/health | grep -q '\"status\":\"ok\"' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 15s
 
   admin-ui:
     build:
