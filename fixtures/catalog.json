@@ -1,5 +1,17 @@
 [
   {
+    "name": "sim-connector",
+    "version": "0.0.0",
+    "image": "ghcr.io/takashikasuya/nexus-gateway/sim-connector",
+    "digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+    "min_gateway_version": "0.1.0",
+    "permissions": {
+      "network": [],
+      "mounts": []
+    },
+    "signature_required": false
+  },
+  {
     "name": "bacnet-connector",
     "version": "0.1.0",
     "image": "ghcr.io/takashikasuya/nexus-gateway/bacnet-connector",

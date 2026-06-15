@@ -61,6 +61,9 @@ func main() {
 	catalogURL := flag.String("catalog-url", envOrDefault("CATALOG_URL", ""), "Remote Connector Catalog base URL; overrides --catalog-file when set")
 	catalogAllowlist := flag.String("catalog-allowlist", envOrDefault("CATALOG_ALLOWLIST", "ghcr.io"), "Comma-separated list of allowed OCI registries (ADR-0006)")
 	catalogPollInterval := flag.Duration("catalog-poll-interval", 10*time.Minute, "How often the Updater polls the catalog for new connector versions (ADR-0006)")
+	cosignKey := flag.String("cosign-key", envOrDefault("COSIGN_KEY_FILE", ""), "Path to cosign public key for signature verification (ADR-0006); empty = keyless")
+	cosignIdentity := flag.String("cosign-identity", envOrDefault("COSIGN_IDENTITY", ""), "Expected certificate identity for keyless cosign verification (ADR-0006)")
+	cosignOIDCIssuer := flag.String("cosign-oidc-issuer", envOrDefault("COSIGN_OIDC_ISSUER", ""), "Expected OIDC issuer for keyless cosign verification (ADR-0006)")
 	flag.Parse()
 
 	// Build the gRPC transport credentials for both Building OS links (ADR-0007).
@@ -229,7 +232,18 @@ func main() {
 		}
 		if catalogClient != nil {
 			allowlist := splitComma(*catalogAllowlist)
-			verifier := catalog.Verifier(catalog.NoopVerifier{}) // replace with CosignVerifier in production
+			var verifier catalog.Verifier
+			if *cosignKey != "" || *cosignIdentity != "" {
+				verifier = catalog.CosignVerifier{
+					KeyPath:    *cosignKey,
+					Identity:   *cosignIdentity,
+					OIDCIssuer: *cosignOIDCIssuer,
+				}
+				slog.Info("catalog: cosign verification enabled", "key", *cosignKey, "identity", *cosignIdentity)
+			} else {
+				verifier = catalog.NoopVerifier{}
+				slog.Warn("catalog: cosign verification disabled — set --cosign-key or --cosign-identity before production use (ADR-0006)")
+			}
 			catalogInstaller = &gatewayInstaller{
 				mgr:       connMgr,
 				client:    catalogClient,
