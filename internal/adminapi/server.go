@@ -143,41 +143,6 @@ func buildServer(mgr ConnectorManager, monitor HealthSnapshotter, opts ServerOpt
 	return s
 }
 
-// ── deprecated constructors (thin wrappers over the two canonical ones) ───────
-
-// Deprecated: use NewSecureServer with ServerOptions and JWTConfig.
-func New(mgr ConnectorManager, monitor HealthSnapshotter, jwksURL, audience, issuer string) *Server {
-	return NewSecureServer(mgr, monitor, ServerOptions{}, JWTConfig{jwksURL, audience, issuer})
-}
-
-// Deprecated: use NewSecureServer with ServerOptions{Installer, Catalog} and JWTConfig.
-func NewWithCatalog(mgr ConnectorManager, installer ConnectorInstaller, catalogSrc CatalogSource, monitor HealthSnapshotter, jwksURL, audience, issuer string) *Server {
-	return NewSecureServer(mgr, monitor, ServerOptions{Installer: installer, Catalog: catalogSrc}, JWTConfig{jwksURL, audience, issuer})
-}
-
-// Deprecated: use NewSecureServer.
-func NewWithOptions(mgr ConnectorManager, monitor HealthSnapshotter, opts ServerOptions, jwksURL, audience, issuer string) *Server {
-	return NewSecureServer(mgr, monitor, opts, JWTConfig{jwksURL, audience, issuer})
-}
-
-// Deprecated: use NewServer with an empty ServerOptions.
-func NewNoAuth(mgr ConnectorManager, monitor HealthSnapshotter) *Server {
-	return NewServer(mgr, monitor, ServerOptions{})
-}
-
-// Deprecated: use NewServer.
-func NewNoAuthWithOptions(mgr ConnectorManager, monitor HealthSnapshotter, opts ServerOptions) *Server {
-	return NewServer(mgr, monitor, opts)
-}
-
-// Deprecated: use NewServer with ServerOptions{Installer, Catalog}.
-func NewNoAuthWithInstaller(mgr ConnectorManager, installer ConnectorInstaller, monitor HealthSnapshotter, catalogSrc ...CatalogSource) *Server {
-	var src CatalogSource
-	if len(catalogSrc) > 0 {
-		src = catalogSrc[0]
-	}
-	return NewServer(mgr, monitor, ServerOptions{Installer: installer, Catalog: src})
-}
 
 func (s *Server) registerRoutes(authenticated bool) {
 	require := func(role string, h http.HandlerFunc) http.HandlerFunc {

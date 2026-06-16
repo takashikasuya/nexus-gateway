@@ -107,6 +107,23 @@ func TestForwarder_RecordsDriftOnPartialAck(t *testing.T) {
 	assert.Equal(t, int64(1), total, "exactly one frame should be recorded as drift")
 }
 
+// A zero-value Config must not panic: NewForwarder clamps non-positive
+// CheckpointSize/CheckpointAge to the defaults (time.NewTicker panics on <= 0).
+func TestForwarder_ZeroConfigClampsToDefaults(t *testing.T) {
+	buf := newBuf(t)
+	writeFrames(t, buf, "p1")
+	sink := &fakeSink{accepted: 1}
+
+	fwd := uplink.NewForwarder(buf, sink, uplink.Config{}) // all-zero config
+	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Millisecond)
+	defer cancel()
+
+	require.NotPanics(t, func() { fwd.Run(ctx) })
+	// The frame is sent immediately on poll even though the default 5s/1000 checkpoint
+	// has not yet fired, proving Run reached its loop instead of panicking on NewTicker(0).
+	assert.Equal(t, 1, sink.sentCount())
+}
+
 // A send failure before any checkpoint must leave the cursor un-advanced so the
 // un-acked batch is replayed on reconnect.
 func TestForwarder_SendErrorDoesNotAdvanceCursor(t *testing.T) {

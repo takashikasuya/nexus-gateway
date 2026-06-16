@@ -35,7 +35,16 @@ type Forwarder struct {
 }
 
 // NewForwarder creates a Forwarder over buf, delivering through sink under cfg.
+// Non-positive CheckpointSize/CheckpointAge are clamped to DefaultConfig: a zero
+// CheckpointAge would panic time.NewTicker, and a zero CheckpointSize would
+// checkpoint after every frame (one StreamAck round-trip per frame).
 func NewForwarder(buf *storeforward.Buffer, sink FrameSink, cfg Config) *Forwarder {
+	if cfg.CheckpointSize <= 0 {
+		cfg.CheckpointSize = DefaultConfig.CheckpointSize
+	}
+	if cfg.CheckpointAge <= 0 {
+		cfg.CheckpointAge = DefaultConfig.CheckpointAge
+	}
 	return &Forwarder{buf: buf, sink: sink, cfg: cfg}
 }
 

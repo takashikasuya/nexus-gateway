@@ -10,3 +10,6 @@ connector/bacnet/.venv/
 connector/bacnet/.pytest_cache/
 connector/bacnet/**/__pycache__/
 connector/bacnet/**/*.pyc
+
+# compiled gateway binary
+/gateway

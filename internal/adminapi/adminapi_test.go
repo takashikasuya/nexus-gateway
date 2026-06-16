@@ -55,7 +55,8 @@ func newFixture(t *testing.T) *testFixture {
 
 	mgr := &mockManager{}
 	mon := &mockMonitor{}
-	srv := adminapi.New(mgr, mon, jwksServer.URL, "nexus-gateway", "test-issuer")
+	srv := adminapi.NewSecureServer(mgr, mon, adminapi.ServerOptions{},
+		adminapi.JWTConfig{JWKSURL: jwksServer.URL, Audience: "nexus-gateway", Issuer: "test-issuer"})
 	t.Cleanup(srv.Shutdown)
 	apiServer := httptest.NewServer(srv)
 	t.Cleanup(apiServer.Close)
@@ -273,7 +274,8 @@ func TestAction_Start(t *testing.T) {
 	f := newFixture(t)
 	mgr := &mockManager{}
 	mon := &mockMonitor{}
-	srv := adminapi.New(mgr, mon, f.jwksServer.URL, "nexus-gateway", "test-issuer")
+	srv := adminapi.NewSecureServer(mgr, mon, adminapi.ServerOptions{},
+		adminapi.JWTConfig{JWKSURL: f.jwksServer.URL, Audience: "nexus-gateway", Issuer: "test-issuer"})
 	t.Cleanup(srv.Shutdown)
 	apiSrv := httptest.NewServer(srv)
 	t.Cleanup(apiSrv.Close)
@@ -291,7 +293,8 @@ func TestAction_UnknownConnector_Returns404(t *testing.T) {
 	f := newFixture(t)
 	mgr := &mockManager{err: fmt.Errorf("lifecycle: connector %q: %w", "ghost", lifecycle.ErrConnectorNotFound)}
 	mon := &mockMonitor{}
-	srv := adminapi.New(mgr, mon, f.jwksServer.URL, "nexus-gateway", "test-issuer")
+	srv := adminapi.NewSecureServer(mgr, mon, adminapi.ServerOptions{},
+		adminapi.JWTConfig{JWKSURL: f.jwksServer.URL, Audience: "nexus-gateway", Issuer: "test-issuer"})
 	t.Cleanup(srv.Shutdown)
 	apiSrv := httptest.NewServer(srv)
 	t.Cleanup(apiSrv.Close)
@@ -317,7 +320,7 @@ func TestDevices_ListAll(t *testing.T) {
 		{ConnectorID: "bacnet-01", Protocol: "bacnet", LocalID: "AHU-1/sup_temp", PointID: "p-001", Unit: "Cel", DeviceRef: "ahu-01"},
 		{ConnectorID: "bacnet-01", Protocol: "bacnet", LocalID: "AHU-1/fan_run", PointID: "p-002", Writable: true, DeviceRef: "ahu-01"},
 	}}
-	srv := adminapi.NewNoAuthWithOptions(&mockManager{}, &mockMonitor{}, adminapi.ServerOptions{PointList: src})
+	srv := adminapi.NewServer(&mockManager{}, &mockMonitor{}, adminapi.ServerOptions{PointList: src})
 	apiSrv := httptest.NewServer(srv)
 	t.Cleanup(apiSrv.Close)
 
@@ -336,7 +339,7 @@ func TestDevices_ListAll(t *testing.T) {
 }
 
 func TestDevices_NilSource_Returns404(t *testing.T) {
-	srv := adminapi.NewNoAuthWithOptions(&mockManager{}, &mockMonitor{}, adminapi.ServerOptions{})
+	srv := adminapi.NewServer(&mockManager{}, &mockMonitor{}, adminapi.ServerOptions{})
 	apiSrv := httptest.NewServer(srv)
 	t.Cleanup(apiSrv.Close)
 
@@ -359,7 +362,7 @@ func TestTelemetry_ReturnsDriftAndDepth(t *testing.T) {
 		drifts: map[string]int64{"p-001": 3, "p-002": 0},
 		depth:  42,
 	}
-	srv := adminapi.NewNoAuthWithOptions(&mockManager{}, &mockMonitor{}, adminapi.ServerOptions{Telemetry: src})
+	srv := adminapi.NewServer(&mockManager{}, &mockMonitor{}, adminapi.ServerOptions{Telemetry: src})
 	apiSrv := httptest.NewServer(srv)
 	t.Cleanup(apiSrv.Close)
 
@@ -377,7 +380,7 @@ func TestTelemetry_ReturnsDriftAndDepth(t *testing.T) {
 }
 
 func TestTelemetry_NilSource_Returns404(t *testing.T) {
-	srv := adminapi.NewNoAuthWithOptions(&mockManager{}, &mockMonitor{}, adminapi.ServerOptions{})
+	srv := adminapi.NewServer(&mockManager{}, &mockMonitor{}, adminapi.ServerOptions{})
 	apiSrv := httptest.NewServer(srv)
 	t.Cleanup(apiSrv.Close)
 
@@ -432,7 +435,7 @@ func TestLogs_ReturnsLinesForConnector(t *testing.T) {
 			"bacnet-01": {"2026-06-15 INFO starting", "2026-06-15 WARN reconnecting"},
 		},
 	}
-	srv := adminapi.NewNoAuthWithOptions(&mockManager{}, &mockMonitor{}, adminapi.ServerOptions{Logger: lg})
+	srv := adminapi.NewServer(&mockManager{}, &mockMonitor{}, adminapi.ServerOptions{Logger: lg})
 	apiSrv := httptest.NewServer(srv)
 	t.Cleanup(apiSrv.Close)
 
@@ -451,7 +454,7 @@ func TestLogs_ReturnsLinesForConnector(t *testing.T) {
 
 func TestLogs_UnknownConnector_Returns404(t *testing.T) {
 	lg := &mockConnectorLogger{err: fmt.Errorf("lifecycle: connector %q: %w", "ghost", lifecycle.ErrConnectorNotFound)}
-	srv := adminapi.NewNoAuthWithOptions(&mockManager{}, &mockMonitor{}, adminapi.ServerOptions{Logger: lg})
+	srv := adminapi.NewServer(&mockManager{}, &mockMonitor{}, adminapi.ServerOptions{Logger: lg})
 	apiSrv := httptest.NewServer(srv)
 	t.Cleanup(apiSrv.Close)
 
@@ -460,7 +463,7 @@ func TestLogs_UnknownConnector_Returns404(t *testing.T) {
 }
 
 func TestLogs_NilSource_Returns404(t *testing.T) {
-	srv := adminapi.NewNoAuthWithOptions(&mockManager{}, &mockMonitor{}, adminapi.ServerOptions{})
+	srv := adminapi.NewServer(&mockManager{}, &mockMonitor{}, adminapi.ServerOptions{})
 	apiSrv := httptest.NewServer(srv)
 	t.Cleanup(apiSrv.Close)
 
@@ -476,7 +479,7 @@ func TestCatalog_ListAll_NoAuth(t *testing.T) {
 			{Name: "sim-connector", Version: "1.0.0", Image: "ghcr.io/org/sim-connector:v1.0.0", Digest: "sha256:abc123"},
 		},
 	}
-	srv := adminapi.NewNoAuthWithInstaller(&mockManager{}, &mockInstaller{}, &mockMonitor{}, src)
+	srv := adminapi.NewServer(&mockManager{}, &mockMonitor{}, adminapi.ServerOptions{Installer: &mockInstaller{}, Catalog: src})
 	apiSrv := httptest.NewServer(srv)
 	t.Cleanup(apiSrv.Close)
 
@@ -493,7 +496,7 @@ func TestCatalog_ListAll_NoAuth(t *testing.T) {
 }
 
 func TestCatalog_NilSource_Returns404(t *testing.T) {
-	srv := adminapi.NewNoAuthWithInstaller(&mockManager{}, nil, &mockMonitor{})
+	srv := adminapi.NewServer(&mockManager{}, &mockMonitor{}, adminapi.ServerOptions{})
 	apiSrv := httptest.NewServer(srv)
 	t.Cleanup(apiSrv.Close)
 
@@ -503,7 +506,7 @@ func TestCatalog_NilSource_Returns404(t *testing.T) {
 
 func TestCatalog_UpdateAction_CallsCatalogSource(t *testing.T) {
 	src := &mockCatalogSource{}
-	srv := adminapi.NewNoAuthWithInstaller(&mockManager{}, &mockInstaller{}, &mockMonitor{}, src)
+	srv := adminapi.NewServer(&mockManager{}, &mockMonitor{}, adminapi.ServerOptions{Installer: &mockInstaller{}, Catalog: src})
 	apiSrv := httptest.NewServer(srv)
 	t.Cleanup(apiSrv.Close)
 
@@ -523,7 +526,8 @@ func TestCatalog_JWTPath_ListAll(t *testing.T) {
 	}
 	mgr := &mockManager{}
 	mon := &mockMonitor{}
-	srv := adminapi.NewWithCatalog(mgr, &mockInstaller{}, src, mon, f.jwksServer.URL, "nexus-gateway", "test-issuer")
+	srv := adminapi.NewSecureServer(mgr, mon, adminapi.ServerOptions{Installer: &mockInstaller{}, Catalog: src},
+		adminapi.JWTConfig{JWKSURL: f.jwksServer.URL, Audience: "nexus-gateway", Issuer: "test-issuer"})
 	t.Cleanup(srv.Shutdown)
 	apiSrv := httptest.NewServer(srv)
 	t.Cleanup(apiSrv.Close)
