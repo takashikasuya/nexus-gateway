@@ -10,7 +10,7 @@
 
 > **ステータス: MVP 直前。** MVP のスコープ(対象/対象外)・合格条件・残ギャップは
 > **[MVP_READINESS.md](MVP_READINESS.md)** に固定しています。基準プロトコルは OPC-UA、
-> BACnet・Envoy mTLS・cosign 本番運用は MVP+1 です。
+> BACnet・エッジ mTLS(Traefik)・cosign 本番運用は MVP+1 です。
 
 ---
 
@@ -71,7 +71,7 @@ write(cmd)  → Result
         │ cmd.<proto>.<id>  (core NATS request-reply)                            ▼
   ┌─────────────┐        ┌──────────┐  ControlCommand  ┌────────────┐  GatewayIngress/StreamTelemetry
   │ Egress      │ ◀───── │ Dispatch │ ◀────────────────│ Building OS │ ◀─────────────────────────────
-  │ agent       │  gRPC GatewayEgress/Connect          └────────────┘  (Envoy エッジで mTLS 終端)
+  │ agent       │  gRPC GatewayEgress/Connect          └────────────┘  (Traefik エッジで mTLS 終端)
   └─────────────┘
 ```
 
@@ -99,7 +99,7 @@ write(cmd)  → Result
 | [0004](docs/adr/0004-control-path-reliable-within-window.md) | 制御は real-time-or-fail。期限付き core-NATS request-reply、`control_id` で冪等。 |
 | [0005](docs/adr/0005-jetstream-topology-bounded-replay.md) | JetStream を Normalizer の前段に置き、durable な replay/back-pressure 境界とする。 |
 | [0006](docs/adr/0006-connector-distribution-signed-oci.md) | コネクタは署名済み OCI イメージ、digest 固定で実行、Connector Catalog 経由で cosign 検証 + rollback。 |
-| [0007](docs/adr/0007-transport-security-mtls-at-edge.md) | ゲートウェイ↔Building OS の gRPC は Building OS の Envoy エッジで mTLS 終端(`gateway_id` ↔ クライアント証明書の CN/SAN)。クラスタ内は h2c。 |
+| [0007](docs/adr/0007-transport-security-mtls-at-edge.md) | ゲートウェイ↔Building OS の gRPC は Building OS の Traefik エッジで mTLS 終端(`gateway_id` ↔ クライアント証明書の CN、`X-Gateway-Id` ヘッダで強制)。クラスタ内は h2c。 |
 
 ---
 
@@ -160,6 +160,31 @@ go run ./cmd/gateway --dev-sim   # 設備不要の smoke 実行用に in-process
 | `--point-sync-interval` | – | `10m` | 初回同期後の Point List ポーリング間隔 |
 | `--admin-jwks-url` | `KEYCLOAK_JWKS_URL` | – | Keycloak JWKS(空 = Admin API 認証無効) |
 | `--dev-sim` | `DEV_SIM` | `false` | in-process sim コネクタを起動(非本番) |
+
+### 本番: Building OS への TLS/mTLS(ADR-0007)
+
+`BOS_INSECURE=true`(平文 h2c)は **dev/CI 専用**です(エッジプロキシの無いローカル用)。
+本番では `--bos-insecure` を外し、CA + クライアント証明書/鍵を渡します。gRPC リンクは
+Building OS の Traefik エッジ(`TLSOption` + `passTLSClientCert`)で **mTLS 終端**され、
+`gateway_id` がクライアント証明書の CN(cert-manager 発行)に束縛されます。エッジは証明書
+由来の信頼ヘッダ `X-Gateway-Id` を注入し、Building OS がフレームの `gateway_id` と一致を
+強制します。ゲートウェイ自身は `X-Gateway-Id` を送りません(エッジが付与)。
+
+```bash
+GATEWAY_ID=GW-SOS-001 \
+BOS_ADDR=bos.example.com:443 \
+BOS_CA_FILE=/etc/nexus/tls/ca.pem \
+BOS_CERT_FILE=/etc/nexus/tls/gateway.crt \   # CN/SAN に GATEWAY_ID を埋め込む
+BOS_KEY_FILE=/etc/nexus/tls/gateway.key \
+BOS_SERVER_NAME=bos.example.com \            # 任意: SNI/検証名の上書き
+PROVISIONING_URL=https://bos.example.com/provisioning \
+go run ./cmd/gateway
+```
+
+- `--bos-cert`/`--bos-key` を省くと **サーバ認証のみ**(CA 検証)、付けると **mTLS**。
+- CN/SAN ↔ `gateway_id` の束縛が Building OS の所有権チェックの前提です。
+  [SECURITY.md](SECURITY.md) と
+  [ADR-0007](docs/adr/0007-transport-security-mtls-at-edge.md) を参照。
 
 ### シミュレータ統合(設備なし)
 

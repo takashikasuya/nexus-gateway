@@ -1,6 +1,39 @@
 # Transport security: mTLS terminated at the Building OS edge, h2c in-cluster
 
-**Status:** accepted — 2026-06-13
+**Status:** accepted — 2026-06-13 · **dependency resolved — 2026-06-16 (see Update)**
+
+## Update (2026-06-16): external dependency resolved; edge is Traefik
+
+The Building OS-side pieces this ADR flagged as **unconfirmed (#161)** are now
+implemented and merged on `gutp-building-os-oss`:
+
+- **Edge proxy is Traefik, not Envoy.** The reverse-proxy uses a Traefik
+  `TLSOption` (`RequireAndVerifyClientCert`) + the `passTLSClientCert` middleware
+  to terminate mTLS and inject a trusted, cert-derived header **`X-Gateway-Id`**
+  (from the client-cert SAN/CN). The "Envoy/Contour/Emissary" guess in the
+  Context below was a placeholder; the OSS stack chose Traefik.
+- **cert-manager with `CN = gateway_id`** is confirmed (BOS gateway-security-ops
+  runbook, #298/#302). One **client CA + the same `X-Gateway-Id` header** is
+  shared across all three channels: telemetry ingress (:5051), control egress
+  (:5052), and the Point List provisioning sync (#224).
+- **Building OS now enforces `X-Gateway-Id == frame.gateway_id` in-app**, behind
+  an **enforce toggle** (`GRPC_INGRESS_REQUIRE_GATEWAY_IDENTITY`, BOS #296/#301):
+  default **off** for OSS/local/CI (backward-compatible), **on** in production.
+  Mismatches are rejected and metered (`identity_missing`/`identity_mismatch`).
+  This refines — does not contradict — the "authorization only" wording below:
+  cert *validation* is still at the edge; Building OS adds a trusted-header
+  *binding check*, not certificate/token parsing.
+
+**Impact on this gateway: none in code.** We are already compatible — the gateway
+presents a client cert whose `CN = gateway_id`, stamps `frame.gateway_id` from
+`GATEWAY_ID`, identifies itself to the Point List API by URL path
+(`/gateways/{gateway_id}/pointlist`, so header==path holds), and **sends no
+`X-Gateway-Id` header itself** (the proxy injects it; the runbook mandates that
+any externally-supplied `X-Gateway-Id` be stripped, and duplicates fail closed).
+The only required change is **documentation** (this update; READMEs; SECURITY.md):
+say *Traefik edge*, not *Envoy*. The config-driven credential surface
+(`--bos-ca`/`--bos-cert`/`--bos-key`/`--bos-servername`) is unchanged and
+sufficient.
 
 ## Context
 

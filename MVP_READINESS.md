@@ -38,8 +38,10 @@ protocol because its E2E runs over plain TCP with no host-networking dependency.
 - **BACnet E2E** — depends on host networking for Who-Is/I-Am broadcast; keep as
   MVP+1 (works today behind the `bacnet` compose profile, just not a gate).
 - **cosign production verification** — dev/file catalog is the MVP path.
-- **Envoy mTLS in production** — ship design + config example only (ADR-0007);
-  local compose uses `--bos-insecure` h2c.
+- **Edge mTLS in production** — ship config example only (ADR-0007); local
+  compose uses `--bos-insecure` h2c. The Building OS side is now in place
+  (Traefik `passTLSClientCert` → `X-Gateway-Id`, cert-manager CN=`gateway_id`,
+  enforce toggle — BOS #296/#224/#298); the gateway needs no code change.
 - **Grafana dashboards / full observability stack** — `/metrics` text is enough
   for MVP.
 - **upgrade-by-arbitrary-image** (`POST /connectors/{id}/upgrade?image=`) — dev
@@ -130,9 +132,10 @@ existing `internal/metrics` registry into `adminapi.handleMetrics`.
 
 - **BACnet host networking** — the BACnet connector needs host networking for
   Who-Is/I-Am broadcast; out of the MVP CI gate (MVP+1).
-- **Envoy mTLS not default in local compose** — local/dev runs `--bos-insecure`
+- **Edge mTLS not default in local compose** — local/dev runs `--bos-insecure`
   plaintext h2c against the gRPC services directly (no edge proxy); production
-  mTLS is design + config example only for MVP (ADR-0007).
+  mTLS terminates at the Building OS **Traefik** edge and is a config example for
+  MVP (ADR-0007, BOS #296/#224/#298 — dependency now resolved).
 - **Connector Catalog uses file-backed dev mode** — cosign production
   verification and a remote catalog are MVP+1.
 - **`upgrade?image=` is a dev affordance** — the supported MVP update path is

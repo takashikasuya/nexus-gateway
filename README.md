@@ -11,7 +11,7 @@ translation**.
 
 > **Status: pre-MVP.** The MVP scope (in/out), pass conditions, and remaining
 > gaps are fixed in **[MVP_READINESS.md](MVP_READINESS.md)** — OPC-UA is the
-> baseline end-to-end protocol; BACnet, Envoy mTLS, and cosign production are
+> baseline end-to-end protocol; BACnet, edge mTLS (Traefik), and cosign production are
 > MVP+1.
 
 ---
@@ -75,7 +75,7 @@ with the proven per-protocol OSS stacks underneath: **Eclipse Milo** (OPC-UA),
         │ cmd.<proto>.<id>  (core NATS request-reply)                              ▼
   ┌─────────────┐        ┌──────────┐   ControlCommand   ┌────────────┐   GatewayIngress/StreamTelemetry
   │ Egress      │ ◀───── │ Dispatch │ ◀───────────────── │ Building OS │ ◀──────────────────────────────
-  │ agent       │  gRPC GatewayEgress/Connect            └────────────┘   (mTLS at the Envoy edge)
+  │ agent       │  gRPC GatewayEgress/Connect            └────────────┘   (mTLS at the Traefik edge)
   └─────────────┘
 ```
 
@@ -103,7 +103,7 @@ with the proven per-protocol OSS stacks underneath: **Eclipse Milo** (OPC-UA),
 | [0004](docs/adr/0004-control-path-reliable-within-window.md) | Control is real-time-or-fail: deadline-bounded core-NATS request-reply, idempotent on `control_id`. |
 | [0005](docs/adr/0005-jetstream-topology-bounded-replay.md) | JetStream sits before the Normalizer as the durable replay/back-pressure boundary. |
 | [0006](docs/adr/0006-connector-distribution-signed-oci.md) | Connectors are signed OCI images, run digest-pinned, installed via the Connector Catalog with cosign verification + rollback. |
-| [0007](docs/adr/0007-transport-security-mtls-at-edge.md) | Gateway↔Building OS gRPC is mTLS terminated at the Building OS Envoy edge (`gateway_id` ↔ client-cert CN/SAN); h2c in-cluster. |
+| [0007](docs/adr/0007-transport-security-mtls-at-edge.md) | Gateway↔Building OS gRPC is mTLS terminated at the Building OS Traefik edge (`gateway_id` ↔ client-cert CN, enforced via the `X-Gateway-Id` header); h2c in-cluster. |
 
 ---
 
@@ -185,6 +185,7 @@ go run ./cmd/gateway --dev-sim   # in-process sim connector for a no-equipment s
 | `--dev-sim` | `DEV_SIM` | `false` | Run the in-process sim connector (non-production, ADR-0001) |
 | `--catalog-file` | `CATALOG_FILE` | – | File-backed Connector Catalog (JSON `[]Manifest`); enables `POST /connectors/{name}/install` |
 | `--catalog-url` | `CATALOG_URL` | – | Remote Connector Catalog base URL (overrides `--catalog-file`) |
+| `--allow-adhoc-upgrade` | `ALLOW_ADHOC_UPGRADE` | `false` | Enable dev-only `POST /connectors/{id}/upgrade?image=`; MVP update path is catalog-driven (ADR-0006) |
 | `--catalog-allowlist` | `CATALOG_ALLOWLIST` | `ghcr.io` | Comma-separated list of allowed OCI registries (ADR-0006) |
 
 ### Simulator integration (no equipment)
@@ -216,6 +217,36 @@ BOS_INSECURE=true \
 PROVISIONING_FILE=/path/to/mvp-pointlist.csv \
 go run ./cmd/gateway
 ```
+
+> `BOS_INSECURE=true` (plaintext h2c) is **dev/CI only** — it is for local runs
+> with no edge proxy. Do not use it in production.
+
+#### Production: TLS/mTLS to Building OS (ADR-0007)
+
+In production the gateway↔Building OS gRPC link is **mTLS terminated at the
+Building OS Traefik edge** (`TLSOption` + `passTLSClientCert`), with the
+gateway's `gateway_id` bound to the client certificate's CN (cert-manager-issued).
+The edge injects a trusted `X-Gateway-Id` header from the cert, which Building OS
+enforces equals the frame's `gateway_id`. Drop `--bos-insecure` and provide the
+CA + client cert/key instead:
+
+```bash
+GATEWAY_ID=GW-SOS-001 \
+BOS_ADDR=bos.example.com:443 \
+BOS_CA_FILE=/etc/nexus/tls/ca.pem \
+BOS_CERT_FILE=/etc/nexus/tls/gateway.crt \   # CN/SAN encodes GATEWAY_ID
+BOS_KEY_FILE=/etc/nexus/tls/gateway.key \
+BOS_SERVER_NAME=bos.example.com \            # optional: override SNI/verify name
+PROVISIONING_URL=https://bos.example.com/provisioning \
+go run ./cmd/gateway
+```
+
+- Omit `--bos-cert`/`--bos-key` for **server-only TLS** (CA verification without
+  a client cert); include them for **mTLS**.
+- The cert CN ↔ `gateway_id` binding is what Building OS's ownership check
+  assumes. The gateway sends **no** `X-Gateway-Id` header itself — the Traefik
+  edge supplies it from the cert. See [SECURITY.md](SECURITY.md) and
+  [ADR-0007](docs/adr/0007-transport-security-mtls-at-edge.md).
 
 For the full E2E test suite against Building OS, see
 **[`docs/e2e-test-overview.md`](docs/e2e-test-overview.md)**.
