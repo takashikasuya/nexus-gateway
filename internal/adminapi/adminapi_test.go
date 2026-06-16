@@ -361,12 +361,63 @@ func TestDevices_NilSource_Returns404(t *testing.T) {
 // ── telemetry tests ──────────────────────────────────────────────────────────
 
 type mockTelemetrySource struct {
-	drifts map[string]int64
-	depth  int64
+	drifts      map[string]int64
+	depth       int64
+	written     int64
+	sent        int64
+	dropped     int64
+	checkpoints int64
+	sendErrors  int64
 }
 
 func (m *mockTelemetrySource) Drifts() map[string]int64 { return m.drifts }
-func (m *mockTelemetrySource) Depth() int64              { return m.depth }
+func (m *mockTelemetrySource) Depth() int64             { return m.depth }
+func (m *mockTelemetrySource) Written() int64           { return m.written }
+func (m *mockTelemetrySource) Sent() int64              { return m.sent }
+func (m *mockTelemetrySource) Dropped() int64           { return m.dropped }
+func (m *mockTelemetrySource) Checkpoints() int64       { return m.checkpoints }
+func (m *mockTelemetrySource) SendErrors() int64        { return m.sendErrors }
+
+// /metrics must expose the store-and-forward series when a TelemetrySource is wired.
+func TestMetrics_IncludesStorefwd(t *testing.T) {
+	src := &mockTelemetrySource{depth: 12, written: 1043, sent: 1031, dropped: 4, checkpoints: 34, sendErrors: 1}
+	srv := adminapi.NewServer(&mockManager{}, &mockMonitor{}, adminapi.ServerOptions{Telemetry: src})
+	apiSrv := httptest.NewServer(srv)
+	t.Cleanup(apiSrv.Close)
+
+	resp, err := http.Get(apiSrv.URL + "/metrics")
+	require.NoError(t, err)
+	require.Equal(t, http.StatusOK, resp.StatusCode)
+	b, _ := io.ReadAll(resp.Body)
+	body := string(b)
+
+	for _, want := range []string{
+		"storefwd_buffer_depth 12",
+		"storefwd_written_total 1043",
+		"storefwd_sent_total 1031",
+		"storefwd_dropped_total 4",
+		"storefwd_checkpoint_total 34",
+		"storefwd_send_error_total 1",
+		"# TYPE storefwd_written_total counter",
+		"# TYPE storefwd_buffer_depth gauge",
+	} {
+		assert.Contains(t, body, want)
+	}
+}
+
+// /metrics must still work (and omit storefwd_*) when no TelemetrySource is wired.
+func TestMetrics_OmitsStorefwdWhenNoSource(t *testing.T) {
+	srv := adminapi.NewServer(&mockManager{}, &mockMonitor{}, adminapi.ServerOptions{})
+	apiSrv := httptest.NewServer(srv)
+	t.Cleanup(apiSrv.Close)
+
+	resp, err := http.Get(apiSrv.URL + "/metrics")
+	require.NoError(t, err)
+	require.Equal(t, http.StatusOK, resp.StatusCode)
+	b, _ := io.ReadAll(resp.Body)
+	assert.NotContains(t, string(b), "storefwd_")
+	assert.Contains(t, string(b), "gateway_uptime_seconds")
+}
 
 func TestTelemetry_ReturnsDriftAndDepth(t *testing.T) {
 	src := &mockTelemetrySource{

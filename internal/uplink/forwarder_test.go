@@ -124,6 +124,36 @@ func TestForwarder_ZeroConfigClampsToDefaults(t *testing.T) {
 	assert.Equal(t, 1, sink.sentCount())
 }
 
+// On a full-ack checkpoint the Forwarder records the sent frames and the
+// checkpoint into the Buffer (the single store-and-forward metrics source).
+func TestForwarder_RecordsSentAndCheckpoint(t *testing.T) {
+	buf := newBuf(t)
+	writeFrames(t, buf, "p1", "p2", "p3")
+	sink := &fakeSink{accepted: 3}
+
+	fwd := uplink.NewForwarder(buf, sink, uplink.Config{CheckpointSize: 3, CheckpointAge: time.Hour})
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	go fwd.Run(ctx) //nolint:errcheck
+
+	assert.Eventually(t, func() bool { return buf.Checkpoints() == 1 }, 2*time.Second, 20*time.Millisecond)
+	assert.Equal(t, int64(3), buf.Sent(), "all 3 frames recorded as sent")
+	assert.Equal(t, int64(0), buf.SendErrors())
+}
+
+// A send failure records a send error and does not count a checkpoint.
+func TestForwarder_RecordsSendError(t *testing.T) {
+	buf := newBuf(t)
+	writeFrames(t, buf, "p1")
+	sink := &fakeSink{sendErr: errors.New("stream broken")}
+
+	fwd := uplink.NewForwarder(buf, sink, uplink.Config{CheckpointSize: 3, CheckpointAge: time.Hour})
+	err := fwd.Run(context.Background())
+	require.Error(t, err)
+	assert.Equal(t, int64(1), buf.SendErrors(), "the send failure is metered")
+	assert.Equal(t, int64(0), buf.Checkpoints(), "no checkpoint on a failed session")
+}
+
 // A send failure before any checkpoint must leave the cursor un-advanced so the
 // un-acked batch is replayed on reconnect.
 func TestForwarder_SendErrorDoesNotAdvanceCursor(t *testing.T) {

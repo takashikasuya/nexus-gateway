@@ -65,10 +65,14 @@ func (f *Forwarder) Run(ctx context.Context) error {
 		if len(batch) == 0 {
 			return nil
 		}
+		sent := int64(len(batch))
 		accepted, err := f.sink.Checkpoint(ctx)
 		if err != nil {
+			f.buf.RecordSendError()
 			return fmt.Errorf("checkpoint: %w", err)
 		}
+		f.buf.RecordSent(sent)
+		f.buf.RecordCheckpoint()
 		newCursor, drifts := storeforward.ApplyAck(batch, accepted)
 		for pointID, delta := range drifts {
 			f.buf.RecordDrift(pointID, delta)
@@ -107,6 +111,7 @@ func (f *Forwarder) Run(ctx context.Context) error {
 			}
 			for _, sf := range frames {
 				if err := f.sink.Send(ctx, sf.Frame); err != nil {
+					f.buf.RecordSendError()
 					return fmt.Errorf("send: %w", err)
 				}
 				batch = append(batch, storeforward.SentFrame{Seq: sf.Seq, PointID: sf.Frame.PointId})
