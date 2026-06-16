@@ -122,6 +122,10 @@ write(cmd)  → Result
 
 ## クイックスタート
 
+> 🚀 はじめての方へ：**[はじめにガイド](docs/getting-started.ja.md)**
+> ([English](docs/getting-started.md))が、`compose up` からテレメトリの観察、
+> Admin API でのコネクタ操作までを、機器なし・約 10 分で案内します。
+
 ```bash
 # フルスタック: NATS + mock Building OS + gateway + Keycloak + Admin UI
 docker compose up --build
@@ -210,6 +214,16 @@ E2E テストは `test/e2e/`(`//go:build e2e`)にあり、
 実シミュレータ / Building OS スタックがある環境で `-tags e2e` + 環境変数を与えて実行
 します。学術評価（E1〜E7）の実験設計は
 [`docs/evaluation-plan.ja.md`](docs/evaluation-plan.ja.md) を参照してください。
+
+---
+
+## 貢献 & セキュリティ
+
+- **貢献** — 開発セットアップ・テストゲート・PR 規約は
+  [`CONTRIBUTING.md`](CONTRIBUTING.md) に。まずは
+  [はじめにガイド](docs/getting-started.ja.md)から。
+- **セキュリティ** — 脆弱性は [`SECURITY.md`](SECURITY.md)(GitHub 限定アドバイザリ)
+  で非公開に報告してください。公開 Issue は作成しないでください。
 
 ---
 

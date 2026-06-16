@@ -126,6 +126,11 @@ with the proven per-protocol OSS stacks underneath: **Eclipse Milo** (OPC-UA),
 
 ## Quickstart
 
+> 🚀 New here? The **[Getting Started guide](docs/getting-started.md)**
+> ([日本語](docs/getting-started.ja.md)) walks you from `compose up` to watching
+> telemetry flow and driving a connector through the Admin API, in ~10 minutes
+> with no equipment.
+
 ```bash
 # 1. Full stack: NATS + mock Building OS + gateway + Keycloak + Admin UI
 docker compose up --build
@@ -258,6 +263,17 @@ without the relevant `E2E_*` env vars (ADR-0004). See
 **[`docs/e2e-test-overview.md`](docs/e2e-test-overview.md)** for the full
 test landscape — in-process CI tests, live connector stack tests, and
 Building OS integration tests (#43–#46).
+
+---
+
+## Contributing & security
+
+- **Contributing** — dev setup, test gates, and PR conventions are in
+  [`CONTRIBUTING.md`](CONTRIBUTING.md). Start from the
+  [Getting Started guide](docs/getting-started.md).
+- **Security** — report vulnerabilities privately via
+  [`SECURITY.md`](SECURITY.md) (GitHub private advisories); please don't open a
+  public issue for them.
 
 ---
 
