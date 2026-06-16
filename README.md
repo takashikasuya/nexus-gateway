@@ -9,6 +9,11 @@ normalizes everything into Building OS's common data model. Building OS is the
 **System of Record**; this gateway is responsible only for **connection and
 translation**.
 
+> **Status: pre-MVP.** The MVP scope (in/out), pass conditions, and remaining
+> gaps are fixed in **[MVP_READINESS.md](MVP_READINESS.md)** — OPC-UA is the
+> baseline end-to-end protocol; BACnet, Envoy mTLS, and cosign production are
+> MVP+1.
+
 ---
 
 ## Why this exists

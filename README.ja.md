@@ -8,6 +8,10 @@
 の共通データモデルへ正規化します。Building OS が **System of Record(記録の正本)**
 であり、本ゲートウェイの責務は **接続と変換** のみです。
 
+> **ステータス: MVP 直前。** MVP のスコープ(対象/対象外)・合格条件・残ギャップは
+> **[MVP_READINESS.md](MVP_READINESS.md)** に固定しています。基準プロトコルは OPC-UA、
+> BACnet・Envoy mTLS・cosign 本番運用は MVP+1 です。
+
 ---
 
 ## なぜ作ったか
@@ -131,10 +135,10 @@ write(cmd)  → Result
 docker compose up --build
 ```
 
-- Admin UI: http://localhost:3000(Keycloak realm `nexus-gateway`、ユーザ
+- Admin UI: http://localhost:13000(Keycloak realm `nexus-gateway`、ユーザ
   `operator`/`operator`、`viewer`/`viewer`)
-- Gateway Admin API: http://localhost:8080(`/health`、`/metrics`、`/connectors`)
-- Keycloak: http://localhost:8090
+- Gateway Admin API: http://localhost:18080(`/health`、`/metrics`、`/connectors`)
+- Keycloak: http://localhost:18090(管理者 `admin`/`admin`)
 
 ゲートウェイバイナリを直接実行:
 

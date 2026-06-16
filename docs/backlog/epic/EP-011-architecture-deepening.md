@@ -62,12 +62,22 @@ This epic also closes a concrete gap surfaced while reviewing `gutp-building-os-
 - [x] **FEAT-029: Store-and-Forward delivery policy as a tested module** (deepens EP-003, makes ADR-0002 testable). **Done** — `uplink.Forwarder` behind the `FrameSink` seam; gRPC is the `grpcSink` adapter.
   The ADR-0002 rules — advance cursor on `StreamAck.accepted`, record `accepted < sent` as a per-`point_id` drift counter, replay the whole un-acked batch on pre-ack failure, never resend rejects — live entirely inside the untested 95-line `internal/uplink/ingress.go` `runStream`, fused with gRPC stream open/close and two timers. Extract the checkpoint/advance/drift decision behind a small interface over the `storeforward.Buffer` and an injected "send batch → accepted-count" seam; gRPC streaming becomes an adapter at that seam.
 
-- [~] **FEAT-030: Normalizer Common Event → Telemetry decision as a pure module** (deepens EP-003, makes ADR-0001 explicit). **Pure decision done** — `Normalize` is a pure `(Common Event, Resolver) → Outcome{frame|poison|miss}` with a public `Outcome` type (#60). *Residual:* extract the JetStream consumer (stream/consumer/subject creation, `Fetch`/`Ack`/`Term`) out of the `Normalizer` constructor into a thin adapter behind an `EventSource` seam, so normalizer behavior is testable without a live JetStream.
+- [~] **FEAT-030: Normalizer Common Event → Telemetry decision as a pure module** (deepens EP-003, makes ADR-0001 explicit). **Pure decision done** — `Normalize` is a pure `(Common Event, Resolver) → Outcome{frame|poison|miss}` with a public `Outcome` type (#60). *Residual (tracked: #69):* extract the JetStream consumer (stream/consumer/subject creation, `Fetch`/`Ack`/`Term`) out of the `Normalizer` constructor into a thin adapter behind an `EventSource` seam, so normalizer behavior is testable without a live JetStream.
   The identity/semantic mapping (decode, resolve `local_id`→`point_id`, classify `ok`/`poison`/`miss`, coerce `value` to numeric per CONTEXT.md) is a private function + private enum welded to JetStream `Fetch`/`Ack`/`Term`; it is testable today only via 500 ms channel-timeout inference and forces serial tests through process-global counters. Extract `(Common Event, Resolver) → Outcome{frame|poison|miss}` as a pure module; the JetStream consumer becomes a thin adapter mapping outcome → Ack/Term + counter.
 
 - [~] **FEAT-031: Point List as one deep module, aligned to the real #224 API** (deepens EP-006). **P0 closed.**
-  **P0 gap closed** — `provisioning.HTTPClient` already speaks the real #224 ETag contract (`GET /gateways/{gatewayId}/pointlist`, `If-None-Match`/304, `?since=` full/delta) (#58); the imagined `/version`+`/snapshot` client is gone. The reverse-resolution seam is now `pointlist.ReverseResolver` (no longer redeclared in `dispatch`). *Residual (refactor, not P0):* unify `pointlist.SyncedResolver` + `pointsync.Loop` + the `main.go` bootstrap/first-sync sequencing into one owning module whose interface is the convergence lifecycle, and act on `EgressDown.point_list_update` as a revalidation hint.
+  **P0 gap closed** — `provisioning.HTTPClient` already speaks the real #224 ETag contract (`GET /gateways/{gatewayId}/pointlist`, `If-None-Match`/304, `?since=` full/delta) (#58); the imagined `/version`+`/snapshot` client is gone. The reverse-resolution seam is now `pointlist.ReverseResolver` (no longer redeclared in `dispatch`). *Residual (refactor, not P0; tracked: #70):* unify `pointlist.SyncedResolver` + `pointsync.Loop` + the `main.go` bootstrap/first-sync sequencing into one owning module whose interface is the convergence lifecycle, and act on `EgressDown.point_list_update` as a revalidation hint.
   Today "the Point List" is split across `pointlist.SyncedResolver` (atomic swap/persist), `pointsync.Loop` (poll cadence), `dispatch`'s separately-redeclared reverse `Resolver` interface, and `main.go` (initial Load + blocking first sync) — no module owns convergence. Give it one owning module whose interface is the convergence lifecycle (file bootstrap → provisioning sync override → blocking-first-load → forward + reverse resolution).
+
+## Follow-up improvements (from the deepening review)
+
+Non-blocking efficiency items surfaced once the seams were isolated — each is now
+a clean, contained follow-up rather than a tangle:
+
+- **#71** — `uplink.Forwarder` polls the buffer every 50 ms; replace with a
+  write-notify signal (idle busy-poll + first-frame latency).
+- **#72** — `/health` does a blocking disk `statfs` on the Admin API hot path via
+  `GatewayMetrics.Sample`; sample periodically and cache.
 
 ## Dependencies
 
