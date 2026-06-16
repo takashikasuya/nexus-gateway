@@ -136,19 +136,19 @@ existing `internal/metrics` registry into `adminapi.handleMetrics`.
 
 **P0 (blocking)**
 
-1. Expose store-and-forward metrics on `/metrics` (see Required Metrics).
-2. Fix the OPC-UA E2E smoke as the single MVP baseline test.
-3. State MVP scope (in/out) in the README.
+1. Expose store-and-forward metrics on `/metrics` (see Required Metrics) — **#73**.
+2. Fix the OPC-UA E2E smoke as the single MVP baseline test — **#74**.
+3. State MVP scope (in/out) in the README — ✅ done (this doc + README pointers).
 4. Unify the `docker compose` port docs (README.ja used container-internal
-   `3000/8080/8090`; published ports are `13000/18080/18090`).
+   `3000/8080/8090`; published ports are `13000/18080/18090`) — ✅ done.
 
 **P1**
 
 5. Demote `upgrade?image=` to a dev-only path; document catalog-driven update as
-   the MVP update route.
+   the MVP update route — **#75**.
 6. Keep `--bos-insecure=true` to compose/dev only; provide a TLS config example
-   for the production MVP procedure.
+   for the production MVP procedure — **#76**.
 7. Maintain this `MVP_READINESS.md` as the gate checklist.
 
-Tracking issues for these items are filed under the `epic:EP-011` /
-`documentation` labels; see the repository issue list.
+All open items are tracked under the **`mvp`** label; see the repository issue
+list (#73–#76).
