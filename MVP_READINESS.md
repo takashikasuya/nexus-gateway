@@ -29,7 +29,7 @@ protocol because its E2E runs over plain TCP with no host-networking dependency.
 | Point List — HTTP provisioning (#224 ETag) | β acceptable |
 | Admin API (`/health` `/metrics` `/telemetry` `/connectors` `/devices`) | ✅ required |
 | Admin UI (Next.js) | nice-to-have, **not** MVP-blocking |
-| **OPC-UA E2E** (`TestOPCUATelemetryE2E`) | ✅ baseline scenario |
+| **OPC-UA E2E** (`integration/TestE2E_OpcUATelemetry`) | ✅ baseline scenario |
 | Connector Catalog — dev/file-backed | ✅ sufficient for MVP |
 | Store-and-Forward metrics on `/metrics` | ✅ required (gap — see below) |
 
@@ -81,15 +81,23 @@ docker compose up --build
 # 2. OPC-UA baseline overlay (CI-friendly, plain TCP)
 docker compose -f docker-compose.yml -f docker-compose.integration.yml --profile opcua up
 
-# 3. Unit + race suite
+# 3. Unit + race suite (also runs the in-process store-and-forward
+#    outage/recovery test, integration/TestSF_OutageSurvival — scenario #3)
 go test -race ./...
 
-# 4. OPC-UA E2E smoke (build tag `e2e`; needs the simulator stack from step 2)
-go test -tags e2e ./test/e2e/ -run TestOPCUATelemetryE2E
+# 4. OPC-UA E2E smoke over the stack from step 2 (scenario #2)
+E2E_NATS_URL=nats://localhost:14222 \
+  go test ./integration/... -run TestE2E_OpcUATelemetry -v -timeout 120s
 ```
 
-> Note: the E2E test is `TestOPCUATelemetryE2E` under `test/e2e/` with the `e2e`
-> build tag — it skips automatically without the simulator stack / `E2E_*` env.
+> Note: `integration/TestE2E_OpcUATelemetry` is **not** build-tagged — it skips
+> automatically when `E2E_NATS_URL` is unset, so it is inert in a normal
+> `go test ./...` run and only executes against the live stack (this is the CI
+> `e2e-opcua` job). It asserts the OPC-UA Common Events on NATS **and** scrapes
+> the gateway's `/metrics` for `storefwd_written_total`/`storefwd_sent_total > 0`,
+> proving the frame reached mock Building OS. The outage/recovery scenario (#3) is
+> the in-process `integration/TestSF_OutageSurvival`, which runs in the unit
+> suite above.
 
 ---
 
