@@ -240,6 +240,19 @@ cd admin-ui && npm run type-check && npm run build
 CI (`.github/workflows/ci.yml`) runs the Go build/test and the Admin UI
 type-check/build on every PR.
 
+### Module seams (testability)
+
+The behaviors the ADRs describe are concentrated into **deep modules** — a small
+interface that is also the unit-test surface, so each is exercised in-process
+without a live NATS/gRPC/Docker stack ([EP-011](docs/backlog/epic/EP-011-architecture-deepening.md)):
+
+| Module | Seam | What it owns |
+|--------|------|--------------|
+| `uplink.Forwarder` | `FrameSink` (`Send` + `Checkpoint`) | ADR-0002 checkpoint/advance/drift/replay policy; gRPC client-streaming is the `grpcSink` adapter. |
+| `lifecycle.HealthMonitor` | `GatewayMetrics` + `ConnectorProber` | host stats (uptime/mem/disk) vs. container liveness, each probed and tested independently. |
+| `pointlist.Resolver` / `ReverseResolver` | forward + reverse lookup | the single Point List, consumed by the Normalizer (forward) and control Dispatch (reverse). |
+| `adminapi` | `NewServer` / `NewSecureServer` + `ServerOptions` | one no-auth and one JWT constructor over a shared builder; optional sources via a single struct. |
+
 E2E tests in `integration/` require a live stack and skip automatically
 without the relevant `E2E_*` env vars (ADR-0004). See
 **[`docs/e2e-test-overview.md`](docs/e2e-test-overview.md)** for the full

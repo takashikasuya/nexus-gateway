@@ -1,7 +1,45 @@
 # EP-011: Architecture Deepening & Building OS #224 Alignment
 
-**Status:** Proposed
-**Priority:** P1 (FEAT-031 carries a P0 correctness gap — see Dependencies)
+**Status:** In progress
+**Priority:** P1 (FEAT-031's P0 gap is now closed — see Progress)
+
+## Progress
+
+A 2026-06-15 architecture review (the `/improve-codebase-architecture` pass)
+walked the codebase against this epic and found two of its premises already
+overtaken by landed work, plus four further shallow seams worth deepening. State
+as of that review:
+
+- **FEAT-030 — pure Normalizer decision: done.** `Normalize` is already a pure
+  `(Common Event, Resolver) → Outcome{frame|poison|miss}` function with a public
+  `Outcome` type. The only residual friction is that the JetStream consumer
+  (stream/consumer/subject) is still created inside the Normalizer constructor —
+  a follow-up adapter extraction, not a re-write.
+- **FEAT-031 — P0 API mismatch: closed.** `provisioning.HTTPClient` already
+  speaks the real #224 contract (`GET /gateways/{id}/pointlist`,
+  `If-None-Match`/304, `?since=` full/delta). What remains is the *structural*
+  deepening (one owning module for the file-bootstrap → provisioning-override →
+  blocking-first-load → forward+reverse lifecycle), which is no longer a P0.
+- **FEAT-029 — S&F policy seam: done.** First as the pure `storeforward.ApplyAck`
+  function, then completed by extracting `uplink.Forwarder` behind the
+  `FrameSink` seam (`Send` + `Checkpoint`); gRPC client-streaming is now the
+  `grpcSink` adapter. The checkpoint/advance/drift/replay rules are tested
+  in-process with no gRPC stack.
+
+### Additional deepenings landed (beyond the original FEAT list)
+
+These came out of the same review — shallow seams not captured by FEAT-028..031:
+
+- **Reverse-resolution seam relocated.** The single-implementation
+  `dispatch.Resolver` interface was an artificial seam; the reverse lookup is now
+  a named `pointlist.ReverseResolver` (its only home), and Dispatch consumes it
+  via alias instead of redeclaring it.
+- **Admin API constructors consolidated.** Six `New*` constructors (auth × feature
+  matrix) collapsed to two — `NewServer` (no-auth) and `NewSecureServer` (JWT via
+  `JWTConfig`) — over one shared builder. Optional sources stay in `ServerOptions`.
+- **HealthMonitor split into two seams.** `GatewayMetrics` (host uptime/mem/disk)
+  and `ConnectorProber` (container liveness via the Docker daemon) are now
+  independently testable; `Snapshot` composes them.
 
 ## Goal
 
@@ -21,7 +59,7 @@ This epic also closes a concrete gap surfaced while reviewing `gutp-building-os-
 - [ ] **FEAT-028: Connector SDK + shared wire contract** (deepens EP-002, fulfils ADR-0005's SDK clause).
   The Command Channel `control_id` dedup + in-flight sentinel + bounded-ack-window publish are currently re-implemented three times (Go/Python/Java) and already diverging (MQTT: no eviction, replies `in_flight`; BACnet/OPC-UA: 1000-entry evict, silent drop). The wire types (`CommonEvent`, `ControlCommand`, `WriteReply`) are redefined per language with nothing enforcing agreement. Make the Connector↔Gateway internal protocol one generated contract (protobuf or single JSON schema) and give each language a thin SDK owning publish-with-ack-window + dedup behind a small interface, so a Connector carries only protocol-specific code.
 
-- [ ] **FEAT-029: Store-and-Forward delivery policy as a tested module** (deepens EP-003, makes ADR-0002 testable).
+- [x] **FEAT-029: Store-and-Forward delivery policy as a tested module** (deepens EP-003, makes ADR-0002 testable). **Done** — `uplink.Forwarder` behind the `FrameSink` seam; gRPC is the `grpcSink` adapter.
   The ADR-0002 rules — advance cursor on `StreamAck.accepted`, record `accepted < sent` as a per-`point_id` drift counter, replay the whole un-acked batch on pre-ack failure, never resend rejects — live entirely inside the untested 95-line `internal/uplink/ingress.go` `runStream`, fused with gRPC stream open/close and two timers. Extract the checkpoint/advance/drift decision behind a small interface over the `storeforward.Buffer` and an injected "send batch → accepted-count" seam; gRPC streaming becomes an adapter at that seam.
 
 - [ ] **FEAT-030: Normalizer Common Event → Telemetry decision as a pure module** (deepens EP-003, makes ADR-0001 explicit).

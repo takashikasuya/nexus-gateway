@@ -191,7 +191,22 @@ cd admin-ui && npm run type-check && npm run build
 ```
 
 CI(`.github/workflows/ci.yml`)は PR ごとに Go の build/test と Admin UI の
-type-check/build を実行します。E2E テストは `test/e2e/`(`//go:build e2e`)にあり、
+type-check/build を実行します。
+
+### モジュールのシーム(テスト容易性)
+
+ADR が定める振る舞いは **深いモジュール**(小さなインターフェース＝ユニットテスト面)に
+集約され、各々が NATS/gRPC/Docker の実スタックなしで in-process に検証できます
+([EP-011](docs/backlog/epic/EP-011-architecture-deepening.md)):
+
+| モジュール | シーム | 責務 |
+|------------|--------|------|
+| `uplink.Forwarder` | `FrameSink`(`Send` + `Checkpoint`) | ADR-0002 のチェックポイント/前進/ドリフト/再送ポリシー。gRPC クライアントストリーミングは `grpcSink` アダプタ。 |
+| `lifecycle.HealthMonitor` | `GatewayMetrics` + `ConnectorProber` | ホスト統計(uptime/mem/disk)とコンテナ生存性を分離し、各々を独立にテスト。 |
+| `pointlist.Resolver` / `ReverseResolver` | 順引き + 逆引き | 単一の Point List。Normalizer(順)と制御 Dispatch(逆)が消費。 |
+| `adminapi` | `NewServer` / `NewSecureServer` + `ServerOptions` | 認証なし/JWT の 2 コンストラクタを共有ビルダーで。任意ソースは 1 構造体に集約。 |
+
+E2E テストは `test/e2e/`(`//go:build e2e`)にあり、
 実シミュレータ / Building OS スタックがある環境で `-tags e2e` + 環境変数を与えて実行
 します。学術評価（E1〜E7）の実験設計は
 [`docs/evaluation-plan.ja.md`](docs/evaluation-plan.ja.md) を参照してください。
