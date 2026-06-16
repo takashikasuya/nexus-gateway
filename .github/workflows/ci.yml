@@ -63,10 +63,13 @@ jobs:
       - name: Run OPC-UA E2E test
         env:
           E2E_NATS_URL: nats://localhost:14222
+          # Gateway Admin API: the test scrapes /metrics (unauthenticated) to assert
+          # the store-and-forward path reached mock Building OS (storefwd_*).
+          E2E_ADMIN_URL: http://localhost:18080
         run: |
           go test ./integration/... \
             -run TestE2E_OpcUATelemetry \
-            -v -timeout 120s
+            -v -timeout 240s
 
       - name: Dump logs on failure
         if: failure()

@@ -2,6 +2,9 @@ package integration_test
 
 import (
 	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
 	"os"
 	"strings"
 	"testing"
@@ -86,4 +89,53 @@ func TestE2E_OpcUATelemetry(t *testing.T) {
 		"expected %d distinct OPC-UA points in EVENTS stream, got %d: %v",
 		wantPoints, len(seen), seen)
 	t.Logf("OPC-UA E2E: %d/8 points: %v", len(seen), seen)
+
+	// Phase 2 (MVP scenario #2): prove the telemetry traversed
+	// Normalizer → SQLite Store-and-Forward → mock Building OS, not just NATS.
+	// Scrape the gateway's unauthenticated /metrics and require the store-and-forward
+	// counters to show frames both written to the buffer and sent up (#73, #74).
+	adminURL := os.Getenv("E2E_ADMIN_URL")
+	if adminURL == "" {
+		adminURL = "http://localhost:18080"
+	}
+	var written, sent int64
+	require.Eventually(t, func() bool {
+		body, err := scrapeMetrics(adminURL)
+		if err != nil {
+			return false
+		}
+		written = parseCounter(body, "storefwd_written_total")
+		sent = parseCounter(body, "storefwd_sent_total")
+		return written > 0 && sent > 0
+	}, 60*time.Second, 2*time.Second,
+		"store-and-forward /metrics must show frames written to the buffer and sent to Building OS")
+	t.Logf("OPC-UA E2E: store-and-forward written=%d sent=%d (reached mock Building OS)", written, sent)
+}
+
+// scrapeMetrics fetches the gateway's Prometheus /metrics text (unauthenticated).
+func scrapeMetrics(baseURL string) (string, error) {
+	resp, err := http.Get(strings.TrimRight(baseURL, "/") + "/metrics")
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("/metrics: status %d", resp.StatusCode)
+	}
+	b, err := io.ReadAll(resp.Body)
+	return string(b), err
+}
+
+// parseCounter returns the value of an unlabeled Prometheus counter line
+// ("<name> <value>"), or 0 if absent.
+func parseCounter(body, name string) int64 {
+	for _, line := range strings.Split(body, "\n") {
+		if rest, ok := strings.CutPrefix(line, name+" "); ok {
+			var v int64
+			if _, err := fmt.Sscanf(strings.TrimSpace(rest), "%d", &v); err == nil {
+				return v
+			}
+		}
+	}
+	return 0
 }
