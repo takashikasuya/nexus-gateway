@@ -48,10 +48,15 @@ type PointListSource interface {
 }
 
 // TelemetrySource exposes Store-and-Forward telemetry counters.
-// A nil TelemetrySource disables GET /telemetry.
+// A nil TelemetrySource disables GET /telemetry and the storefwd_* /metrics series.
 type TelemetrySource interface {
 	Drifts() map[string]int64
 	Depth() int64
+	Written() int64
+	Sent() int64
+	Dropped() int64
+	Checkpoints() int64
+	SendErrors() int64
 }
 
 // ConnectorLogger provides recent log lines for a connector container.
@@ -357,6 +362,28 @@ func (s *Server) handleMetrics(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "# HELP normalizer_unresolved_total Common Events whose local_id is absent from the Point List.\n")
 	fmt.Fprintf(w, "# TYPE normalizer_unresolved_total counter\n")
 	fmt.Fprintf(w, "normalizer_unresolved_total{reason=\"point_list_miss\"} %d\n", metrics.NormalizerUnresolved())
+
+	if s.telemetry != nil {
+		t := s.telemetry
+		fmt.Fprintf(w, "# HELP storefwd_buffer_depth Frames currently held in the Store-and-Forward ring buffer.\n")
+		fmt.Fprintf(w, "# TYPE storefwd_buffer_depth gauge\n")
+		fmt.Fprintf(w, "storefwd_buffer_depth %d\n", t.Depth())
+		fmt.Fprintf(w, "# HELP storefwd_written_total Frames written to the Store-and-Forward buffer.\n")
+		fmt.Fprintf(w, "# TYPE storefwd_written_total counter\n")
+		fmt.Fprintf(w, "storefwd_written_total %d\n", t.Written())
+		fmt.Fprintf(w, "# HELP storefwd_sent_total Frames sent up to Building OS.\n")
+		fmt.Fprintf(w, "# TYPE storefwd_sent_total counter\n")
+		fmt.Fprintf(w, "storefwd_sent_total %d\n", t.Sent())
+		fmt.Fprintf(w, "# HELP storefwd_dropped_total Frames evicted by drop-oldest at capacity (ADR-0002).\n")
+		fmt.Fprintf(w, "# TYPE storefwd_dropped_total counter\n")
+		fmt.Fprintf(w, "storefwd_dropped_total %d\n", t.Dropped())
+		fmt.Fprintf(w, "# HELP storefwd_checkpoint_total Successful uplink ack-checkpoints.\n")
+		fmt.Fprintf(w, "# TYPE storefwd_checkpoint_total counter\n")
+		fmt.Fprintf(w, "storefwd_checkpoint_total %d\n", t.Checkpoints())
+		fmt.Fprintf(w, "# HELP storefwd_send_error_total Uplink send/checkpoint failures.\n")
+		fmt.Fprintf(w, "# TYPE storefwd_send_error_total counter\n")
+		fmt.Fprintf(w, "storefwd_send_error_total %d\n", t.SendErrors())
+	}
 }
 
 func writeJSON(w http.ResponseWriter, v any) {

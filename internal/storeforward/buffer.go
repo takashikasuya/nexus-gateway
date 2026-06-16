@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"sync"
+	"sync/atomic"
 
 	_ "modernc.org/sqlite"
 
@@ -26,6 +27,15 @@ type Buffer struct {
 
 	mu     sync.Mutex
 	drifts map[string]int64
+
+	// Store-and-forward observability counters (ADR-0002). Atomic: written from
+	// the pump goroutine (written/dropped) and the uplink Forwarder goroutine
+	// (sent/checkpoints/sendErrors), read from the Admin API handler goroutine.
+	written     atomic.Int64
+	dropped     atomic.Int64
+	sent        atomic.Int64
+	checkpoints atomic.Int64
+	sendErrors  atomic.Int64
 }
 
 // Open opens (or creates) a Buffer at the given file path with the given capacity.
@@ -65,7 +75,7 @@ func (b *Buffer) Write(f *pb.TelemetryFrame) error {
 	}
 
 	// Drop oldest if over capacity
-	_, err = tx.Exec(`
+	res, err := tx.Exec(`
 		DELETE FROM frames
 		WHERE seq IN (
 			SELECT seq FROM frames ORDER BY seq ASC LIMIT MAX(0, (SELECT COUNT(*) FROM frames) - ?)
@@ -73,9 +83,41 @@ func (b *Buffer) Write(f *pb.TelemetryFrame) error {
 	if err != nil {
 		return err
 	}
+	evicted, _ := res.RowsAffected()
 
-	return tx.Commit()
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+	b.written.Add(1)
+	if evicted > 0 {
+		b.dropped.Add(evicted)
+	}
+	return nil
 }
+
+// RecordSent adds n to the count of frames acked-as-sent to Building OS.
+func (b *Buffer) RecordSent(n int64) { b.sent.Add(n) }
+
+// RecordCheckpoint counts one successful ack-checkpoint (ADR-0002).
+func (b *Buffer) RecordCheckpoint() { b.checkpoints.Add(1) }
+
+// RecordSendError counts one uplink send/checkpoint failure.
+func (b *Buffer) RecordSendError() { b.sendErrors.Add(1) }
+
+// Written returns the total frames successfully written to the buffer.
+func (b *Buffer) Written() int64 { return b.written.Load() }
+
+// Dropped returns the total frames evicted by drop-oldest at capacity (ADR-0002).
+func (b *Buffer) Dropped() int64 { return b.dropped.Load() }
+
+// Sent returns the total frames acked-as-sent to Building OS.
+func (b *Buffer) Sent() int64 { return b.sent.Load() }
+
+// Checkpoints returns the total successful ack-checkpoints.
+func (b *Buffer) Checkpoints() int64 { return b.checkpoints.Load() }
+
+// SendErrors returns the total uplink send/checkpoint failures.
+func (b *Buffer) SendErrors() int64 { return b.sendErrors.Load() }
 
 // ReadBatch returns up to limit frames with seq > afterSeq, in ascending order.
 func (b *Buffer) ReadBatch(afterSeq int64, limit int) ([]StoredFrame, error) {

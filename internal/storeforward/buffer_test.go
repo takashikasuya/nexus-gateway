@@ -41,6 +41,36 @@ func TestBuffer_WriteReadAdvance(t *testing.T) {
 	assert.Equal(t, "p3", batch2[0].Frame.PointId)
 }
 
+// The Buffer is the single store-and-forward metrics source: it counts frames
+// written and frames dropped on overflow, and accumulates the uplink-side
+// sent/checkpoint/send-error records the Forwarder feeds it.
+func TestBuffer_Counters(t *testing.T) {
+	buf, err := storeforward.Open(t.TempDir()+"/sf.db", 3) // capacity=3
+	require.NoError(t, err)
+	defer buf.Close()
+
+	for i := range 5 {
+		require.NoError(t, buf.Write(&pb.TelemetryFrame{
+			GatewayId: "gw-1", PointId: "p" + string(rune('0'+i)), Value: float64(i), Timestamp: "2024-01-01T00:00:00Z",
+		}))
+	}
+
+	assert.Equal(t, int64(5), buf.Written(), "every successful Write counts")
+	assert.Equal(t, int64(2), buf.Dropped(), "2 of 5 evicted by drop-oldest at capacity 3")
+	assert.Equal(t, int64(3), buf.Depth(), "depth is bounded by capacity")
+
+	// Uplink-side records (the Forwarder feeds these).
+	buf.RecordSent(10)
+	buf.RecordSent(5)
+	buf.RecordCheckpoint()
+	buf.RecordCheckpoint()
+	buf.RecordSendError()
+
+	assert.Equal(t, int64(15), buf.Sent())
+	assert.Equal(t, int64(2), buf.Checkpoints())
+	assert.Equal(t, int64(1), buf.SendErrors())
+}
+
 func TestBuffer_DropOldestOnOverflow(t *testing.T) {
 	buf, err := storeforward.Open(t.TempDir()+"/sf.db", 3) // capacity=3
 	require.NoError(t, err)
