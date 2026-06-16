@@ -86,12 +86,38 @@ func (h *HealthMonitor) Snapshot(ctx context.Context) GatewayHealth {
 
 type runtimeMetrics struct {
 	startTime time.Time // when this monitor was created; per-instance, not package-global
+
+	// Disk stats are sampled at most once per diskTTL and cached: a `statfs` can
+	// block on a slow/stale mount, and /health (a liveness probe) is hit often.
+	diskFn  func() (usedMB, totalMB float64)
+	diskTTL time.Duration
+	diskMu  sync.Mutex
+	dUsed   float64
+	dTotal  float64
+	dAt     time.Time
+	dInit   bool
 }
 
 // NewGatewayMetrics returns the default GatewayMetrics backed by the Go runtime
 // and the host filesystem. Uptime is measured from the moment of construction.
 func NewGatewayMetrics() GatewayMetrics {
-	return &runtimeMetrics{startTime: time.Now()}
+	return newRuntimeMetrics(diskStatsMB, 15*time.Second)
+}
+
+func newRuntimeMetrics(diskFn func() (usedMB, totalMB float64), diskTTL time.Duration) *runtimeMetrics {
+	return &runtimeMetrics{startTime: time.Now(), diskFn: diskFn, diskTTL: diskTTL}
+}
+
+// disk returns cached disk stats, refreshing via diskFn at most once per diskTTL.
+func (m *runtimeMetrics) disk() (usedMB, totalMB float64) {
+	m.diskMu.Lock()
+	defer m.diskMu.Unlock()
+	if !m.dInit || time.Since(m.dAt) >= m.diskTTL {
+		m.dUsed, m.dTotal = m.diskFn()
+		m.dAt = time.Now()
+		m.dInit = true
+	}
+	return m.dUsed, m.dTotal
 }
 
 func (m *runtimeMetrics) Sample() GatewayStats {
@@ -102,7 +128,7 @@ func (m *runtimeMetrics) Sample() GatewayStats {
 	if samples[0].Value.Kind() == metrics.KindUint64 {
 		allocMB = float64(samples[0].Value.Uint64()) / 1024 / 1024
 	}
-	diskUsed, diskTotal := diskStatsMB()
+	diskUsed, diskTotal := m.disk()
 	return GatewayStats{
 		UptimeSeconds: time.Since(m.startTime).Seconds(),
 		GoRoutines:    runtime.NumGoroutine(),
