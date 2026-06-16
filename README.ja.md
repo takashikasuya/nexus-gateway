@@ -161,6 +161,29 @@ go run ./cmd/gateway --dev-sim   # 設備不要の smoke 実行用に in-process
 | `--admin-jwks-url` | `KEYCLOAK_JWKS_URL` | – | Keycloak JWKS(空 = Admin API 認証無効) |
 | `--dev-sim` | `DEV_SIM` | `false` | in-process sim コネクタを起動(非本番) |
 
+### 本番: Building OS への TLS/mTLS(ADR-0007)
+
+`BOS_INSECURE=true`(平文 h2c)は **dev/CI 専用**です(エッジプロキシの無いローカル用)。
+本番では `--bos-insecure` を外し、CA + クライアント証明書/鍵を渡します。gRPC リンクは
+Building OS の Envoy エッジで **mTLS 終端**され、`gateway_id` がクライアント証明書の
+CN/SAN に束縛されます。
+
+```bash
+GATEWAY_ID=GW-SOS-001 \
+BOS_ADDR=bos.example.com:443 \
+BOS_CA_FILE=/etc/nexus/tls/ca.pem \
+BOS_CERT_FILE=/etc/nexus/tls/gateway.crt \   # CN/SAN に GATEWAY_ID を埋め込む
+BOS_KEY_FILE=/etc/nexus/tls/gateway.key \
+BOS_SERVER_NAME=bos.example.com \            # 任意: SNI/検証名の上書き
+PROVISIONING_URL=https://bos.example.com/provisioning \
+go run ./cmd/gateway
+```
+
+- `--bos-cert`/`--bos-key` を省くと **サーバ認証のみ**(CA 検証)、付けると **mTLS**。
+- CN/SAN ↔ `gateway_id` の束縛が Building OS の所有権チェックの前提です。
+  [SECURITY.md](SECURITY.md) と
+  [ADR-0007](docs/adr/0007-transport-security-mtls-at-edge.md) を参照。
+
 ### シミュレータ統合(設備なし)
 
 隣接リポ `../bacnet-sim-gateway` と `../opcua-sim-gateway` が標準準拠の BACnet/IP・

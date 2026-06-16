@@ -324,6 +324,39 @@ func TestAction_UnknownAction_Returns400(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
 }
 
+// ── ad-hoc upgrade fence tests (#75) ─────────────────────────────────────────
+
+// By default the MVP update path is catalog-driven; the ad-hoc
+// `upgrade?image=<ref>` action is disabled and returns 501.
+func TestAction_AdhocUpgradeDisabledByDefault(t *testing.T) {
+	mgr := &mockManager{}
+	srv := adminapi.NewServer(mgr, &mockMonitor{}, adminapi.ServerOptions{})
+	apiSrv := httptest.NewServer(srv)
+	t.Cleanup(apiSrv.Close)
+
+	req, _ := http.NewRequestWithContext(context.Background(), http.MethodPost,
+		apiSrv.URL+"/connectors/mqtt-01/upgrade?image=ghcr.io/x@sha256:abc", nil)
+	resp, err := http.DefaultClient.Do(req)
+	require.NoError(t, err)
+	assert.Equal(t, http.StatusNotImplemented, resp.StatusCode)
+	assert.Empty(t, mgr.lastAction, "Upgrade must not be invoked when ad-hoc upgrade is disabled")
+}
+
+// With AllowAdhocUpgrade enabled (dev), the action proceeds to the manager.
+func TestAction_AdhocUpgradeAllowedWithFlag(t *testing.T) {
+	mgr := &mockManager{}
+	srv := adminapi.NewServer(mgr, &mockMonitor{}, adminapi.ServerOptions{AllowAdhocUpgrade: true})
+	apiSrv := httptest.NewServer(srv)
+	t.Cleanup(apiSrv.Close)
+
+	req, _ := http.NewRequestWithContext(context.Background(), http.MethodPost,
+		apiSrv.URL+"/connectors/mqtt-01/upgrade?image=ghcr.io/x@sha256:abc", nil)
+	resp, err := http.DefaultClient.Do(req)
+	require.NoError(t, err)
+	assert.Equal(t, http.StatusNoContent, resp.StatusCode)
+	assert.Equal(t, "upgrade", mgr.lastAction)
+}
+
 // ── devices tests ────────────────────────────────────────────────────────────
 
 func TestDevices_ListAll(t *testing.T) {

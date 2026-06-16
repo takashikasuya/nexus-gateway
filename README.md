@@ -185,6 +185,7 @@ go run ./cmd/gateway --dev-sim   # in-process sim connector for a no-equipment s
 | `--dev-sim` | `DEV_SIM` | `false` | Run the in-process sim connector (non-production, ADR-0001) |
 | `--catalog-file` | `CATALOG_FILE` | – | File-backed Connector Catalog (JSON `[]Manifest`); enables `POST /connectors/{name}/install` |
 | `--catalog-url` | `CATALOG_URL` | – | Remote Connector Catalog base URL (overrides `--catalog-file`) |
+| `--allow-adhoc-upgrade` | `ALLOW_ADHOC_UPGRADE` | `false` | Enable dev-only `POST /connectors/{id}/upgrade?image=`; MVP update path is catalog-driven (ADR-0006) |
 | `--catalog-allowlist` | `CATALOG_ALLOWLIST` | `ghcr.io` | Comma-separated list of allowed OCI registries (ADR-0006) |
 
 ### Simulator integration (no equipment)
@@ -216,6 +217,33 @@ BOS_INSECURE=true \
 PROVISIONING_FILE=/path/to/mvp-pointlist.csv \
 go run ./cmd/gateway
 ```
+
+> `BOS_INSECURE=true` (plaintext h2c) is **dev/CI only** — it is for local runs
+> with no edge proxy. Do not use it in production.
+
+#### Production: TLS/mTLS to Building OS (ADR-0007)
+
+In production the gateway↔Building OS gRPC link is **mTLS terminated at the
+Building OS Envoy edge**, with the gateway's `gateway_id` bound to the client
+certificate's CN/SAN. Drop `--bos-insecure` and provide the CA + client
+cert/key instead:
+
+```bash
+GATEWAY_ID=GW-SOS-001 \
+BOS_ADDR=bos.example.com:443 \
+BOS_CA_FILE=/etc/nexus/tls/ca.pem \
+BOS_CERT_FILE=/etc/nexus/tls/gateway.crt \   # CN/SAN encodes GATEWAY_ID
+BOS_KEY_FILE=/etc/nexus/tls/gateway.key \
+BOS_SERVER_NAME=bos.example.com \            # optional: override SNI/verify name
+PROVISIONING_URL=https://bos.example.com/provisioning \
+go run ./cmd/gateway
+```
+
+- Omit `--bos-cert`/`--bos-key` for **server-only TLS** (CA verification without
+  a client cert); include them for **mTLS**.
+- The cert CN/SAN ↔ `gateway_id` binding is what Building OS's ownership check
+  assumes — see [SECURITY.md](SECURITY.md) and
+  [ADR-0007](docs/adr/0007-transport-security-mtls-at-edge.md).
 
 For the full E2E test suite against Building OS, see
 **[`docs/e2e-test-overview.md`](docs/e2e-test-overview.md)**.

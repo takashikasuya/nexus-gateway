@@ -51,6 +51,7 @@ func main() {
 	sfDB := flag.String("sf-db", envOrDefault("SF_DB", "data/storeforward.db"), "Store-and-Forward SQLite database path")
 	sfCap := flag.Int("sf-cap", 100_000, "Store-and-Forward ring buffer capacity (frames)")
 	devSim := flag.Bool("dev-sim", envOrDefault("DEV_SIM", "") == "true", "Run an in-process sim connector (dev/smoke only, non-production; ADR-0001)")
+	allowAdhocUpgrade := flag.Bool("allow-adhoc-upgrade", envOrDefault("ALLOW_ADHOC_UPGRADE", "") == "true", "Enable the dev-only POST /connectors/{id}/upgrade?image= action; MVP update path is catalog-driven (ADR-0006)")
 	syncInterval := flag.Duration("point-sync-interval", 10*time.Minute, "Point List poll interval after the initial sync (the list is near-static, ADR-0003)")
 	bosInsecure := flag.Bool("bos-insecure", envOrDefault("BOS_INSECURE", "") == "true", "Dial Building OS over plaintext h2c (no TLS) — dev/CI only (ADR-0007)")
 	bosCA := flag.String("bos-ca", envOrDefault("BOS_CA_FILE", ""), "PEM CA bundle to verify the Building OS server cert (empty = system roots)")
@@ -263,11 +264,12 @@ func main() {
 	}
 
 	adminOpts := adminapi.ServerOptions{
-		Installer: catalogInstaller,
-		Catalog:   catalogSrc,
-		PointList: resolver,
-		Telemetry: buf,
-		Logger:    connMgr,
+		Installer:         catalogInstaller,
+		Catalog:           catalogSrc,
+		PointList:         resolver,
+		Telemetry:         buf,
+		Logger:            connMgr,
+		AllowAdhocUpgrade: *allowAdhocUpgrade,
 	}
 	var adminSrv *adminapi.Server
 	if *jwksURL != "" {

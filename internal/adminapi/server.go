@@ -73,6 +73,10 @@ type ServerOptions struct {
 	PointList PointListSource
 	Telemetry TelemetrySource
 	Logger    ConnectorLogger
+	// AllowAdhocUpgrade enables the dev-only POST /connectors/{id}/upgrade?image=<ref>
+	// action. The MVP update path is catalog-driven (ADR-0006); when false (default)
+	// the upgrade action returns 501 Not Implemented.
+	AllowAdhocUpgrade bool
 }
 
 // JWTConfig configures bearer-token authentication for the Admin API. The token
@@ -103,6 +107,8 @@ type Server struct {
 	logger    ConnectorLogger    // nil if log streaming is not configured
 	monitor   HealthSnapshotter
 	shutdown  context.CancelFunc // stops the JWKS cache refresh goroutine
+
+	allowAdhocUpgrade bool // dev-only upgrade?image= action (ADR-0006: catalog-driven by default)
 }
 
 // NewServer creates an Admin API Server with authentication DISABLED — for
@@ -143,6 +149,8 @@ func buildServer(mgr ConnectorManager, monitor HealthSnapshotter, opts ServerOpt
 		telemetry: opts.Telemetry,
 		logger:    opts.Logger,
 		monitor:   monitor,
+
+		allowAdhocUpgrade: opts.AllowAdhocUpgrade,
 	}
 	s.registerRoutes(authenticated)
 	return s
@@ -269,6 +277,10 @@ func (s *Server) handleAction(w http.ResponseWriter, r *http.Request) {
 	case "restart":
 		err = s.mgr.Restart(r.Context(), id)
 	case "upgrade":
+		if !s.allowAdhocUpgrade {
+			http.Error(w, "ad-hoc upgrade disabled; use catalog-driven update (POST /connectors/{id}/update) — ADR-0006", http.StatusNotImplemented)
+			return
+		}
 		newImage := strings.TrimSpace(r.URL.Query().Get("image"))
 		if newImage == "" {
 			http.Error(w, "upgrade requires ?image=<ref>", http.StatusBadRequest)
