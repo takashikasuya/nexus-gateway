@@ -36,6 +36,10 @@ type Buffer struct {
 	sent        atomic.Int64
 	checkpoints atomic.Int64
 	sendErrors  atomic.Int64
+
+	// notify is signaled (non-blocking, coalesced) after each successful Write so
+	// the single uplink Forwarder can drain immediately instead of polling (#71).
+	notify chan struct{}
 }
 
 // Open opens (or creates) a Buffer at the given file path with the given capacity.
@@ -50,8 +54,13 @@ func Open(path string, capacity int) (*Buffer, error) {
 	if err := migrate(db); err != nil {
 		return nil, err
 	}
-	return &Buffer{db: db, capacity: capacity, drifts: make(map[string]int64)}, nil
+	return &Buffer{db: db, capacity: capacity, drifts: make(map[string]int64), notify: make(chan struct{}, 1)}, nil
 }
+
+// WriteNotify returns a channel signaled (coalesced to one pending slot) after
+// each successful Write. The single uplink consumer selects on it to drain
+// promptly; missed signals are covered by the consumer's own backstop tick.
+func (b *Buffer) WriteNotify() <-chan struct{} { return b.notify }
 
 // Close closes the underlying database.
 func (b *Buffer) Close() error {
@@ -91,6 +100,12 @@ func (b *Buffer) Write(f *pb.TelemetryFrame) error {
 	b.written.Add(1)
 	if evicted > 0 {
 		b.dropped.Add(evicted)
+	}
+	if b.notify != nil {
+		select {
+		case b.notify <- struct{}{}:
+		default: // a signal is already pending; coalesce
+		}
 	}
 	return nil
 }

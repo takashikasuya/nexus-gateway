@@ -107,6 +107,25 @@ func TestForwarder_RecordsDriftOnPartialAck(t *testing.T) {
 	assert.Equal(t, int64(1), total, "exactly one frame should be recorded as drift")
 }
 
+// A frame written after Run has started is forwarded promptly via the buffer's
+// write signal — faster than the 1s backstop, proving the notify path (#71).
+func TestForwarder_ForwardsWriteAfterStartViaNotify(t *testing.T) {
+	buf := newBuf(t)
+	sink := &fakeSink{accepted: 1}
+
+	fwd := uplink.NewForwarder(buf, sink, uplink.Config{CheckpointSize: 1, CheckpointAge: time.Hour})
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	go fwd.Run(ctx) //nolint:errcheck
+
+	time.Sleep(20 * time.Millisecond) // let Run reach its select
+	writeFrames(t, buf, "p1")
+
+	// 700ms < the 1s backstop, so only the write-notify path can satisfy this.
+	assert.Eventually(t, func() bool { return buf.Cursor() == 1 }, 700*time.Millisecond, 10*time.Millisecond)
+	assert.Equal(t, 1, sink.sentCount())
+}
+
 // A zero-value Config must not panic: NewForwarder clamps non-positive
 // CheckpointSize/CheckpointAge to the defaults (time.NewTicker panics on <= 0).
 func TestForwarder_ZeroConfigClampsToDefaults(t *testing.T) {

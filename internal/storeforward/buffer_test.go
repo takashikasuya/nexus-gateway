@@ -2,6 +2,7 @@ package storeforward_test
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -9,6 +10,23 @@ import (
 	pb "nexus-gateway/gen"
 	"nexus-gateway/internal/storeforward"
 )
+
+// A successful Write signals WriteNotify so the uplink Forwarder can react
+// immediately instead of polling on a fixed tick (#71).
+func TestBuffer_WriteNotifies(t *testing.T) {
+	buf, err := storeforward.Open(t.TempDir()+"/sf.db", 100)
+	require.NoError(t, err)
+	defer buf.Close()
+
+	n := buf.WriteNotify()
+	require.NoError(t, buf.Write(&pb.TelemetryFrame{GatewayId: "gw", PointId: "p1", Value: 1, Timestamp: "t"}))
+
+	select {
+	case <-n:
+	case <-time.After(2 * time.Second):
+		t.Fatal("Write did not signal WriteNotify")
+	}
+}
 
 func TestBuffer_WriteReadAdvance(t *testing.T) {
 	buf, err := storeforward.Open(t.TempDir()+"/sf.db", 100)
