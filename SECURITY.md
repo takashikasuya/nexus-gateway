@@ -39,12 +39,16 @@ yet; if that changes it will be recorded here.
 
 Reports are most useful when framed against the intended model:
 
-- **Machine link to Building OS — mTLS at the edge (ADR-0007).** The two gRPC
-  links are authenticated by **mutual TLS terminated at the Building OS Envoy
-  edge**, with the gateway's `gateway_id` bound to the client-cert CN/SAN. The
-  gateway is config-driven and default-secure; clear-text h2c is available
-  **only** behind an explicit `--bos-insecure`/dev flag. There is no bearer
-  token on these links (Building OS does not validate one).
+- **Machine link to Building OS — mTLS at the edge (ADR-0007).** The gRPC links
+  are authenticated by **mutual TLS terminated at the Building OS Traefik edge**
+  (`TLSOption` + `passTLSClientCert`), with the gateway's `gateway_id` bound to
+  the client-cert CN (cert-manager-issued). The edge injects a trusted
+  `X-Gateway-Id` header from the cert; Building OS enforces it equals the frame's
+  `gateway_id` (anti-spoofing, behind a production enforce toggle). The gateway is
+  config-driven and default-secure; clear-text h2c is available **only** behind an
+  explicit `--bos-insecure`/dev flag. There is no bearer token on these links
+  (Building OS does not validate one). The gateway never sends `X-Gateway-Id`
+  itself — the edge supplies it, and any externally-supplied value is stripped.
 - **Connector distribution — signed OCI, digest-pinned (ADR-0006).** The Core
   Agent **never** runs an unsigned image, **never** runs a digest mismatch, and
   **never** pulls from a registry outside the allowlist (`--catalog-allowlist`).
