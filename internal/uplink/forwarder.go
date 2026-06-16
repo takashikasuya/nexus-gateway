@@ -56,8 +56,12 @@ func (f *Forwarder) Run(ctx context.Context) error {
 	cursor := f.buf.Cursor()
 	tick := time.NewTicker(f.cfg.CheckpointAge)
 	defer tick.Stop()
-	pollTick := time.NewTicker(50 * time.Millisecond)
-	defer pollTick.Stop()
+	// The primary trigger is the buffer's write signal (#71). The backstop is a
+	// low-frequency safety net for frames written before Run started or a
+	// coalesced/missed signal — not the hot path.
+	backstop := time.NewTicker(time.Second)
+	defer backstop.Stop()
+	notify := f.buf.WriteNotify()
 
 	var batch []storeforward.SentFrame
 
@@ -90,24 +94,16 @@ func (f *Forwarder) Run(ctx context.Context) error {
 		return nil
 	}
 
-	for {
-		select {
-		case <-ctx.Done():
-			if len(batch) > 0 {
-				_, _ = f.sink.Checkpoint(ctx)
-			}
-			return nil
-
-		case <-tick.C:
-			if err := checkpoint(); err != nil {
-				return err
-			}
-
-		case <-pollTick.C:
+	// drain sends every frame currently past the cursor, checkpointing on size.
+	drain := func() error {
+		for {
 			frames, err := f.buf.ReadBatch(cursor, 32)
 			if err != nil {
 				slog.Warn("ingress: buffer read error", "err", err)
-				continue
+				return nil
+			}
+			if len(frames) == 0 {
+				return nil
 			}
 			for _, sf := range frames {
 				if err := f.sink.Send(ctx, sf.Frame); err != nil {
@@ -121,6 +117,31 @@ func (f *Forwarder) Run(ctx context.Context) error {
 						return err
 					}
 				}
+			}
+		}
+	}
+
+	for {
+		select {
+		case <-ctx.Done():
+			if len(batch) > 0 {
+				_, _ = f.sink.Checkpoint(ctx)
+			}
+			return nil
+
+		case <-tick.C:
+			if err := checkpoint(); err != nil {
+				return err
+			}
+
+		case <-notify:
+			if err := drain(); err != nil {
+				return err
+			}
+
+		case <-backstop.C:
+			if err := drain(); err != nil {
+				return err
 			}
 		}
 	}
