@@ -221,7 +221,11 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {
-	writeJSON(w, s.monitor.Snapshot(r.Context()))
+	h := s.monitor.Snapshot(r.Context())
+	// If the handler is responding, the gateway process is live. The container
+	// healthcheck (docker-compose.yml) greps the body for `"status":"ok"`.
+	h.Status = "ok"
+	writeJSON(w, h)
 }
 
 type connectorItem struct {

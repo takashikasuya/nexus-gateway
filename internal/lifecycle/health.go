@@ -19,6 +19,9 @@ type ConnectorHealth struct {
 
 // GatewayHealth is a point-in-time health snapshot.
 type GatewayHealth struct {
+	// Status is "ok" when the Admin API is serving; the Admin API sets it on the
+	// /health response. The container healthcheck greps for `"status":"ok"`.
+	Status        string `json:"status,omitempty"`
 	UptimeSeconds float64
 	GoRoutines    int
 	MemAllocMB    float64

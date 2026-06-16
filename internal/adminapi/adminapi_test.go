@@ -257,6 +257,17 @@ func TestHealth_NoAuthRequired(t *testing.T) {
 	assert.Greater(t, h.UptimeSeconds, 0.0)
 }
 
+// The container healthcheck in docker-compose.yml greps /health for
+// `"status":"ok"`, so the endpoint must emit that field.
+func TestHealth_ReportsStatusOk(t *testing.T) {
+	f := newFixture(t)
+	resp := f.get("/health", "")
+	require.Equal(t, http.StatusOK, resp.StatusCode)
+	var body map[string]any
+	require.NoError(t, json.NewDecoder(resp.Body).Decode(&body))
+	assert.Equal(t, "ok", body["status"], `/health must report "status":"ok" for the container healthcheck`)
+}
+
 func TestConnectors_ReturnsConnectorList(t *testing.T) {
 	f := newFixture(t)
 	tok := f.signToken(t, []string{adminapi.RoleViewer}, time.Now().Add(1*time.Hour))
