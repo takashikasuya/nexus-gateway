@@ -21,34 +21,79 @@ import (
 	"nexus-gateway/internal/pointlist"
 )
 
+// egressEnv holds BOS-deployment-specific identifiers for egress E2E tests.
+// Override via env vars to target any BOS instance (not just the SOS fixture).
+//
+//	E2E_GATEWAY_ID          — gateway identity the egress.Agent registers as (default: GW-SOS-001)
+//	E2E_WRITABLE_POINT_ID   — a writable point that BOS will route control commands for (default: SOS-PT-023)
+//	E2E_READONLY_POINT_ID   — a read-only point BOS must reject (default: SOS-PT-001)
+//	E2E_WRITABLE_LOCAL_ID   — the connector-local ID for the writable point (default: L-023)
+//	E2E_WRITABLE_CONNECTOR  — connector ID for the writable point (default: bacnet-01)
+//	E2E_WRITABLE_DEVICE_REF — device ref for the writable point (default: SOS-DEV-009)
+//
+// Example for the SoS BOS (defaults):
+//
+//	(no overrides needed)
+//
+// Example for the nexus-gateway dev BOS (gw-001, PT006 is writable):
+//
+//	E2E_GATEWAY_ID=gw-001 E2E_WRITABLE_POINT_ID=PT006 E2E_READONLY_POINT_ID=PT001 \
+//	E2E_WRITABLE_LOCAL_ID=analogValue,1002 E2E_WRITABLE_CONNECTOR=bacnet-01 \
+//	E2E_WRITABLE_DEVICE_REF=ahu-01
+type egressEnvConfig struct {
+	GatewayID        string
+	WritablePointID  string
+	ReadonlyPointID  string
+	WritableLocalID  string
+	WritableConnector string
+	WritableDeviceRef string
+}
+
+func loadEgressEnv() egressEnvConfig {
+	get := func(key, def string) string {
+		if v := os.Getenv(key); v != "" {
+			return v
+		}
+		return def
+	}
+	return egressEnvConfig{
+		GatewayID:        get("E2E_GATEWAY_ID", "GW-SOS-001"),
+		WritablePointID:  get("E2E_WRITABLE_POINT_ID", "SOS-PT-023"),
+		ReadonlyPointID:  get("E2E_READONLY_POINT_ID", "SOS-PT-001"),
+		WritableLocalID:  get("E2E_WRITABLE_LOCAL_ID", "L-023"),
+		WritableConnector: get("E2E_WRITABLE_CONNECTOR", "bacnet-01"),
+		WritableDeviceRef: get("E2E_WRITABLE_DEVICE_REF", "SOS-DEV-009"),
+	}
+}
+
 // TestE2E_BosControlGate verifies M8: the Building OS HTTP API enforces the
 // writable flag — writable points return 202, non-writable return 403.
 //
 // This does not require GatewayEgressService on the BOS side; it exercises the
 // HTTP API's authorization gate independently of the gRPC control path.
 //
-// Run with:
+// Run with (SoS BOS defaults):
 //
-//	E2E_BOS_API_URL=http://localhost:5000 \
+//	E2E_BOS_API_URL=http://192.168.0.18:5000 \
 //	  go test ./integration/... -run TestE2E_BosControlGate -v -timeout 30s
 //
+// For a different BOS deployment, also set E2E_WRITABLE_POINT_ID and E2E_READONLY_POINT_ID.
 // The test skips automatically when E2E_BOS_API_URL is unset (normal CI, ADR-0004).
 func TestE2E_BosControlGate(t *testing.T) {
 	apiBase := os.Getenv("E2E_BOS_API_URL")
 	if apiBase == "" {
 		t.Skip("E2E_BOS_API_URL not set — set E2E_BOS_API_URL to run")
 	}
+	cfg := loadEgressEnv()
 
 	t.Run("M8: writable point accepted (202)", func(t *testing.T) {
-		// SOS-PT-023: VAV-101 temperature setpoint (writable=true)
-		statusCode := bosControl(t, apiBase, "SOS-PT-023", 21.5)
+		statusCode := bosControl(t, apiBase, cfg.WritablePointID, 21.5)
 		assert.Contains(t, []int{200, 202}, statusCode,
-			"POST /points/SOS-PT-023/control must be accepted by BOS (200 or 202)")
+			"POST /points/%s/control must be accepted by BOS (200 or 202)", cfg.WritablePointID)
 	})
 
 	t.Run("M8: non-writable point rejected (403)", func(t *testing.T) {
-		// SOS-PT-001: Entrance Temperature (writable=false)
-		statusCode := bosControl(t, apiBase, "SOS-PT-001", 99.0)
+		statusCode := bosControl(t, apiBase, cfg.ReadonlyPointID, 99.0)
 		assert.Equal(t, http.StatusForbidden, statusCode,
 			"POST to non-writable point must return 403")
 	})
@@ -58,20 +103,28 @@ func TestE2E_BosControlGate(t *testing.T) {
 // GatewayEgressService.Connect — BOS sends ControlCommand, egress.Agent
 // dispatches to NATS, mock connector acknowledges, ControlResult returned.
 //
-// NOTE (2026-06-15): Building OS connector-worker (port 5051) does not yet
-// implement GatewayEgressService. Set E2E_BOS_EGRESS_ADDR to the address of a
-// BOS instance that has the egress gRPC service when testing M7.
+// GatewayEgressService is exposed by building-os.gateway-bridge on port 5052
+// (not connector-worker on 5051, which only implements GatewayIngressService).
+// Use BOS_EGRESS_ADDR=<host>:5052 in production; see feat/split-bos-ingress-egress-addr.
+//
+// IMPORTANT — single-connection constraint: BOS only allows one egress connection
+// per gateway ID. If the nexus-gateway service is running and already connected as
+// the same E2E_GATEWAY_ID, BOS will reject the test's egress.Agent with AlreadyExists.
+// Stop nexus-gateway before running this test, or set E2E_GATEWAY_ID to a gateway ID
+// that is registered in BOS but not currently connected.
 //
 // Run with:
 //
-//	E2E_BOS_EGRESS_ADDR=localhost:5051 E2E_BOS_API_URL=http://localhost:5000 \
+//	E2E_BOS_EGRESS_ADDR=192.168.0.18:5052 E2E_BOS_API_URL=http://192.168.0.18:5000 \
+//	E2E_GATEWAY_ID=gw-001 E2E_WRITABLE_POINT_ID=PT006 E2E_READONLY_POINT_ID=PT001 \
+//	E2E_WRITABLE_LOCAL_ID=analogValue,1002 E2E_WRITABLE_CONNECTOR=bacnet-01 E2E_WRITABLE_DEVICE_REF=ahu-01 \
 //	  go test ./integration/... -run TestE2E_BosEgressDispatch -v -timeout 60s
 //
 // The test skips automatically when E2E_BOS_EGRESS_ADDR is unset.
 //
 // Prerequisites on the Building OS side:
-//   - building-os.gateway-bridge running (port 5052, docker-compose.oss.yaml)
-//   - building-os.api configured with GatewayConnectionTypes__Map__GW-SOS-001=bacnet-sim
+//   - building-os.gateway-bridge running (port 5052)
+//   - nexus-gateway service NOT connected as E2E_GATEWAY_ID (stop it first)
 func TestE2E_BosEgressDispatch(t *testing.T) {
 	bosAddr := os.Getenv("E2E_BOS_EGRESS_ADDR")
 	if bosAddr == "" {
@@ -100,22 +153,25 @@ func TestE2E_BosEgressDispatch(t *testing.T) {
 	})
 	require.NoError(t, err)
 
+	cfg := loadEgressEnv()
+
 	resolver := pointlist.NewSynced(nil)
 	resolver.Update([]pointlist.Entry{
 		{
-			ConnectorID: "bacnet-01",
+			ConnectorID: cfg.WritableConnector,
 			Protocol:    "bacnet",
-			LocalID:     "L-023",
-			PointID:     "SOS-PT-023",
+			LocalID:     cfg.WritableLocalID,
+			PointID:     cfg.WritablePointID,
 			Writable:    true,
-			DeviceRef:   "SOS-DEV-009",
+			DeviceRef:   cfg.WritableDeviceRef,
 		},
 	})
 
 	d := dispatch.New(nc, resolver, 10*time.Second)
 
+	cmdSubject := "cmd.bacnet." + cfg.WritableConnector
 	var writeCount atomic.Int64
-	sub, err := nc.Subscribe("cmd.bacnet.bacnet-01", func(msg *nats.Msg) {
+	sub, err := nc.Subscribe(cmdSubject, func(msg *nats.Msg) {
 		writeCount.Add(1)
 		reply := dispatch.ConnectorReply{Success: true, Response: "ok"}
 		data, _ := json.Marshal(reply)
@@ -124,13 +180,14 @@ func TestE2E_BosEgressDispatch(t *testing.T) {
 	require.NoError(t, err)
 	t.Cleanup(func() { sub.Unsubscribe() })
 
-	agent := egress.New(bosAddr, "GW-SOS-001", d, insecureCreds(), nil)
+	agent := egress.New(bosAddr, cfg.GatewayID, d, insecureCreds(), nil)
 	go agent.Run(ctx)
 	time.Sleep(500 * time.Millisecond)
 
 	t.Run("M7: control command dispatched through gateway to connector", func(t *testing.T) {
-		statusCode := bosControl(t, apiBase, "SOS-PT-023", 21.5)
-		assert.Contains(t, []int{200, 202}, statusCode)
+		statusCode := bosControl(t, apiBase, cfg.WritablePointID, 21.5)
+		assert.Contains(t, []int{200, 202}, statusCode,
+			"POST /points/%s/control must be accepted by BOS (200 or 202)", cfg.WritablePointID)
 
 		require.Eventually(t, func() bool {
 			return writeCount.Load() >= 1
