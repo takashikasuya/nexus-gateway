@@ -40,15 +40,52 @@ func TestLoadCSV_ParsesWritable(t *testing.T) {
 	assert.True(t, entries[2].Writable, "writable=true must be parsed")
 }
 
-func TestLoadCSV_SkipsRowsMissingBACnetAddress(t *testing.T) {
+func TestLoadCSV_SkipsRowsMissingBACnetAddressAndLocalID(t *testing.T) {
 	const csv = `point_id,writable,unit,object_type_bacnet,instance_no_bacnet
 SOS-PT-001,false,C,analogInput,1
 SOS-PT-OPCUA,false,C,,
 `
 	entries, err := pointlist.LoadCSV(strings.NewReader(csv), "bacnet-01")
 	require.NoError(t, err)
-	require.Len(t, entries, 1, "rows without a BACnet object type/instance are skipped")
+	require.Len(t, entries, 1, "rows without BACnet columns and without local_id are skipped")
 	assert.Equal(t, "analogInput,1", entries[0].LocalID)
+}
+
+func TestLoadCSV_UsesLocalIDForNonBACnetRows(t *testing.T) {
+	const csv = `point_id,writable,unit,local_id,connector_id,protocol
+UA-PT-001,false,℃,ns=2;s=PT001,opcua-01,opcua
+UA-PT-002,true,,ns=2;s=PT002,opcua-01,opcua
+`
+	entries, err := pointlist.LoadCSV(strings.NewReader(csv), "fallback-connector")
+	require.NoError(t, err)
+	require.Len(t, entries, 2)
+
+	assert.Equal(t, "ns=2;s=PT001", entries[0].LocalID)
+	assert.Equal(t, "opcua", entries[0].Protocol)
+	assert.Equal(t, "opcua-01", entries[0].ConnectorID)
+	assert.Equal(t, "℃", entries[0].Unit)
+	assert.False(t, entries[0].Writable)
+
+	assert.Equal(t, "ns=2;s=PT002", entries[1].LocalID)
+	assert.True(t, entries[1].Writable)
+}
+
+func TestLoadCSV_MixedProtocolsInOnefile(t *testing.T) {
+	const csv = `point_id,local_id,connector_id,protocol,object_type_bacnet,instance_no_bacnet,unit
+PT001,"analogInput,1001",bacnet-01,bacnet,analogInput,1001,℃
+PT101,ns=2;s=PT001,opcua-01,opcua,,,℃
+`
+	entries, err := pointlist.LoadCSV(strings.NewReader(csv), "default-connector")
+	require.NoError(t, err)
+	require.Len(t, entries, 2)
+
+	assert.Equal(t, "analogInput,1001", entries[0].LocalID)
+	assert.Equal(t, "bacnet", entries[0].Protocol)
+	assert.Equal(t, "bacnet-01", entries[0].ConnectorID)
+
+	assert.Equal(t, "ns=2;s=PT001", entries[1].LocalID)
+	assert.Equal(t, "opcua", entries[1].Protocol)
+	assert.Equal(t, "opcua-01", entries[1].ConnectorID)
 }
 
 func TestLoadCSV_RequiresPointIDColumn(t *testing.T) {
