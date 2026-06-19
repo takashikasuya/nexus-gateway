@@ -60,6 +60,27 @@ func TestStartDevSim_RegistersAndRunsSim(t *testing.T) {
 	require.NoError(t, err, "dev-sim connector should publish to evt.sim.sim-01")
 }
 
+func TestResolveBOSAddr_FallsBackToBosAddr(t *testing.T) {
+	got := resolveBOSAddr("host:5051", "")
+	if got != "host:5051" {
+		t.Fatalf("want host:5051, got %s", got)
+	}
+}
+
+func TestResolveBOSAddr_OverrideWins(t *testing.T) {
+	got := resolveBOSAddr("host:5051", "host:5052")
+	if got != "host:5052" {
+		t.Fatalf("want host:5052, got %s", got)
+	}
+}
+
+func TestResolveBOSAddr_BothEmpty(t *testing.T) {
+	got := resolveBOSAddr("", "")
+	if got != "" {
+		t.Fatalf("want empty, got %s", got)
+	}
+}
+
 func newTestNATS(t *testing.T, ctx context.Context) (*nats.Conn, jetstream.JetStream) {
 	t.Helper()
 	ns, err := server.NewServer(&server.Options{JetStream: true, StoreDir: t.TempDir(), Port: -1})

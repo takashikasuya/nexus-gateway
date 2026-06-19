@@ -77,6 +77,11 @@ services:
       - GATEWAY_ID=gw-001
       - NATS_URL=nats://nats:4222
       - BOS_ADDR=mock-bos:50051
+      # BOS_INGRESS_ADDR / BOS_EGRESS_ADDR override BOS_ADDR per-service when BOS exposes
+      # GatewayIngressService and GatewayEgressService on different ports (e.g. 5051 / 5052).
+      # Omit both to use BOS_ADDR for both services (default for dev with mock-bos).
+      #- BOS_INGRESS_ADDR=<bos-host>:5051
+      #- BOS_EGRESS_ADDR=<bos-host>:5052
       - POINT_LIST_FILE=/fixtures/point_list.json
       - ADMIN_ADDR=:8080
       # Connector Catalog (ADR-0006): file-backed for dev; replace with CATALOG_URL in production.
