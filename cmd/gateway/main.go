@@ -37,7 +37,9 @@ import (
 
 func main() {
 	natsURL := flag.String("nats", envOrDefault("NATS_URL", nats.DefaultURL), "NATS URL")
-	bosAddr := flag.String("bos", envOrDefault("BOS_ADDR", "localhost:50051"), "Building OS gRPC address")
+	bosAddr := flag.String("bos", envOrDefault("BOS_ADDR", "localhost:50051"), "Building OS gRPC address (default for both ingress and egress; overridden by --bos-ingress-addr / --bos-egress-addr)")
+	bosIngressAddr := flag.String("bos-ingress-addr", envOrDefault("BOS_INGRESS_ADDR", ""), "Building OS GatewayIngress gRPC address for telemetry (overrides --bos; env BOS_INGRESS_ADDR)")
+	bosEgressAddr := flag.String("bos-egress-addr", envOrDefault("BOS_EGRESS_ADDR", ""), "Building OS GatewayEgress gRPC address for control (overrides --bos; env BOS_EGRESS_ADDR)")
 	gatewayID := flag.String("gateway-id", envOrDefault("GATEWAY_ID", "gw-001"), "Gateway ID")
 	adminAddr := flag.String("admin-addr", envOrDefault("ADMIN_ADDR", ":8080"), "Admin API listen address")
 	jwksURL := flag.String("admin-jwks-url", envOrDefault("KEYCLOAK_JWKS_URL", ""), "Keycloak JWKS URL (empty = auth disabled)")
@@ -66,6 +68,8 @@ func main() {
 	cosignIdentity := flag.String("cosign-identity", envOrDefault("COSIGN_IDENTITY", ""), "Expected certificate identity for keyless cosign verification (ADR-0006)")
 	cosignOIDCIssuer := flag.String("cosign-oidc-issuer", envOrDefault("COSIGN_OIDC_ISSUER", ""), "Expected OIDC issuer for keyless cosign verification (ADR-0006)")
 	flag.Parse()
+	*bosIngressAddr = resolveBOSAddr(*bosAddr, *bosIngressAddr)
+	*bosEgressAddr = resolveBOSAddr(*bosAddr, *bosEgressAddr)
 
 	// Build the gRPC transport credentials for both Building OS links (ADR-0007).
 	bosCreds, err := transport.ClientCredentials(transport.Config{
@@ -141,6 +145,14 @@ func main() {
 		}
 		provClient = provisioning.NewFileClient(*provFile, *provConnID)
 	}
+	// Ensure the persist directory exists before the sync loop tries to write.
+	if *plPersist != "" {
+		if err := os.MkdirAll(filepath.Dir(*plPersist), 0o755); err != nil {
+			slog.Error("point list persist dir create failed", "err", err)
+			os.Exit(1)
+		}
+	}
+
 	// revalidatePL is signalled by the egress agent on EgressDown.point_list_update (#224/push).
 	revalidatePL := make(chan struct{}, 1)
 	if provClient != nil {
@@ -196,7 +208,7 @@ func main() {
 	}()
 
 	// Start Ingress uplink
-	ul, err := uplink.NewIngress(ctx, *bosAddr, *gatewayID, buf, uplink.DefaultConfig, bosCreds)
+	ul, err := uplink.NewIngress(ctx, *bosIngressAddr, *gatewayID, buf, uplink.DefaultConfig, bosCreds)
 	if err != nil {
 		slog.Error("uplink init failed", "err", err)
 		os.Exit(1)
@@ -205,7 +217,7 @@ func main() {
 
 	// Start Egress agent (control path, ADR-0004); also signals revalidatePL on PointListUpdate.
 	d := dispatch.New(nc, resolver, 5*time.Second)
-	egressAgent := egress.New(*bosAddr, *gatewayID, d, bosCreds, revalidatePL)
+	egressAgent := egress.New(*bosEgressAddr, *gatewayID, d, bosCreds, revalidatePL)
 	go egressAgent.Run(ctx)
 
 	// Start Admin API
@@ -295,7 +307,7 @@ func main() {
 		startDevSim(ctx, js, connRegistry, 5*time.Second)
 	}
 
-	slog.Info("gateway started", "gateway_id", *gatewayID, "nats", *natsURL, "bos", *bosAddr)
+	slog.Info("gateway started", "gateway_id", *gatewayID, "nats", *natsURL, "bos-ingress", *bosIngressAddr, "bos-egress", *bosEgressAddr)
 
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)
@@ -347,6 +359,15 @@ func envOrDefault(key, def string) string {
 		return v
 	}
 	return def
+}
+
+// resolveBOSAddr returns override when non-empty, otherwise falls back to bosAddr.
+// This allows BOS_INGRESS_ADDR / BOS_EGRESS_ADDR to override the shared BOS_ADDR default.
+func resolveBOSAddr(bosAddr, override string) string {
+	if override != "" {
+		return override
+	}
+	return bosAddr
 }
 
 func splitComma(s string) []string {
