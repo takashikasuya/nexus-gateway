@@ -21,7 +21,11 @@ var bacnetLocalID = regexp.MustCompile(`^[a-zA-Z]+,\d+$`)
 // from bbc-sim-gateway and publishes Common Events with native addressing only
 // (ADR-0001). BACnet/IP requires host networking for UDP Who-Is broadcasts.
 //
-// Prerequisite: start the integration stack with the bacnet profile:
+// Option A — physical device at 192.168.0.26 (bacnet-sim-gateway with config/simulator.yaml):
+//
+//	docker compose -f docker-compose.yml -f docker-compose.bacnet.yml up -d
+//
+// Option B — fully local (CI-friendly), builds bbc-sim from ../bacnet-sim-gateway:
 //
 //	docker compose -f docker-compose.yml -f docker-compose.integration.yml --profile bacnet up -d
 //

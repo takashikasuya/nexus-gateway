@@ -17,9 +17,32 @@ logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(messag
 logger = logging.getLogger(__name__)
 
 
+async def _await_stream(js: JetStreamContext, subject: str, *, poll_interval: float = 5.0) -> None:
+    """Block until the JetStream stream covering *subject* exists.
+
+    The EVENTS stream is owned by the gateway; the connector must wait for it
+    rather than publishing into a void and emitting WARNING noise on every poll.
+    """
+    while True:
+        try:
+            await js.find_stream_name_by_subject(subject)
+            return
+        except Exception:
+            logger.info(
+                "bacnet: EVENTS stream not ready for subject %s — waiting %.0fs "
+                "(start the gateway, or create the stream manually)",
+                subject, poll_interval,
+            )
+            await asyncio.sleep(poll_interval)
+
+
 async def _run(cfg: Config) -> None:
     nc = await nats.connect(cfg.nats_url)
     js: JetStreamContext = nc.jetstream()
+
+    subject = f"evt.bacnet.{cfg.connector_id}"
+    await _await_stream(js, subject)
+
     bacnet = await Bacpypes3Client.create(cfg.local_address)
 
     stop_event = asyncio.Event()

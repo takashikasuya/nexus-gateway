@@ -11,8 +11,23 @@
 # ../opcua-sim-gateway). Profiles keep the two protocols separate so a given
 # point_id has a single source per run:
 #
-#   docker compose -f docker-compose.yml -f docker-compose.integration.yml --profile opcua  up   # OPC-UA E2E (#39, CI-friendly)
-#   docker compose -f docker-compose.yml -f docker-compose.integration.yml --profile bacnet up   # BACnet E2E (#40, needs host networking)
+#   docker compose -f docker-compose.yml -f docker-compose.integration.yml --profile opcua  up   # OPC-UA E2E — builds opcua-sim from ../opcua-sim-gateway
+#   docker compose -f docker-compose.yml -f docker-compose.integration.yml --profile bacnet up   # BACnet E2E — builds bbc-sim from ../bacnet-sim-gateway
+#
+# To run against a remote/physical device (no sibling build needed), use the
+# "*-remote" profiles and set the corresponding endpoint env vars:
+#
+#   OPCUA_ENDPOINT=opc.tcp://192.168.0.26:4840 \
+#     docker compose -f docker-compose.yml -f docker-compose.integration.yml --profile opcua-remote up -d
+#
+#   BACNET_ADDRESS=192.168.0.26 \
+#     docker compose -f docker-compose.yml -f docker-compose.integration.yml --profile bacnet-remote up -d
+#
+# Both simultaneously:
+#
+#   OPCUA_ENDPOINT=opc.tcp://192.168.0.26:4840 BACNET_ADDRESS=192.168.0.26 \
+#     docker compose -f docker-compose.yml -f docker-compose.integration.yml \
+#     --profile opcua-remote --profile bacnet-remote up -d
 #
 # Runtime verification (telemetry actually flowing) is #39/#40; this file is the
 # topology + shared addressing. Sibling-specific details flagged TODO are nailed
@@ -27,7 +42,7 @@ services:
   # sim://… events that the integration Point List does not contain.
   gateway:
     environment:
-      - POINT_LIST_FILE=/fixtures/integration/point_list.json
+      - PROVISIONING_FILE=/fixtures/integration/point_list.csv
       - DEV_SIM=false
       - KEYCLOAK_JWKS_URL=  # auth-free in integration tests; admin API not exercised
     depends_on:
@@ -49,13 +64,14 @@ services:
     restart: unless-stopped
 
   opcua-connector:
-    profiles: ["opcua"]
+    profiles: ["opcua", "opcua-remote"]
     build:
       context: connector/opcua
     environment:
       - CONNECTOR_ID=opcua-01
       - NATS_URL=nats://nats:4222
-      - OPCUA_ENDPOINT=opc.tcp://opcua-sim:4840
+      # Default points at the in-Docker opcua-sim; override with OPCUA_ENDPOINT for a remote server.
+      - OPCUA_ENDPOINT=${OPCUA_ENDPOINT:-opc.tcp://opcua-sim:4840}
       - OPCUA_DEVICE_REF=ahu-01
       - OPCUA_POLL_INTERVAL=5
       # NodeIds match opcua-sim's address space (ns=2;s=PT00x) and the shared Point List.
@@ -75,6 +91,7 @@ services:
         condition: service_healthy
       opcua-sim:
         condition: service_started
+        required: false  # not active under opcua-remote profile
     restart: unless-stopped
 
   # ── BACnet (profile: bacnet) — BACnet/IP, needs host networking for Who-Is ───
@@ -90,13 +107,14 @@ services:
     restart: unless-stopped
 
   bacnet-connector:
-    profiles: ["bacnet"]
+    profiles: ["bacnet", "bacnet-remote"]
     build:
       context: connector/bacnet
     environment:
       - CONNECTOR_ID=bacnet-01
       - NATS_URL=nats://localhost:14222 # host networking: nexus NATS is on host port 14222
-      - BACNET_ADDRESS=127.0.0.1
+      # Default points at bbc-sim on localhost; override with BACNET_ADDRESS for a remote device.
+      - BACNET_ADDRESS=${BACNET_ADDRESS:-127.0.0.1}
       - BACNET_DEVICE_ID=1001 # bbc-sim device_id (config/simulator.yaml)
       - BACNET_LOCAL_ADDRESS=0.0.0.0:47809
       - BACNET_POLL_INTERVAL=5
@@ -118,4 +136,5 @@ services:
         condition: service_healthy
       bbc-sim:
         condition: service_started
+        required: false  # not active under bacnet-remote profile
     restart: unless-stopped

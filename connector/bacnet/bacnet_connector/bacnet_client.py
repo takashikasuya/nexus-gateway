@@ -15,6 +15,10 @@ from bacnet_connector.connector import BACnetClient
 
 logger = logging.getLogger(__name__)
 
+_COV_BACKOFF_INITIAL = 5.0   # seconds before first COV retry
+_COV_BACKOFF_CAP = 300.0     # maximum backoff (5 minutes)
+_COV_GIVE_UP_AFTER = 5       # consecutive failures before abandoning COV for this point
+
 
 def _to_float(raw: object) -> float | None:
     """Coerce a bacpypes3 primitive value to float, or return None."""
@@ -108,13 +112,22 @@ class Bacpypes3Client(BACnetClient):
         callback: Callable[[str, float, str], Awaitable[None]],
         lifetime: int,
     ) -> None:
-        """Maintain a COV subscription, renewing before it expires."""
+        """Maintain a COV subscription, renewing before it expires.
+
+        Uses exponential backoff on failure.  After _COV_GIVE_UP_AFTER consecutive
+        failures the loop exits so the connector relies entirely on polling — this
+        is the correct behaviour when a device does not support COV for an object type.
+        """
         addr = Address(address)
         oid = ObjectIdentifier(obj_id)
+        backoff = _COV_BACKOFF_INITIAL
+        consecutive_failures = 0
 
         while True:
             try:
                 async with self._app.change_of_value(addr, oid, lifetime=lifetime) as cov:
+                    consecutive_failures = 0
+                    backoff = _COV_BACKOFF_INITIAL
                     while True:
                         # get_value() decodes the next PropertyValue from the queue.
                         prop_id, prop_value = await cov.get_value()
@@ -125,8 +138,19 @@ class Bacpypes3Client(BACnetClient):
             except asyncio.CancelledError:
                 return
             except (Exception, ErrorRejectAbortNack) as exc:
-                logger.warning("bacnet: COV loop error for %s: %s — retrying", obj_id, exc)
-                await asyncio.sleep(5)
+                consecutive_failures += 1
+                if consecutive_failures >= _COV_GIVE_UP_AFTER:
+                    logger.info(
+                        "bacnet: COV not supported for %s (%s) — relying on polling only",
+                        obj_id, exc,
+                    )
+                    return
+                logger.warning(
+                    "bacnet: COV loop error for %s: %s — retry in %.0fs",
+                    obj_id, exc, backoff,
+                )
+                await asyncio.sleep(backoff)
+                backoff = min(backoff * 2, _COV_BACKOFF_CAP)
 
     async def write_property(
         self,

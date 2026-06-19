@@ -8,13 +8,23 @@ import (
 	"strings"
 )
 
-// LoadCSV parses the SBCO point-list CSV (as used by building-os-e2e-test) into
-// Entries for the given BACnet connector. The protocol-native address is
-// projected from object_type_bacnet + instance_no_bacnet (e.g. "analogInput,1") —
-// the canonical point_id comes from the point_id column (ADR-0001/ADR-0003).
+// LoadCSV parses the SBCO point-list CSV into Entries.
 //
-// Columns are resolved by header name, so column order does not matter. Rows
-// without a BACnet object type + instance are skipped (e.g. OPC-UA-only points).
+// Native address resolution (in priority order):
+//  1. object_type_bacnet + instance_no_bacnet both non-empty → "type,instance" (BACnet, backward-compat)
+//  2. local_id column non-empty → used as-is (OPC-UA, MQTT, or any protocol)
+//
+// connector_id: per-row "connector_id" column overrides the connectorID parameter.
+// protocol:     inferred from which resolution path was taken ("bacnet" or "opcua");
+//               a per-row "protocol" column overrides the inferred value.
+//
+// Rows with neither a valid BACnet address nor a local_id are skipped.
+// Rows with an empty point_id are skipped.
+// Duplicate point_id rows are deduplicated (first row wins).
+//
+// Columns are resolved by header name so column order does not matter.
+// A UTF-8 BOM on the first header cell (common in Excel/SBCO exports) is stripped.
+// point_id is the only required column; all others are optional.
 func LoadCSV(r io.Reader, connectorID string) ([]Entry, error) {
 	cr := csv.NewReader(r)
 	cr.FieldsPerRecord = -1 // tolerate ragged rows
@@ -26,18 +36,14 @@ func LoadCSV(r io.Reader, connectorID string) ([]Entry, error) {
 		return nil, fmt.Errorf("pointlist: empty CSV")
 	}
 
-	// Strip a UTF-8 BOM from the first header cell (common in Excel/SBCO exports);
-	// TrimSpace does not remove U+FEFF, which would otherwise break column matching.
+	// Strip a UTF-8 BOM from the first header cell (common in Excel/SBCO exports).
 	rows[0][0] = strings.TrimPrefix(rows[0][0], "\ufeff")
 	col := map[string]int{}
 	for i, name := range rows[0] {
 		col[strings.TrimSpace(name)] = i
 	}
-	required := []string{"point_id", "object_type_bacnet", "instance_no_bacnet"}
-	for _, name := range required {
-		if _, ok := col[name]; !ok {
-			return nil, fmt.Errorf("pointlist: CSV missing required column %q", name)
-		}
+	if _, ok := col["point_id"]; !ok {
+		return nil, fmt.Errorf("pointlist: CSV missing required column %q", "point_id")
 	}
 
 	get := func(row []string, name string) string {
@@ -51,23 +57,51 @@ func LoadCSV(r io.Reader, connectorID string) ([]Entry, error) {
 	var entries []Entry
 	seen := map[string]bool{}
 	for _, row := range rows[1:] {
+		pointID := get(row, "point_id")
+		if pointID == "" {
+			continue
+		}
+
+		// Resolve native address and protocol.
 		objType := get(row, "object_type_bacnet")
 		instance := get(row, "instance_no_bacnet")
-		pointID := get(row, "point_id")
-		if objType == "" || instance == "" || pointID == "" {
-			continue // not a resolvable BACnet point
+		localIDCol := get(row, "local_id")
+
+		var localID, proto string
+		switch {
+		case objType != "" && instance != "":
+			// BACnet columns present — construct native address (backward-compat).
+			localID = objType + "," + instance
+			proto = "bacnet"
+		case localIDCol != "":
+			// local_id column present — use as-is (OPC-UA, MQTT, …).
+			localID = localIDCol
+			proto = "opcua"
+		default:
+			continue // no resolvable native address
 		}
+
+		// Per-row protocol column overrides the inferred value.
+		if p := get(row, "protocol"); p != "" {
+			proto = p
+		}
+
+		// Per-row connector_id column overrides the parameter.
+		cid := get(row, "connector_id")
+		if cid == "" {
+			cid = connectorID
+		}
+
 		if seen[pointID] {
-			// Dedupe in the loader so the returned snapshot has exactly one entry per
-			// point_id (the resolver would otherwise silently keep only one anyway).
 			slog.Warn("pointlist: duplicate point_id in CSV — ignoring later row", "point_id", pointID)
 			continue
 		}
 		seen[pointID] = true
+
 		entries = append(entries, Entry{
-			ConnectorID: connectorID,
-			Protocol:    "bacnet",
-			LocalID:     objType + "," + instance,
+			ConnectorID: cid,
+			Protocol:    proto,
+			LocalID:     localID,
 			PointID:     pointID,
 			Unit:        get(row, "unit"),
 			Writable:    strings.EqualFold(get(row, "writable"), "true"),
