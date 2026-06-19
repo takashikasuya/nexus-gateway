@@ -145,6 +145,14 @@ func main() {
 		}
 		provClient = provisioning.NewFileClient(*provFile, *provConnID)
 	}
+	// Ensure the persist directory exists before the sync loop tries to write.
+	if *plPersist != "" {
+		if err := os.MkdirAll(filepath.Dir(*plPersist), 0o755); err != nil {
+			slog.Error("point list persist dir create failed", "err", err)
+			os.Exit(1)
+		}
+	}
+
 	// revalidatePL is signalled by the egress agent on EgressDown.point_list_update (#224/push).
 	revalidatePL := make(chan struct{}, 1)
 	if provClient != nil {
