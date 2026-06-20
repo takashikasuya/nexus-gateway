@@ -103,10 +103,10 @@ _UNIT_META: dict[str, dict] = {
 _DEVICE_META: dict[str, dict] = {
     "ahu-01":       {"device_id": "ahu-01",       "device_name": "AHU-01",       "device_type": "AHU",     "device_id_bacnet": "1001"},
     "ahu-02":       {"device_id": "ahu-02",       "device_name": "AHU-02",       "device_type": "AHU",     "device_id_bacnet": "1002"},
-    "fcu-01":       {"device_id": "fcu-01",       "device_name": "FCU-01",       "device_type": "FCU",     "device_id_bacnet": "1003"},
+    "fcu-01":       {"device_id": "fcu-01",       "device_name": "FCU-01",       "device_type": "AHU",     "device_id_bacnet": "1003"},
     "chiller-01":   {"device_id": "chiller-01",   "device_name": "Chiller-01",   "device_type": "Chiller", "device_id_bacnet": "1004"},
     "env-01":       {"device_id": "env-01",       "device_name": "ENV-01",       "device_type": "Sensor",  "device_id_bacnet": "1005"},
-    "opcua-server": {"device_id": "opcua-server", "device_name": "OPCUA Server", "device_type": "Server",  "device_id_bacnet": ""},
+    "opcua-server": {"device_id": "opcua-server", "device_name": "OPCUA Server", "device_type": "Sensor",  "device_id_bacnet": ""},
 }
 
 

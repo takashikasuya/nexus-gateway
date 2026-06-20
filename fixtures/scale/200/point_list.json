@@ -157,7 +157,7 @@
     "protocol": "opcua",
     "local_id": "ns=2;s=UA-F-0009",
     "point_id": "UA-F-0009",
-    "unit": "m/s",
+    "unit": "m3/h",
     "writable": true,
     "device_ref": "opcua-server"
   },
@@ -175,7 +175,7 @@
     "protocol": "opcua",
     "local_id": "ns=2;s=UA-F-0010",
     "point_id": "UA-F-0010",
-    "unit": "bar",
+    "unit": "Pa",
     "writable": true,
     "device_ref": "opcua-server"
   },
@@ -337,7 +337,7 @@
     "protocol": "opcua",
     "local_id": "ns=2;s=UA-F-0019",
     "point_id": "UA-F-0019",
-    "unit": "m/s",
+    "unit": "m3/h",
     "writable": true,
     "device_ref": "opcua-server"
   },
@@ -355,7 +355,7 @@
     "protocol": "opcua",
     "local_id": "ns=2;s=UA-F-0020",
     "point_id": "UA-F-0020",
-    "unit": "bar",
+    "unit": "Pa",
     "writable": true,
     "device_ref": "opcua-server"
   },
@@ -517,7 +517,7 @@
     "protocol": "opcua",
     "local_id": "ns=2;s=UA-F-0029",
     "point_id": "UA-F-0029",
-    "unit": "m/s",
+    "unit": "m3/h",
     "writable": true,
     "device_ref": "opcua-server"
   },
@@ -535,7 +535,7 @@
     "protocol": "opcua",
     "local_id": "ns=2;s=UA-F-0030",
     "point_id": "UA-F-0030",
-    "unit": "bar",
+    "unit": "Pa",
     "writable": true,
     "device_ref": "opcua-server"
   },
@@ -697,7 +697,7 @@
     "protocol": "opcua",
     "local_id": "ns=2;s=UA-F-0039",
     "point_id": "UA-F-0039",
-    "unit": "m/s",
+    "unit": "m3/h",
     "writable": true,
     "device_ref": "opcua-server"
   },
@@ -715,7 +715,7 @@
     "protocol": "opcua",
     "local_id": "ns=2;s=UA-F-0040",
     "point_id": "UA-F-0040",
-    "unit": "bar",
+    "unit": "Pa",
     "writable": true,
     "device_ref": "opcua-server"
   },
@@ -877,7 +877,7 @@
     "protocol": "opcua",
     "local_id": "ns=2;s=UA-F-0049",
     "point_id": "UA-F-0049",
-    "unit": "m/s",
+    "unit": "m3/h",
     "writable": true,
     "device_ref": "opcua-server"
   },
@@ -895,7 +895,7 @@
     "protocol": "opcua",
     "local_id": "ns=2;s=UA-F-0050",
     "point_id": "UA-F-0050",
-    "unit": "bar",
+    "unit": "Pa",
     "writable": true,
     "device_ref": "opcua-server"
   },
@@ -1057,7 +1057,7 @@
     "protocol": "opcua",
     "local_id": "ns=2;s=UA-F-0059",
     "point_id": "UA-F-0059",
-    "unit": "m/s",
+    "unit": "m3/h",
     "writable": true,
     "device_ref": "opcua-server"
   },
@@ -1075,7 +1075,7 @@
     "protocol": "opcua",
     "local_id": "ns=2;s=UA-F-0060",
     "point_id": "UA-F-0060",
-    "unit": "bar",
+    "unit": "Pa",
     "writable": true,
     "device_ref": "opcua-server"
   },
@@ -1237,7 +1237,7 @@
     "protocol": "opcua",
     "local_id": "ns=2;s=UA-F-0069",
     "point_id": "UA-F-0069",
-    "unit": "m/s",
+    "unit": "m3/h",
     "writable": true,
     "device_ref": "opcua-server"
   },
@@ -1255,7 +1255,7 @@
     "protocol": "opcua",
     "local_id": "ns=2;s=UA-F-0070",
     "point_id": "UA-F-0070",
-    "unit": "bar",
+    "unit": "Pa",
     "writable": true,
     "device_ref": "opcua-server"
   },
@@ -1417,7 +1417,7 @@
     "protocol": "opcua",
     "local_id": "ns=2;s=UA-F-0079",
     "point_id": "UA-F-0079",
-    "unit": "m/s",
+    "unit": "m3/h",
     "writable": true,
     "device_ref": "opcua-server"
   },
@@ -1435,7 +1435,7 @@
     "protocol": "opcua",
     "local_id": "ns=2;s=UA-F-0080",
     "point_id": "UA-F-0080",
-    "unit": "bar",
+    "unit": "Pa",
     "writable": true,
     "device_ref": "opcua-server"
   },
@@ -1597,7 +1597,7 @@
     "protocol": "opcua",
     "local_id": "ns=2;s=UA-F-0089",
     "point_id": "UA-F-0089",
-    "unit": "m/s",
+    "unit": "m3/h",
     "writable": true,
     "device_ref": "opcua-server"
   },
@@ -1615,7 +1615,7 @@
     "protocol": "opcua",
     "local_id": "ns=2;s=UA-F-0090",
     "point_id": "UA-F-0090",
-    "unit": "bar",
+    "unit": "Pa",
     "writable": true,
     "device_ref": "opcua-server"
   },
@@ -1777,7 +1777,7 @@
     "protocol": "opcua",
     "local_id": "ns=2;s=UA-F-0099",
     "point_id": "UA-F-0099",
-    "unit": "m/s",
+    "unit": "m3/h",
     "writable": true,
     "device_ref": "opcua-server"
   },
@@ -1795,7 +1795,7 @@
     "protocol": "opcua",
     "local_id": "ns=2;s=UA-F-0100",
     "point_id": "UA-F-0100",
-    "unit": "bar",
+    "unit": "Pa",
     "writable": true,
     "device_ref": "opcua-server"
   }
