@@ -1,32 +1,23 @@
-# OPC-UA integration stack: adds a simulated OPC-UA server and the opcua connector.
+# OPC-UA connector stack.
+# The OPC-UA simulator is provided by the external opcua-sim-gateway repository.
+# Use docker-compose.opcua-simgw.yml to bring up the full stack including the simulator.
+#
 # Run with: docker compose -f docker-compose.yml -f docker-compose.opcua.yml up
-
-version: "3.9"
+#
+# Set OPCUA_ENDPOINT to the simulator's address before starting:
+#   OPCUA_ENDPOINT=opc.tcp://<host>:4840 docker compose ...
 
 services:
-  opcua-sim:
-    build:
-      context: simulator/opcua
-      dockerfile: Dockerfile
-    environment:
-      - OPCUA_SERVER_ENDPOINT=opc.tcp://0.0.0.0:4840/freeopcua/server/
-    ports:
-      - "4840:4840"
-    restart: unless-stopped
-
   opcua-connector:
     build:
       context: connector/opcua
     environment:
       - CONNECTOR_ID=opcua-01
       - NATS_URL=nats://nats:4222
-      - OPCUA_ENDPOINT=opc.tcp://opcua-sim:4840/freeopcua/server/
-      - OPCUA_DEVICE_REF=opcua-sim
+      - OPCUA_ENDPOINT=${OPCUA_ENDPOINT:-opc.tcp://localhost:4840}
       - OPCUA_POLL_INTERVAL=30
-      - OPCUA_POINTS=[{"local_id":"ns=2;i=2","device_ref":"opcua-sim","unit":"degC"},{"local_id":"ns=2;i=3","device_ref":"opcua-sim","unit":""}]
+      - OPCUA_POINTS=${OPCUA_POINTS:-[]}
     depends_on:
       nats:
         condition: service_healthy
-      opcua-sim:
-        condition: service_started
     restart: unless-stopped
