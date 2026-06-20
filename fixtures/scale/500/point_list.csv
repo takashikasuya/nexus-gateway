@@ -1,501 +1,501 @@
-point_id,connector_id,protocol,local_id,device_ref,unit,writable
-BN-01-AI-001,bacnet-01,bacnet,"analogInput,1",ahu-01,degC,False
-UA-F-0001,opcua-01,opcua,ns=2;s=UA-F-0001,opcua-server,degC,True
-BN-01-AI-002,bacnet-01,bacnet,"analogInput,2",ahu-01,%RH,False
-UA-F-0002,opcua-01,opcua,ns=2;s=UA-F-0002,opcua-server,%RH,True
-BN-01-AI-003,bacnet-01,bacnet,"analogInput,3",ahu-01,ppm,False
-UA-F-0003,opcua-01,opcua,ns=2;s=UA-F-0003,opcua-server,ppm,True
-BN-01-AI-004,bacnet-01,bacnet,"analogInput,4",ahu-01,Pa,False
-UA-F-0004,opcua-01,opcua,ns=2;s=UA-F-0004,opcua-server,Pa,True
-BN-01-AI-005,bacnet-01,bacnet,"analogInput,5",ahu-01,m3/h,False
-UA-F-0005,opcua-01,opcua,ns=2;s=UA-F-0005,opcua-server,m3/h,True
-BN-01-AI-006,bacnet-01,bacnet,"analogInput,6",ahu-01,kW,False
-UA-F-0006,opcua-01,opcua,ns=2;s=UA-F-0006,opcua-server,kW,True
-BN-01-AI-007,bacnet-01,bacnet,"analogInput,7",ahu-01,kWh,False
-UA-F-0007,opcua-01,opcua,ns=2;s=UA-F-0007,opcua-server,kWh,True
-BN-01-AI-008,bacnet-01,bacnet,"analogInput,8",ahu-01,lux,False
-UA-F-0008,opcua-01,opcua,ns=2;s=UA-F-0008,opcua-server,lux,True
-BN-01-AI-009,bacnet-01,bacnet,"analogInput,9",ahu-01,degC,False
-UA-F-0009,opcua-01,opcua,ns=2;s=UA-F-0009,opcua-server,m/s,True
-BN-01-AI-010,bacnet-01,bacnet,"analogInput,10",ahu-01,%RH,False
-UA-F-0010,opcua-01,opcua,ns=2;s=UA-F-0010,opcua-server,bar,True
-BN-01-AI-011,bacnet-01,bacnet,"analogInput,11",ahu-01,degC,False
-UA-F-0011,opcua-01,opcua,ns=2;s=UA-F-0011,opcua-server,degC,True
-BN-01-AI-012,bacnet-01,bacnet,"analogInput,12",ahu-01,%RH,False
-UA-F-0012,opcua-01,opcua,ns=2;s=UA-F-0012,opcua-server,%RH,True
-BN-01-AI-013,bacnet-01,bacnet,"analogInput,13",ahu-01,ppm,False
-UA-F-0013,opcua-01,opcua,ns=2;s=UA-F-0013,opcua-server,ppm,True
-BN-01-AI-014,bacnet-01,bacnet,"analogInput,14",ahu-01,Pa,False
-UA-F-0014,opcua-01,opcua,ns=2;s=UA-F-0014,opcua-server,Pa,True
-BN-01-AI-015,bacnet-01,bacnet,"analogInput,15",ahu-01,m3/h,False
-UA-F-0015,opcua-01,opcua,ns=2;s=UA-F-0015,opcua-server,m3/h,True
-BN-01-AI-016,bacnet-01,bacnet,"analogInput,16",ahu-01,kW,False
-UA-F-0016,opcua-01,opcua,ns=2;s=UA-F-0016,opcua-server,kW,True
-BN-01-AI-017,bacnet-01,bacnet,"analogInput,17",ahu-01,kWh,False
-UA-F-0017,opcua-01,opcua,ns=2;s=UA-F-0017,opcua-server,kWh,True
-BN-01-AI-018,bacnet-01,bacnet,"analogInput,18",ahu-01,lux,False
-UA-F-0018,opcua-01,opcua,ns=2;s=UA-F-0018,opcua-server,lux,True
-BN-01-AI-019,bacnet-01,bacnet,"analogInput,19",ahu-01,degC,False
-UA-F-0019,opcua-01,opcua,ns=2;s=UA-F-0019,opcua-server,m/s,True
-BN-01-AI-020,bacnet-01,bacnet,"analogInput,20",ahu-01,%RH,False
-UA-F-0020,opcua-01,opcua,ns=2;s=UA-F-0020,opcua-server,bar,True
-BN-01-AI-021,bacnet-01,bacnet,"analogInput,21",ahu-01,degC,False
-UA-F-0021,opcua-01,opcua,ns=2;s=UA-F-0021,opcua-server,degC,True
-BN-01-AI-022,bacnet-01,bacnet,"analogInput,22",ahu-01,%RH,False
-UA-F-0022,opcua-01,opcua,ns=2;s=UA-F-0022,opcua-server,%RH,True
-BN-01-AI-023,bacnet-01,bacnet,"analogInput,23",ahu-01,ppm,False
-UA-F-0023,opcua-01,opcua,ns=2;s=UA-F-0023,opcua-server,ppm,True
-BN-01-AI-024,bacnet-01,bacnet,"analogInput,24",ahu-01,Pa,False
-UA-F-0024,opcua-01,opcua,ns=2;s=UA-F-0024,opcua-server,Pa,True
-BN-01-AI-025,bacnet-01,bacnet,"analogInput,25",ahu-01,m3/h,False
-UA-F-0025,opcua-01,opcua,ns=2;s=UA-F-0025,opcua-server,m3/h,True
-BN-01-AI-026,bacnet-01,bacnet,"analogInput,26",ahu-01,kW,False
-UA-F-0026,opcua-01,opcua,ns=2;s=UA-F-0026,opcua-server,kW,True
-BN-01-AI-027,bacnet-01,bacnet,"analogInput,27",ahu-01,kWh,False
-UA-F-0027,opcua-01,opcua,ns=2;s=UA-F-0027,opcua-server,kWh,True
-BN-01-AI-028,bacnet-01,bacnet,"analogInput,28",ahu-01,lux,False
-UA-F-0028,opcua-01,opcua,ns=2;s=UA-F-0028,opcua-server,lux,True
-BN-01-AI-029,bacnet-01,bacnet,"analogInput,29",ahu-01,degC,False
-UA-F-0029,opcua-01,opcua,ns=2;s=UA-F-0029,opcua-server,m/s,True
-BN-01-AI-030,bacnet-01,bacnet,"analogInput,30",ahu-01,%RH,False
-UA-F-0030,opcua-01,opcua,ns=2;s=UA-F-0030,opcua-server,bar,True
-BN-01-AI-031,bacnet-01,bacnet,"analogInput,31",ahu-01,degC,False
-UA-F-0031,opcua-01,opcua,ns=2;s=UA-F-0031,opcua-server,degC,True
-BN-01-AI-032,bacnet-01,bacnet,"analogInput,32",ahu-01,%RH,False
-UA-F-0032,opcua-01,opcua,ns=2;s=UA-F-0032,opcua-server,%RH,True
-BN-01-AI-033,bacnet-01,bacnet,"analogInput,33",ahu-01,ppm,False
-UA-F-0033,opcua-01,opcua,ns=2;s=UA-F-0033,opcua-server,ppm,True
-BN-01-AI-034,bacnet-01,bacnet,"analogInput,34",ahu-01,Pa,False
-UA-F-0034,opcua-01,opcua,ns=2;s=UA-F-0034,opcua-server,Pa,True
-BN-01-AI-035,bacnet-01,bacnet,"analogInput,35",ahu-01,m3/h,False
-UA-F-0035,opcua-01,opcua,ns=2;s=UA-F-0035,opcua-server,m3/h,True
-BN-01-AI-036,bacnet-01,bacnet,"analogInput,36",ahu-01,kW,False
-UA-F-0036,opcua-01,opcua,ns=2;s=UA-F-0036,opcua-server,kW,True
-BN-01-AI-037,bacnet-01,bacnet,"analogInput,37",ahu-01,kWh,False
-UA-F-0037,opcua-01,opcua,ns=2;s=UA-F-0037,opcua-server,kWh,True
-BN-01-AI-038,bacnet-01,bacnet,"analogInput,38",ahu-01,lux,False
-UA-F-0038,opcua-01,opcua,ns=2;s=UA-F-0038,opcua-server,lux,True
-BN-01-AI-039,bacnet-01,bacnet,"analogInput,39",ahu-01,degC,False
-UA-F-0039,opcua-01,opcua,ns=2;s=UA-F-0039,opcua-server,m/s,True
-BN-01-AI-040,bacnet-01,bacnet,"analogInput,40",ahu-01,%RH,False
-UA-F-0040,opcua-01,opcua,ns=2;s=UA-F-0040,opcua-server,bar,True
-BN-01-AI-041,bacnet-01,bacnet,"analogInput,41",ahu-01,degC,False
-UA-F-0041,opcua-01,opcua,ns=2;s=UA-F-0041,opcua-server,degC,True
-BN-01-AI-042,bacnet-01,bacnet,"analogInput,42",ahu-01,%RH,False
-UA-F-0042,opcua-01,opcua,ns=2;s=UA-F-0042,opcua-server,%RH,True
-BN-01-AI-043,bacnet-01,bacnet,"analogInput,43",ahu-01,ppm,False
-UA-F-0043,opcua-01,opcua,ns=2;s=UA-F-0043,opcua-server,ppm,True
-BN-01-AI-044,bacnet-01,bacnet,"analogInput,44",ahu-01,Pa,False
-UA-F-0044,opcua-01,opcua,ns=2;s=UA-F-0044,opcua-server,Pa,True
-BN-01-AI-045,bacnet-01,bacnet,"analogInput,45",ahu-01,m3/h,False
-UA-F-0045,opcua-01,opcua,ns=2;s=UA-F-0045,opcua-server,m3/h,True
-BN-01-AI-046,bacnet-01,bacnet,"analogInput,46",ahu-01,kW,False
-UA-F-0046,opcua-01,opcua,ns=2;s=UA-F-0046,opcua-server,kW,True
-BN-01-AI-047,bacnet-01,bacnet,"analogInput,47",ahu-01,kWh,False
-UA-F-0047,opcua-01,opcua,ns=2;s=UA-F-0047,opcua-server,kWh,True
-BN-01-AI-048,bacnet-01,bacnet,"analogInput,48",ahu-01,lux,False
-UA-F-0048,opcua-01,opcua,ns=2;s=UA-F-0048,opcua-server,lux,True
-BN-01-AI-049,bacnet-01,bacnet,"analogInput,49",ahu-01,degC,False
-UA-F-0049,opcua-01,opcua,ns=2;s=UA-F-0049,opcua-server,m/s,True
-BN-01-AI-050,bacnet-01,bacnet,"analogInput,50",ahu-01,%RH,False
-UA-F-0050,opcua-01,opcua,ns=2;s=UA-F-0050,opcua-server,bar,True
-BN-01-AI-051,bacnet-01,bacnet,"analogInput,51",ahu-01,degC,False
-UA-F-0051,opcua-01,opcua,ns=2;s=UA-F-0051,opcua-server,degC,True
-BN-01-AI-052,bacnet-01,bacnet,"analogInput,52",ahu-01,%RH,False
-UA-F-0052,opcua-01,opcua,ns=2;s=UA-F-0052,opcua-server,%RH,True
-BN-01-AI-053,bacnet-01,bacnet,"analogInput,53",ahu-01,ppm,False
-UA-F-0053,opcua-01,opcua,ns=2;s=UA-F-0053,opcua-server,ppm,True
-BN-01-AI-054,bacnet-01,bacnet,"analogInput,54",ahu-01,Pa,False
-UA-F-0054,opcua-01,opcua,ns=2;s=UA-F-0054,opcua-server,Pa,True
-BN-01-AI-055,bacnet-01,bacnet,"analogInput,55",ahu-01,m3/h,False
-UA-F-0055,opcua-01,opcua,ns=2;s=UA-F-0055,opcua-server,m3/h,True
-BN-01-AI-056,bacnet-01,bacnet,"analogInput,56",ahu-01,kW,False
-UA-F-0056,opcua-01,opcua,ns=2;s=UA-F-0056,opcua-server,kW,True
-BN-01-AI-057,bacnet-01,bacnet,"analogInput,57",ahu-01,kWh,False
-UA-F-0057,opcua-01,opcua,ns=2;s=UA-F-0057,opcua-server,kWh,True
-BN-01-AI-058,bacnet-01,bacnet,"analogInput,58",ahu-01,lux,False
-UA-F-0058,opcua-01,opcua,ns=2;s=UA-F-0058,opcua-server,lux,True
-BN-01-AI-059,bacnet-01,bacnet,"analogInput,59",ahu-01,degC,False
-UA-F-0059,opcua-01,opcua,ns=2;s=UA-F-0059,opcua-server,m/s,True
-BN-01-AI-060,bacnet-01,bacnet,"analogInput,60",ahu-01,%RH,False
-UA-F-0060,opcua-01,opcua,ns=2;s=UA-F-0060,opcua-server,bar,True
-BN-01-AI-061,bacnet-01,bacnet,"analogInput,61",ahu-01,degC,False
-UA-F-0061,opcua-01,opcua,ns=2;s=UA-F-0061,opcua-server,degC,True
-BN-01-AI-062,bacnet-01,bacnet,"analogInput,62",ahu-01,%RH,False
-UA-F-0062,opcua-01,opcua,ns=2;s=UA-F-0062,opcua-server,%RH,True
-BN-01-AI-063,bacnet-01,bacnet,"analogInput,63",ahu-01,ppm,False
-UA-F-0063,opcua-01,opcua,ns=2;s=UA-F-0063,opcua-server,ppm,True
-BN-01-AI-064,bacnet-01,bacnet,"analogInput,64",ahu-01,Pa,False
-UA-F-0064,opcua-01,opcua,ns=2;s=UA-F-0064,opcua-server,Pa,True
-BN-01-AI-065,bacnet-01,bacnet,"analogInput,65",ahu-01,m3/h,False
-UA-F-0065,opcua-01,opcua,ns=2;s=UA-F-0065,opcua-server,m3/h,True
-BN-01-AI-066,bacnet-01,bacnet,"analogInput,66",ahu-01,kW,False
-UA-F-0066,opcua-01,opcua,ns=2;s=UA-F-0066,opcua-server,kW,True
-BN-01-AI-067,bacnet-01,bacnet,"analogInput,67",ahu-01,kWh,False
-UA-F-0067,opcua-01,opcua,ns=2;s=UA-F-0067,opcua-server,kWh,True
-BN-01-AI-068,bacnet-01,bacnet,"analogInput,68",ahu-01,lux,False
-UA-F-0068,opcua-01,opcua,ns=2;s=UA-F-0068,opcua-server,lux,True
-BN-01-AI-069,bacnet-01,bacnet,"analogInput,69",ahu-01,degC,False
-UA-F-0069,opcua-01,opcua,ns=2;s=UA-F-0069,opcua-server,m/s,True
-BN-01-AI-070,bacnet-01,bacnet,"analogInput,70",ahu-01,%RH,False
-UA-F-0070,opcua-01,opcua,ns=2;s=UA-F-0070,opcua-server,bar,True
-BN-01-AI-071,bacnet-01,bacnet,"analogInput,71",ahu-01,degC,False
-UA-F-0071,opcua-01,opcua,ns=2;s=UA-F-0071,opcua-server,degC,True
-BN-01-AI-072,bacnet-01,bacnet,"analogInput,72",ahu-01,%RH,False
-UA-F-0072,opcua-01,opcua,ns=2;s=UA-F-0072,opcua-server,%RH,True
-BN-01-AI-073,bacnet-01,bacnet,"analogInput,73",ahu-01,ppm,False
-UA-F-0073,opcua-01,opcua,ns=2;s=UA-F-0073,opcua-server,ppm,True
-BN-01-AI-074,bacnet-01,bacnet,"analogInput,74",ahu-01,Pa,False
-UA-F-0074,opcua-01,opcua,ns=2;s=UA-F-0074,opcua-server,Pa,True
-BN-01-AI-075,bacnet-01,bacnet,"analogInput,75",ahu-01,m3/h,False
-UA-F-0075,opcua-01,opcua,ns=2;s=UA-F-0075,opcua-server,m3/h,True
-BN-01-AI-076,bacnet-01,bacnet,"analogInput,76",ahu-01,kW,False
-UA-F-0076,opcua-01,opcua,ns=2;s=UA-F-0076,opcua-server,kW,True
-BN-01-AI-077,bacnet-01,bacnet,"analogInput,77",ahu-01,kWh,False
-UA-F-0077,opcua-01,opcua,ns=2;s=UA-F-0077,opcua-server,kWh,True
-BN-01-AI-078,bacnet-01,bacnet,"analogInput,78",ahu-01,lux,False
-UA-F-0078,opcua-01,opcua,ns=2;s=UA-F-0078,opcua-server,lux,True
-BN-01-AI-079,bacnet-01,bacnet,"analogInput,79",ahu-01,degC,False
-UA-F-0079,opcua-01,opcua,ns=2;s=UA-F-0079,opcua-server,m/s,True
-BN-01-AI-080,bacnet-01,bacnet,"analogInput,80",ahu-01,%RH,False
-UA-F-0080,opcua-01,opcua,ns=2;s=UA-F-0080,opcua-server,bar,True
-BN-01-AI-081,bacnet-01,bacnet,"analogInput,81",ahu-01,degC,False
-UA-F-0081,opcua-01,opcua,ns=2;s=UA-F-0081,opcua-server,degC,True
-BN-01-AI-082,bacnet-01,bacnet,"analogInput,82",ahu-01,%RH,False
-UA-F-0082,opcua-01,opcua,ns=2;s=UA-F-0082,opcua-server,%RH,True
-BN-01-AI-083,bacnet-01,bacnet,"analogInput,83",ahu-01,ppm,False
-UA-F-0083,opcua-01,opcua,ns=2;s=UA-F-0083,opcua-server,ppm,True
-BN-01-AI-084,bacnet-01,bacnet,"analogInput,84",ahu-01,Pa,False
-UA-F-0084,opcua-01,opcua,ns=2;s=UA-F-0084,opcua-server,Pa,True
-BN-01-AI-085,bacnet-01,bacnet,"analogInput,85",ahu-01,m3/h,False
-UA-F-0085,opcua-01,opcua,ns=2;s=UA-F-0085,opcua-server,m3/h,True
-BN-01-AI-086,bacnet-01,bacnet,"analogInput,86",ahu-01,kW,False
-UA-F-0086,opcua-01,opcua,ns=2;s=UA-F-0086,opcua-server,kW,True
-BN-01-AI-087,bacnet-01,bacnet,"analogInput,87",ahu-01,kWh,False
-UA-F-0087,opcua-01,opcua,ns=2;s=UA-F-0087,opcua-server,kWh,True
-BN-01-AI-088,bacnet-01,bacnet,"analogInput,88",ahu-01,lux,False
-UA-F-0088,opcua-01,opcua,ns=2;s=UA-F-0088,opcua-server,lux,True
-BN-01-AI-089,bacnet-01,bacnet,"analogInput,89",ahu-01,degC,False
-UA-F-0089,opcua-01,opcua,ns=2;s=UA-F-0089,opcua-server,m/s,True
-BN-01-AI-090,bacnet-01,bacnet,"analogInput,90",ahu-01,%RH,False
-UA-F-0090,opcua-01,opcua,ns=2;s=UA-F-0090,opcua-server,bar,True
-BN-01-AI-091,bacnet-01,bacnet,"analogInput,91",ahu-01,degC,False
-UA-F-0091,opcua-01,opcua,ns=2;s=UA-F-0091,opcua-server,degC,True
-BN-01-AI-092,bacnet-01,bacnet,"analogInput,92",ahu-01,%RH,False
-UA-F-0092,opcua-01,opcua,ns=2;s=UA-F-0092,opcua-server,%RH,True
-BN-01-AI-093,bacnet-01,bacnet,"analogInput,93",ahu-01,ppm,False
-UA-F-0093,opcua-01,opcua,ns=2;s=UA-F-0093,opcua-server,ppm,True
-BN-01-AI-094,bacnet-01,bacnet,"analogInput,94",ahu-01,Pa,False
-UA-F-0094,opcua-01,opcua,ns=2;s=UA-F-0094,opcua-server,Pa,True
-BN-01-AI-095,bacnet-01,bacnet,"analogInput,95",ahu-01,m3/h,False
-UA-F-0095,opcua-01,opcua,ns=2;s=UA-F-0095,opcua-server,m3/h,True
-BN-01-AI-096,bacnet-01,bacnet,"analogInput,96",ahu-01,kW,False
-UA-F-0096,opcua-01,opcua,ns=2;s=UA-F-0096,opcua-server,kW,True
-BN-01-AI-097,bacnet-01,bacnet,"analogInput,97",ahu-01,kWh,False
-UA-F-0097,opcua-01,opcua,ns=2;s=UA-F-0097,opcua-server,kWh,True
-BN-01-AI-098,bacnet-01,bacnet,"analogInput,98",ahu-01,lux,False
-UA-F-0098,opcua-01,opcua,ns=2;s=UA-F-0098,opcua-server,lux,True
-BN-01-AI-099,bacnet-01,bacnet,"analogInput,99",ahu-01,degC,False
-UA-F-0099,opcua-01,opcua,ns=2;s=UA-F-0099,opcua-server,m/s,True
-BN-01-AI-100,bacnet-01,bacnet,"analogInput,100",ahu-01,%RH,False
-UA-F-0100,opcua-01,opcua,ns=2;s=UA-F-0100,opcua-server,bar,True
-BN-01-AO-001,bacnet-01,bacnet,"analogOutput,1",ahu-01,degC,True
-UA-F-0101,opcua-01,opcua,ns=2;s=UA-F-0101,opcua-server,degC,False
-BN-01-AO-002,bacnet-01,bacnet,"analogOutput,2",ahu-01,%,True
-UA-F-0102,opcua-01,opcua,ns=2;s=UA-F-0102,opcua-server,%RH,False
-BN-01-AO-003,bacnet-01,bacnet,"analogOutput,3",ahu-01,Pa,True
-UA-F-0103,opcua-01,opcua,ns=2;s=UA-F-0103,opcua-server,ppm,False
-BN-01-AO-004,bacnet-01,bacnet,"analogOutput,4",ahu-01,m3/h,True
-UA-F-0104,opcua-01,opcua,ns=2;s=UA-F-0104,opcua-server,Pa,False
-BN-01-AO-005,bacnet-01,bacnet,"analogOutput,5",ahu-01,kW,True
-UA-F-0105,opcua-01,opcua,ns=2;s=UA-F-0105,opcua-server,m3/h,False
-BN-01-AO-006,bacnet-01,bacnet,"analogOutput,6",ahu-01,degC,True
-UA-F-0106,opcua-01,opcua,ns=2;s=UA-F-0106,opcua-server,kW,False
-BN-01-AO-007,bacnet-01,bacnet,"analogOutput,7",ahu-01,%,True
-UA-F-0107,opcua-01,opcua,ns=2;s=UA-F-0107,opcua-server,kWh,False
-BN-01-AO-008,bacnet-01,bacnet,"analogOutput,8",ahu-01,Pa,True
-UA-F-0108,opcua-01,opcua,ns=2;s=UA-F-0108,opcua-server,lux,False
-BN-01-AO-009,bacnet-01,bacnet,"analogOutput,9",ahu-01,m3/h,True
-UA-F-0109,opcua-01,opcua,ns=2;s=UA-F-0109,opcua-server,m/s,False
-BN-01-AO-010,bacnet-01,bacnet,"analogOutput,10",ahu-01,kW,True
-UA-F-0110,opcua-01,opcua,ns=2;s=UA-F-0110,opcua-server,bar,False
-BN-01-AO-011,bacnet-01,bacnet,"analogOutput,11",ahu-01,degC,True
-UA-F-0111,opcua-01,opcua,ns=2;s=UA-F-0111,opcua-server,degC,False
-BN-01-AO-012,bacnet-01,bacnet,"analogOutput,12",ahu-01,%,True
-UA-F-0112,opcua-01,opcua,ns=2;s=UA-F-0112,opcua-server,%RH,False
-BN-01-AO-013,bacnet-01,bacnet,"analogOutput,13",ahu-01,Pa,True
-UA-F-0113,opcua-01,opcua,ns=2;s=UA-F-0113,opcua-server,ppm,False
-BN-01-AO-014,bacnet-01,bacnet,"analogOutput,14",ahu-01,m3/h,True
-UA-F-0114,opcua-01,opcua,ns=2;s=UA-F-0114,opcua-server,Pa,False
-BN-01-AO-015,bacnet-01,bacnet,"analogOutput,15",ahu-01,kW,True
-UA-F-0115,opcua-01,opcua,ns=2;s=UA-F-0115,opcua-server,m3/h,False
-BN-01-AO-016,bacnet-01,bacnet,"analogOutput,16",ahu-01,degC,True
-UA-F-0116,opcua-01,opcua,ns=2;s=UA-F-0116,opcua-server,kW,False
-BN-01-AO-017,bacnet-01,bacnet,"analogOutput,17",ahu-01,%,True
-UA-F-0117,opcua-01,opcua,ns=2;s=UA-F-0117,opcua-server,kWh,False
-BN-01-AO-018,bacnet-01,bacnet,"analogOutput,18",ahu-01,Pa,True
-UA-F-0118,opcua-01,opcua,ns=2;s=UA-F-0118,opcua-server,lux,False
-BN-01-AO-019,bacnet-01,bacnet,"analogOutput,19",ahu-01,m3/h,True
-UA-F-0119,opcua-01,opcua,ns=2;s=UA-F-0119,opcua-server,m/s,False
-BN-01-AO-020,bacnet-01,bacnet,"analogOutput,20",ahu-01,kW,True
-UA-F-0120,opcua-01,opcua,ns=2;s=UA-F-0120,opcua-server,bar,False
-BN-01-AO-021,bacnet-01,bacnet,"analogOutput,21",ahu-01,degC,True
-UA-F-0121,opcua-01,opcua,ns=2;s=UA-F-0121,opcua-server,degC,False
-BN-01-AO-022,bacnet-01,bacnet,"analogOutput,22",ahu-01,%,True
-UA-F-0122,opcua-01,opcua,ns=2;s=UA-F-0122,opcua-server,%RH,False
-BN-01-AO-023,bacnet-01,bacnet,"analogOutput,23",ahu-01,Pa,True
-UA-F-0123,opcua-01,opcua,ns=2;s=UA-F-0123,opcua-server,ppm,False
-BN-01-AO-024,bacnet-01,bacnet,"analogOutput,24",ahu-01,m3/h,True
-UA-F-0124,opcua-01,opcua,ns=2;s=UA-F-0124,opcua-server,Pa,False
-BN-01-AO-025,bacnet-01,bacnet,"analogOutput,25",ahu-01,kW,True
-UA-F-0125,opcua-01,opcua,ns=2;s=UA-F-0125,opcua-server,m3/h,False
-BN-01-AO-026,bacnet-01,bacnet,"analogOutput,26",ahu-01,degC,True
-UA-F-0126,opcua-01,opcua,ns=2;s=UA-F-0126,opcua-server,kW,False
-BN-01-AO-027,bacnet-01,bacnet,"analogOutput,27",ahu-01,%,True
-UA-F-0127,opcua-01,opcua,ns=2;s=UA-F-0127,opcua-server,kWh,False
-BN-01-AO-028,bacnet-01,bacnet,"analogOutput,28",ahu-01,Pa,True
-UA-F-0128,opcua-01,opcua,ns=2;s=UA-F-0128,opcua-server,lux,False
-BN-01-AO-029,bacnet-01,bacnet,"analogOutput,29",ahu-01,m3/h,True
-UA-F-0129,opcua-01,opcua,ns=2;s=UA-F-0129,opcua-server,m/s,False
-BN-01-AO-030,bacnet-01,bacnet,"analogOutput,30",ahu-01,kW,True
-UA-F-0130,opcua-01,opcua,ns=2;s=UA-F-0130,opcua-server,bar,False
-BN-01-AO-031,bacnet-01,bacnet,"analogOutput,31",ahu-01,degC,True
-UA-F-0131,opcua-01,opcua,ns=2;s=UA-F-0131,opcua-server,degC,False
-BN-01-AO-032,bacnet-01,bacnet,"analogOutput,32",ahu-01,%,True
-UA-F-0132,opcua-01,opcua,ns=2;s=UA-F-0132,opcua-server,%RH,False
-BN-01-AO-033,bacnet-01,bacnet,"analogOutput,33",ahu-01,Pa,True
-UA-F-0133,opcua-01,opcua,ns=2;s=UA-F-0133,opcua-server,ppm,False
-BN-01-AO-034,bacnet-01,bacnet,"analogOutput,34",ahu-01,m3/h,True
-UA-F-0134,opcua-01,opcua,ns=2;s=UA-F-0134,opcua-server,Pa,False
-BN-01-AO-035,bacnet-01,bacnet,"analogOutput,35",ahu-01,kW,True
-UA-F-0135,opcua-01,opcua,ns=2;s=UA-F-0135,opcua-server,m3/h,False
-BN-01-AO-036,bacnet-01,bacnet,"analogOutput,36",ahu-01,degC,True
-UA-F-0136,opcua-01,opcua,ns=2;s=UA-F-0136,opcua-server,kW,False
-BN-01-AO-037,bacnet-01,bacnet,"analogOutput,37",ahu-01,%,True
-UA-F-0137,opcua-01,opcua,ns=2;s=UA-F-0137,opcua-server,kWh,False
-BN-01-AO-038,bacnet-01,bacnet,"analogOutput,38",ahu-01,Pa,True
-UA-F-0138,opcua-01,opcua,ns=2;s=UA-F-0138,opcua-server,lux,False
-BN-01-AO-039,bacnet-01,bacnet,"analogOutput,39",ahu-01,m3/h,True
-UA-F-0139,opcua-01,opcua,ns=2;s=UA-F-0139,opcua-server,m/s,False
-BN-01-AO-040,bacnet-01,bacnet,"analogOutput,40",ahu-01,kW,True
-UA-F-0140,opcua-01,opcua,ns=2;s=UA-F-0140,opcua-server,bar,False
-BN-01-BI-001,bacnet-01,bacnet,"binaryInput,1",ahu-01,,False
-UA-F-0141,opcua-01,opcua,ns=2;s=UA-F-0141,opcua-server,degC,False
-BN-01-BI-002,bacnet-01,bacnet,"binaryInput,2",ahu-01,,False
-UA-F-0142,opcua-01,opcua,ns=2;s=UA-F-0142,opcua-server,%RH,False
-BN-01-BI-003,bacnet-01,bacnet,"binaryInput,3",ahu-01,,False
-UA-F-0143,opcua-01,opcua,ns=2;s=UA-F-0143,opcua-server,ppm,False
-BN-01-BI-004,bacnet-01,bacnet,"binaryInput,4",ahu-01,,False
-UA-F-0144,opcua-01,opcua,ns=2;s=UA-F-0144,opcua-server,Pa,False
-BN-01-BI-005,bacnet-01,bacnet,"binaryInput,5",ahu-01,,False
-UA-F-0145,opcua-01,opcua,ns=2;s=UA-F-0145,opcua-server,m3/h,False
-BN-01-BI-006,bacnet-01,bacnet,"binaryInput,6",ahu-01,,False
-UA-F-0146,opcua-01,opcua,ns=2;s=UA-F-0146,opcua-server,kW,False
-BN-01-BI-007,bacnet-01,bacnet,"binaryInput,7",ahu-01,,False
-UA-F-0147,opcua-01,opcua,ns=2;s=UA-F-0147,opcua-server,kWh,False
-BN-01-BI-008,bacnet-01,bacnet,"binaryInput,8",ahu-01,,False
-UA-F-0148,opcua-01,opcua,ns=2;s=UA-F-0148,opcua-server,lux,False
-BN-01-BI-009,bacnet-01,bacnet,"binaryInput,9",ahu-01,,False
-UA-F-0149,opcua-01,opcua,ns=2;s=UA-F-0149,opcua-server,m/s,False
-BN-01-BI-010,bacnet-01,bacnet,"binaryInput,10",ahu-01,,False
-UA-F-0150,opcua-01,opcua,ns=2;s=UA-F-0150,opcua-server,bar,False
-BN-01-BI-011,bacnet-01,bacnet,"binaryInput,11",ahu-01,,False
-UA-F-0151,opcua-01,opcua,ns=2;s=UA-F-0151,opcua-server,degC,False
-BN-01-BI-012,bacnet-01,bacnet,"binaryInput,12",ahu-01,,False
-UA-F-0152,opcua-01,opcua,ns=2;s=UA-F-0152,opcua-server,%RH,False
-BN-01-BI-013,bacnet-01,bacnet,"binaryInput,13",ahu-01,,False
-UA-F-0153,opcua-01,opcua,ns=2;s=UA-F-0153,opcua-server,ppm,False
-BN-01-BI-014,bacnet-01,bacnet,"binaryInput,14",ahu-01,,False
-UA-F-0154,opcua-01,opcua,ns=2;s=UA-F-0154,opcua-server,Pa,False
-BN-01-BI-015,bacnet-01,bacnet,"binaryInput,15",ahu-01,,False
-UA-F-0155,opcua-01,opcua,ns=2;s=UA-F-0155,opcua-server,m3/h,False
-BN-01-BI-016,bacnet-01,bacnet,"binaryInput,16",ahu-01,,False
-UA-F-0156,opcua-01,opcua,ns=2;s=UA-F-0156,opcua-server,kW,False
-BN-01-BI-017,bacnet-01,bacnet,"binaryInput,17",ahu-01,,False
-UA-F-0157,opcua-01,opcua,ns=2;s=UA-F-0157,opcua-server,kWh,False
-BN-01-BI-018,bacnet-01,bacnet,"binaryInput,18",ahu-01,,False
-UA-F-0158,opcua-01,opcua,ns=2;s=UA-F-0158,opcua-server,lux,False
-BN-01-BI-019,bacnet-01,bacnet,"binaryInput,19",ahu-01,,False
-UA-F-0159,opcua-01,opcua,ns=2;s=UA-F-0159,opcua-server,m/s,False
-BN-01-BI-020,bacnet-01,bacnet,"binaryInput,20",ahu-01,,False
-UA-F-0160,opcua-01,opcua,ns=2;s=UA-F-0160,opcua-server,bar,False
-BN-01-BI-021,bacnet-01,bacnet,"binaryInput,21",ahu-01,,False
-UA-F-0161,opcua-01,opcua,ns=2;s=UA-F-0161,opcua-server,degC,False
-BN-01-BI-022,bacnet-01,bacnet,"binaryInput,22",ahu-01,,False
-UA-F-0162,opcua-01,opcua,ns=2;s=UA-F-0162,opcua-server,%RH,False
-BN-01-BI-023,bacnet-01,bacnet,"binaryInput,23",ahu-01,,False
-UA-F-0163,opcua-01,opcua,ns=2;s=UA-F-0163,opcua-server,ppm,False
-BN-01-BI-024,bacnet-01,bacnet,"binaryInput,24",ahu-01,,False
-UA-F-0164,opcua-01,opcua,ns=2;s=UA-F-0164,opcua-server,Pa,False
-BN-01-BI-025,bacnet-01,bacnet,"binaryInput,25",ahu-01,,False
-UA-F-0165,opcua-01,opcua,ns=2;s=UA-F-0165,opcua-server,m3/h,False
-BN-01-BI-026,bacnet-01,bacnet,"binaryInput,26",ahu-01,,False
-UA-F-0166,opcua-01,opcua,ns=2;s=UA-F-0166,opcua-server,kW,False
-BN-01-BI-027,bacnet-01,bacnet,"binaryInput,27",ahu-01,,False
-UA-F-0167,opcua-01,opcua,ns=2;s=UA-F-0167,opcua-server,kWh,False
-BN-01-BI-028,bacnet-01,bacnet,"binaryInput,28",ahu-01,,False
-UA-F-0168,opcua-01,opcua,ns=2;s=UA-F-0168,opcua-server,lux,False
-BN-01-BI-029,bacnet-01,bacnet,"binaryInput,29",ahu-01,,False
-UA-F-0169,opcua-01,opcua,ns=2;s=UA-F-0169,opcua-server,m/s,False
-BN-01-BI-030,bacnet-01,bacnet,"binaryInput,30",ahu-01,,False
-UA-F-0170,opcua-01,opcua,ns=2;s=UA-F-0170,opcua-server,bar,False
-BN-01-BI-031,bacnet-01,bacnet,"binaryInput,31",ahu-01,,False
-UA-F-0171,opcua-01,opcua,ns=2;s=UA-F-0171,opcua-server,degC,False
-BN-01-BI-032,bacnet-01,bacnet,"binaryInput,32",ahu-01,,False
-UA-F-0172,opcua-01,opcua,ns=2;s=UA-F-0172,opcua-server,%RH,False
-BN-01-BI-033,bacnet-01,bacnet,"binaryInput,33",ahu-01,,False
-UA-F-0173,opcua-01,opcua,ns=2;s=UA-F-0173,opcua-server,ppm,False
-BN-01-BI-034,bacnet-01,bacnet,"binaryInput,34",ahu-01,,False
-UA-F-0174,opcua-01,opcua,ns=2;s=UA-F-0174,opcua-server,Pa,False
-BN-01-BI-035,bacnet-01,bacnet,"binaryInput,35",ahu-01,,False
-UA-F-0175,opcua-01,opcua,ns=2;s=UA-F-0175,opcua-server,m3/h,False
-BN-01-BI-036,bacnet-01,bacnet,"binaryInput,36",ahu-01,,False
-UA-F-0176,opcua-01,opcua,ns=2;s=UA-F-0176,opcua-server,kW,False
-BN-01-BI-037,bacnet-01,bacnet,"binaryInput,37",ahu-01,,False
-UA-F-0177,opcua-01,opcua,ns=2;s=UA-F-0177,opcua-server,kWh,False
-BN-01-BI-038,bacnet-01,bacnet,"binaryInput,38",ahu-01,,False
-UA-F-0178,opcua-01,opcua,ns=2;s=UA-F-0178,opcua-server,lux,False
-BN-01-BI-039,bacnet-01,bacnet,"binaryInput,39",ahu-01,,False
-UA-F-0179,opcua-01,opcua,ns=2;s=UA-F-0179,opcua-server,m/s,False
-BN-01-BI-040,bacnet-01,bacnet,"binaryInput,40",ahu-01,,False
-UA-F-0180,opcua-01,opcua,ns=2;s=UA-F-0180,opcua-server,bar,False
-BN-01-BO-001,bacnet-01,bacnet,"binaryOutput,1",ahu-01,,True
-UA-F-0181,opcua-01,opcua,ns=2;s=UA-F-0181,opcua-server,degC,False
-BN-01-BO-002,bacnet-01,bacnet,"binaryOutput,2",ahu-01,,True
-UA-F-0182,opcua-01,opcua,ns=2;s=UA-F-0182,opcua-server,%RH,False
-BN-01-BO-003,bacnet-01,bacnet,"binaryOutput,3",ahu-01,,True
-UA-F-0183,opcua-01,opcua,ns=2;s=UA-F-0183,opcua-server,ppm,False
-BN-01-BO-004,bacnet-01,bacnet,"binaryOutput,4",ahu-01,,True
-UA-F-0184,opcua-01,opcua,ns=2;s=UA-F-0184,opcua-server,Pa,False
-BN-01-BO-005,bacnet-01,bacnet,"binaryOutput,5",ahu-01,,True
-UA-F-0185,opcua-01,opcua,ns=2;s=UA-F-0185,opcua-server,m3/h,False
-BN-01-BO-006,bacnet-01,bacnet,"binaryOutput,6",ahu-01,,True
-UA-F-0186,opcua-01,opcua,ns=2;s=UA-F-0186,opcua-server,kW,False
-BN-01-BO-007,bacnet-01,bacnet,"binaryOutput,7",ahu-01,,True
-UA-F-0187,opcua-01,opcua,ns=2;s=UA-F-0187,opcua-server,kWh,False
-BN-01-BO-008,bacnet-01,bacnet,"binaryOutput,8",ahu-01,,True
-UA-F-0188,opcua-01,opcua,ns=2;s=UA-F-0188,opcua-server,lux,False
-BN-01-BO-009,bacnet-01,bacnet,"binaryOutput,9",ahu-01,,True
-UA-F-0189,opcua-01,opcua,ns=2;s=UA-F-0189,opcua-server,m/s,False
-BN-01-BO-010,bacnet-01,bacnet,"binaryOutput,10",ahu-01,,True
-UA-F-0190,opcua-01,opcua,ns=2;s=UA-F-0190,opcua-server,bar,False
-BN-01-BO-011,bacnet-01,bacnet,"binaryOutput,11",ahu-01,,True
-UA-F-0191,opcua-01,opcua,ns=2;s=UA-F-0191,opcua-server,degC,False
-BN-01-BO-012,bacnet-01,bacnet,"binaryOutput,12",ahu-01,,True
-UA-F-0192,opcua-01,opcua,ns=2;s=UA-F-0192,opcua-server,%RH,False
-BN-01-BO-013,bacnet-01,bacnet,"binaryOutput,13",ahu-01,,True
-UA-F-0193,opcua-01,opcua,ns=2;s=UA-F-0193,opcua-server,ppm,False
-BN-01-BO-014,bacnet-01,bacnet,"binaryOutput,14",ahu-01,,True
-UA-F-0194,opcua-01,opcua,ns=2;s=UA-F-0194,opcua-server,Pa,False
-BN-01-BO-015,bacnet-01,bacnet,"binaryOutput,15",ahu-01,,True
-UA-F-0195,opcua-01,opcua,ns=2;s=UA-F-0195,opcua-server,m3/h,False
-BN-01-BO-016,bacnet-01,bacnet,"binaryOutput,16",ahu-01,,True
-UA-F-0196,opcua-01,opcua,ns=2;s=UA-F-0196,opcua-server,kW,False
-BN-01-BO-017,bacnet-01,bacnet,"binaryOutput,17",ahu-01,,True
-UA-F-0197,opcua-01,opcua,ns=2;s=UA-F-0197,opcua-server,kWh,False
-BN-01-BO-018,bacnet-01,bacnet,"binaryOutput,18",ahu-01,,True
-UA-F-0198,opcua-01,opcua,ns=2;s=UA-F-0198,opcua-server,lux,False
-BN-01-BO-019,bacnet-01,bacnet,"binaryOutput,19",ahu-01,,True
-UA-F-0199,opcua-01,opcua,ns=2;s=UA-F-0199,opcua-server,m/s,False
-BN-01-BO-020,bacnet-01,bacnet,"binaryOutput,20",ahu-01,,True
-UA-F-0200,opcua-01,opcua,ns=2;s=UA-F-0200,opcua-server,bar,False
-BN-02-AI-001,bacnet-02,bacnet,"analogInput,1",ahu-02,degC,False
-UA-F-0201,opcua-01,opcua,ns=2;s=UA-F-0201,opcua-server,degC,False
-BN-02-AI-002,bacnet-02,bacnet,"analogInput,2",ahu-02,%RH,False
-UA-F-0202,opcua-01,opcua,ns=2;s=UA-F-0202,opcua-server,%RH,False
-BN-02-AI-003,bacnet-02,bacnet,"analogInput,3",ahu-02,ppm,False
-UA-F-0203,opcua-01,opcua,ns=2;s=UA-F-0203,opcua-server,ppm,False
-BN-02-AI-004,bacnet-02,bacnet,"analogInput,4",ahu-02,Pa,False
-UA-F-0204,opcua-01,opcua,ns=2;s=UA-F-0204,opcua-server,Pa,False
-BN-02-AI-005,bacnet-02,bacnet,"analogInput,5",ahu-02,m3/h,False
-UA-F-0205,opcua-01,opcua,ns=2;s=UA-F-0205,opcua-server,m3/h,False
-BN-02-AI-006,bacnet-02,bacnet,"analogInput,6",ahu-02,kW,False
-UA-F-0206,opcua-01,opcua,ns=2;s=UA-F-0206,opcua-server,kW,False
-BN-02-AI-007,bacnet-02,bacnet,"analogInput,7",ahu-02,kWh,False
-UA-F-0207,opcua-01,opcua,ns=2;s=UA-F-0207,opcua-server,kWh,False
-BN-02-AI-008,bacnet-02,bacnet,"analogInput,8",ahu-02,lux,False
-UA-F-0208,opcua-01,opcua,ns=2;s=UA-F-0208,opcua-server,lux,False
-BN-02-AI-009,bacnet-02,bacnet,"analogInput,9",ahu-02,degC,False
-UA-F-0209,opcua-01,opcua,ns=2;s=UA-F-0209,opcua-server,m/s,False
-BN-02-AI-010,bacnet-02,bacnet,"analogInput,10",ahu-02,%RH,False
-UA-F-0210,opcua-01,opcua,ns=2;s=UA-F-0210,opcua-server,bar,False
-BN-02-AI-011,bacnet-02,bacnet,"analogInput,11",ahu-02,degC,False
-UA-F-0211,opcua-01,opcua,ns=2;s=UA-F-0211,opcua-server,degC,False
-BN-02-AI-012,bacnet-02,bacnet,"analogInput,12",ahu-02,%RH,False
-UA-F-0212,opcua-01,opcua,ns=2;s=UA-F-0212,opcua-server,%RH,False
-BN-02-AI-013,bacnet-02,bacnet,"analogInput,13",ahu-02,ppm,False
-UA-F-0213,opcua-01,opcua,ns=2;s=UA-F-0213,opcua-server,ppm,False
-BN-02-AI-014,bacnet-02,bacnet,"analogInput,14",ahu-02,Pa,False
-UA-F-0214,opcua-01,opcua,ns=2;s=UA-F-0214,opcua-server,Pa,False
-BN-02-AI-015,bacnet-02,bacnet,"analogInput,15",ahu-02,m3/h,False
-UA-F-0215,opcua-01,opcua,ns=2;s=UA-F-0215,opcua-server,m3/h,False
-BN-02-AI-016,bacnet-02,bacnet,"analogInput,16",ahu-02,kW,False
-UA-F-0216,opcua-01,opcua,ns=2;s=UA-F-0216,opcua-server,kW,False
-BN-02-AI-017,bacnet-02,bacnet,"analogInput,17",ahu-02,kWh,False
-UA-F-0217,opcua-01,opcua,ns=2;s=UA-F-0217,opcua-server,kWh,False
-BN-02-AI-018,bacnet-02,bacnet,"analogInput,18",ahu-02,lux,False
-UA-F-0218,opcua-01,opcua,ns=2;s=UA-F-0218,opcua-server,lux,False
-BN-02-AI-019,bacnet-02,bacnet,"analogInput,19",ahu-02,degC,False
-UA-F-0219,opcua-01,opcua,ns=2;s=UA-F-0219,opcua-server,m/s,False
-BN-02-AI-020,bacnet-02,bacnet,"analogInput,20",ahu-02,%RH,False
-UA-F-0220,opcua-01,opcua,ns=2;s=UA-F-0220,opcua-server,bar,False
-BN-02-AI-021,bacnet-02,bacnet,"analogInput,21",ahu-02,degC,False
-UA-F-0221,opcua-01,opcua,ns=2;s=UA-F-0221,opcua-server,degC,False
-BN-02-AI-022,bacnet-02,bacnet,"analogInput,22",ahu-02,%RH,False
-UA-F-0222,opcua-01,opcua,ns=2;s=UA-F-0222,opcua-server,%RH,False
-BN-02-AI-023,bacnet-02,bacnet,"analogInput,23",ahu-02,ppm,False
-UA-F-0223,opcua-01,opcua,ns=2;s=UA-F-0223,opcua-server,ppm,False
-BN-02-AI-024,bacnet-02,bacnet,"analogInput,24",ahu-02,Pa,False
-UA-F-0224,opcua-01,opcua,ns=2;s=UA-F-0224,opcua-server,Pa,False
-BN-02-AI-025,bacnet-02,bacnet,"analogInput,25",ahu-02,m3/h,False
-UA-F-0225,opcua-01,opcua,ns=2;s=UA-F-0225,opcua-server,m3/h,False
-BN-02-AI-026,bacnet-02,bacnet,"analogInput,26",ahu-02,kW,False
-UA-F-0226,opcua-01,opcua,ns=2;s=UA-F-0226,opcua-server,kW,False
-BN-02-AI-027,bacnet-02,bacnet,"analogInput,27",ahu-02,kWh,False
-UA-F-0227,opcua-01,opcua,ns=2;s=UA-F-0227,opcua-server,kWh,False
-BN-02-AI-028,bacnet-02,bacnet,"analogInput,28",ahu-02,lux,False
-UA-F-0228,opcua-01,opcua,ns=2;s=UA-F-0228,opcua-server,lux,False
-BN-02-AI-029,bacnet-02,bacnet,"analogInput,29",ahu-02,degC,False
-UA-F-0229,opcua-01,opcua,ns=2;s=UA-F-0229,opcua-server,m/s,False
-BN-02-AI-030,bacnet-02,bacnet,"analogInput,30",ahu-02,%RH,False
-UA-F-0230,opcua-01,opcua,ns=2;s=UA-F-0230,opcua-server,bar,False
-BN-02-AI-031,bacnet-02,bacnet,"analogInput,31",ahu-02,degC,False
-UA-F-0231,opcua-01,opcua,ns=2;s=UA-F-0231,opcua-server,degC,False
-BN-02-AI-032,bacnet-02,bacnet,"analogInput,32",ahu-02,%RH,False
-UA-F-0232,opcua-01,opcua,ns=2;s=UA-F-0232,opcua-server,%RH,False
-BN-02-AI-033,bacnet-02,bacnet,"analogInput,33",ahu-02,ppm,False
-UA-F-0233,opcua-01,opcua,ns=2;s=UA-F-0233,opcua-server,ppm,False
-BN-02-AI-034,bacnet-02,bacnet,"analogInput,34",ahu-02,Pa,False
-UA-F-0234,opcua-01,opcua,ns=2;s=UA-F-0234,opcua-server,Pa,False
-BN-02-AI-035,bacnet-02,bacnet,"analogInput,35",ahu-02,m3/h,False
-UA-F-0235,opcua-01,opcua,ns=2;s=UA-F-0235,opcua-server,m3/h,False
-BN-02-AI-036,bacnet-02,bacnet,"analogInput,36",ahu-02,kW,False
-UA-F-0236,opcua-01,opcua,ns=2;s=UA-F-0236,opcua-server,kW,False
-BN-02-AI-037,bacnet-02,bacnet,"analogInput,37",ahu-02,kWh,False
-UA-F-0237,opcua-01,opcua,ns=2;s=UA-F-0237,opcua-server,kWh,False
-BN-02-AI-038,bacnet-02,bacnet,"analogInput,38",ahu-02,lux,False
-UA-F-0238,opcua-01,opcua,ns=2;s=UA-F-0238,opcua-server,lux,False
-BN-02-AI-039,bacnet-02,bacnet,"analogInput,39",ahu-02,degC,False
-UA-F-0239,opcua-01,opcua,ns=2;s=UA-F-0239,opcua-server,m/s,False
-BN-02-AI-040,bacnet-02,bacnet,"analogInput,40",ahu-02,%RH,False
-UA-F-0240,opcua-01,opcua,ns=2;s=UA-F-0240,opcua-server,bar,False
-BN-02-AI-041,bacnet-02,bacnet,"analogInput,41",ahu-02,degC,False
-UA-F-0241,opcua-01,opcua,ns=2;s=UA-F-0241,opcua-server,degC,False
-BN-02-AI-042,bacnet-02,bacnet,"analogInput,42",ahu-02,%RH,False
-UA-F-0242,opcua-01,opcua,ns=2;s=UA-F-0242,opcua-server,%RH,False
-BN-02-AI-043,bacnet-02,bacnet,"analogInput,43",ahu-02,ppm,False
-UA-F-0243,opcua-01,opcua,ns=2;s=UA-F-0243,opcua-server,ppm,False
-BN-02-AI-044,bacnet-02,bacnet,"analogInput,44",ahu-02,Pa,False
-UA-F-0244,opcua-01,opcua,ns=2;s=UA-F-0244,opcua-server,Pa,False
-BN-02-AI-045,bacnet-02,bacnet,"analogInput,45",ahu-02,m3/h,False
-UA-F-0245,opcua-01,opcua,ns=2;s=UA-F-0245,opcua-server,m3/h,False
-BN-02-AI-046,bacnet-02,bacnet,"analogInput,46",ahu-02,kW,False
-UA-F-0246,opcua-01,opcua,ns=2;s=UA-F-0246,opcua-server,kW,False
-BN-02-AI-047,bacnet-02,bacnet,"analogInput,47",ahu-02,kWh,False
-UA-F-0247,opcua-01,opcua,ns=2;s=UA-F-0247,opcua-server,kWh,False
-BN-02-AI-048,bacnet-02,bacnet,"analogInput,48",ahu-02,lux,False
-UA-F-0248,opcua-01,opcua,ns=2;s=UA-F-0248,opcua-server,lux,False
-BN-02-AI-049,bacnet-02,bacnet,"analogInput,49",ahu-02,degC,False
-UA-F-0249,opcua-01,opcua,ns=2;s=UA-F-0249,opcua-server,m/s,False
-BN-02-AI-050,bacnet-02,bacnet,"analogInput,50",ahu-02,%RH,False
-UA-F-0250,opcua-01,opcua,ns=2;s=UA-F-0250,opcua-server,bar,False
+gateway_id,connector_id,protocol,point_id,point_name,point_type,point_specification,writable,interval,unit,max_pres_value,min_pres_value,labels,scale,device_id,device_name,device_type,site,building,floor,installation_area,target_area,panel,tags,supplier,owner,description,local_id,device_id_bacnet,instance_no_bacnet,object_type_bacnet
+gw-001,bacnet-01,bacnet,BN-01-AI-001,温度,温度,Measurement,false,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,1",1001,1,analogInput
+gw-001,opcua-01,opcua,UA-F-0001,温度,温度,Measurement,true,5,degC,50,-10,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0001,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-002,湿度,湿度,Measurement,false,5,%RH,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,2",1001,2,analogInput
+gw-001,opcua-01,opcua,UA-F-0002,湿度,湿度,Measurement,true,5,%RH,100,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0002,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-003,CO2濃度,CO2濃度,Measurement,false,5,ppm,5000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,3",1001,3,analogInput
+gw-001,opcua-01,opcua,UA-F-0003,CO2濃度,CO2濃度,Measurement,true,5,ppm,5000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0003,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-004,差圧,差圧,Measurement,false,5,Pa,1000,-1000,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,4",1001,4,analogInput
+gw-001,opcua-01,opcua,UA-F-0004,差圧,差圧,Measurement,true,5,Pa,1000,-1000,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0004,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-005,風量,流量,Measurement,false,5,m3/h,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,5",1001,5,analogInput
+gw-001,opcua-01,opcua,UA-F-0005,風量,流量,Measurement,true,5,m3/h,10000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0005,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-006,電力,電力,Measurement,false,5,kW,1000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,6",1001,6,analogInput
+gw-001,opcua-01,opcua,UA-F-0006,電力,電力,Measurement,true,5,kW,1000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0006,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-007,電力量,電力量,Metering,false,5,kWh,999999,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,7",1001,7,analogInput
+gw-001,opcua-01,opcua,UA-F-0007,電力量,電力量,Metering,true,5,kWh,999999,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0007,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-008,照度,照度,Measurement,false,5,lux,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,8",1001,8,analogInput
+gw-001,opcua-01,opcua,UA-F-0008,照度,照度,Measurement,true,5,lux,10000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0008,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-009,温度,温度,Measurement,false,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,9",1001,9,analogInput
+gw-001,opcua-01,opcua,UA-F-0009,風速,風速,Measurement,true,5,m/s,50,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0009,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-010,湿度,湿度,Measurement,false,5,%RH,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,10",1001,10,analogInput
+gw-001,opcua-01,opcua,UA-F-0010,圧力,圧力,Measurement,true,5,bar,10,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0010,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-011,温度,温度,Measurement,false,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,11",1001,11,analogInput
+gw-001,opcua-01,opcua,UA-F-0011,温度,温度,Measurement,true,5,degC,50,-10,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0011,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-012,湿度,湿度,Measurement,false,5,%RH,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,12",1001,12,analogInput
+gw-001,opcua-01,opcua,UA-F-0012,湿度,湿度,Measurement,true,5,%RH,100,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0012,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-013,CO2濃度,CO2濃度,Measurement,false,5,ppm,5000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,13",1001,13,analogInput
+gw-001,opcua-01,opcua,UA-F-0013,CO2濃度,CO2濃度,Measurement,true,5,ppm,5000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0013,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-014,差圧,差圧,Measurement,false,5,Pa,1000,-1000,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,14",1001,14,analogInput
+gw-001,opcua-01,opcua,UA-F-0014,差圧,差圧,Measurement,true,5,Pa,1000,-1000,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0014,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-015,風量,流量,Measurement,false,5,m3/h,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,15",1001,15,analogInput
+gw-001,opcua-01,opcua,UA-F-0015,風量,流量,Measurement,true,5,m3/h,10000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0015,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-016,電力,電力,Measurement,false,5,kW,1000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,16",1001,16,analogInput
+gw-001,opcua-01,opcua,UA-F-0016,電力,電力,Measurement,true,5,kW,1000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0016,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-017,電力量,電力量,Metering,false,5,kWh,999999,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,17",1001,17,analogInput
+gw-001,opcua-01,opcua,UA-F-0017,電力量,電力量,Metering,true,5,kWh,999999,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0017,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-018,照度,照度,Measurement,false,5,lux,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,18",1001,18,analogInput
+gw-001,opcua-01,opcua,UA-F-0018,照度,照度,Measurement,true,5,lux,10000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0018,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-019,温度,温度,Measurement,false,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,19",1001,19,analogInput
+gw-001,opcua-01,opcua,UA-F-0019,風速,風速,Measurement,true,5,m/s,50,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0019,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-020,湿度,湿度,Measurement,false,5,%RH,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,20",1001,20,analogInput
+gw-001,opcua-01,opcua,UA-F-0020,圧力,圧力,Measurement,true,5,bar,10,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0020,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-021,温度,温度,Measurement,false,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,21",1001,21,analogInput
+gw-001,opcua-01,opcua,UA-F-0021,温度,温度,Measurement,true,5,degC,50,-10,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0021,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-022,湿度,湿度,Measurement,false,5,%RH,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,22",1001,22,analogInput
+gw-001,opcua-01,opcua,UA-F-0022,湿度,湿度,Measurement,true,5,%RH,100,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0022,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-023,CO2濃度,CO2濃度,Measurement,false,5,ppm,5000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,23",1001,23,analogInput
+gw-001,opcua-01,opcua,UA-F-0023,CO2濃度,CO2濃度,Measurement,true,5,ppm,5000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0023,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-024,差圧,差圧,Measurement,false,5,Pa,1000,-1000,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,24",1001,24,analogInput
+gw-001,opcua-01,opcua,UA-F-0024,差圧,差圧,Measurement,true,5,Pa,1000,-1000,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0024,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-025,風量,流量,Measurement,false,5,m3/h,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,25",1001,25,analogInput
+gw-001,opcua-01,opcua,UA-F-0025,風量,流量,Measurement,true,5,m3/h,10000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0025,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-026,電力,電力,Measurement,false,5,kW,1000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,26",1001,26,analogInput
+gw-001,opcua-01,opcua,UA-F-0026,電力,電力,Measurement,true,5,kW,1000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0026,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-027,電力量,電力量,Metering,false,5,kWh,999999,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,27",1001,27,analogInput
+gw-001,opcua-01,opcua,UA-F-0027,電力量,電力量,Metering,true,5,kWh,999999,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0027,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-028,照度,照度,Measurement,false,5,lux,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,28",1001,28,analogInput
+gw-001,opcua-01,opcua,UA-F-0028,照度,照度,Measurement,true,5,lux,10000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0028,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-029,温度,温度,Measurement,false,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,29",1001,29,analogInput
+gw-001,opcua-01,opcua,UA-F-0029,風速,風速,Measurement,true,5,m/s,50,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0029,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-030,湿度,湿度,Measurement,false,5,%RH,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,30",1001,30,analogInput
+gw-001,opcua-01,opcua,UA-F-0030,圧力,圧力,Measurement,true,5,bar,10,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0030,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-031,温度,温度,Measurement,false,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,31",1001,31,analogInput
+gw-001,opcua-01,opcua,UA-F-0031,温度,温度,Measurement,true,5,degC,50,-10,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0031,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-032,湿度,湿度,Measurement,false,5,%RH,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,32",1001,32,analogInput
+gw-001,opcua-01,opcua,UA-F-0032,湿度,湿度,Measurement,true,5,%RH,100,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0032,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-033,CO2濃度,CO2濃度,Measurement,false,5,ppm,5000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,33",1001,33,analogInput
+gw-001,opcua-01,opcua,UA-F-0033,CO2濃度,CO2濃度,Measurement,true,5,ppm,5000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0033,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-034,差圧,差圧,Measurement,false,5,Pa,1000,-1000,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,34",1001,34,analogInput
+gw-001,opcua-01,opcua,UA-F-0034,差圧,差圧,Measurement,true,5,Pa,1000,-1000,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0034,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-035,風量,流量,Measurement,false,5,m3/h,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,35",1001,35,analogInput
+gw-001,opcua-01,opcua,UA-F-0035,風量,流量,Measurement,true,5,m3/h,10000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0035,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-036,電力,電力,Measurement,false,5,kW,1000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,36",1001,36,analogInput
+gw-001,opcua-01,opcua,UA-F-0036,電力,電力,Measurement,true,5,kW,1000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0036,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-037,電力量,電力量,Metering,false,5,kWh,999999,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,37",1001,37,analogInput
+gw-001,opcua-01,opcua,UA-F-0037,電力量,電力量,Metering,true,5,kWh,999999,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0037,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-038,照度,照度,Measurement,false,5,lux,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,38",1001,38,analogInput
+gw-001,opcua-01,opcua,UA-F-0038,照度,照度,Measurement,true,5,lux,10000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0038,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-039,温度,温度,Measurement,false,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,39",1001,39,analogInput
+gw-001,opcua-01,opcua,UA-F-0039,風速,風速,Measurement,true,5,m/s,50,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0039,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-040,湿度,湿度,Measurement,false,5,%RH,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,40",1001,40,analogInput
+gw-001,opcua-01,opcua,UA-F-0040,圧力,圧力,Measurement,true,5,bar,10,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0040,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-041,温度,温度,Measurement,false,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,41",1001,41,analogInput
+gw-001,opcua-01,opcua,UA-F-0041,温度,温度,Measurement,true,5,degC,50,-10,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0041,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-042,湿度,湿度,Measurement,false,5,%RH,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,42",1001,42,analogInput
+gw-001,opcua-01,opcua,UA-F-0042,湿度,湿度,Measurement,true,5,%RH,100,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0042,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-043,CO2濃度,CO2濃度,Measurement,false,5,ppm,5000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,43",1001,43,analogInput
+gw-001,opcua-01,opcua,UA-F-0043,CO2濃度,CO2濃度,Measurement,true,5,ppm,5000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0043,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-044,差圧,差圧,Measurement,false,5,Pa,1000,-1000,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,44",1001,44,analogInput
+gw-001,opcua-01,opcua,UA-F-0044,差圧,差圧,Measurement,true,5,Pa,1000,-1000,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0044,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-045,風量,流量,Measurement,false,5,m3/h,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,45",1001,45,analogInput
+gw-001,opcua-01,opcua,UA-F-0045,風量,流量,Measurement,true,5,m3/h,10000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0045,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-046,電力,電力,Measurement,false,5,kW,1000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,46",1001,46,analogInput
+gw-001,opcua-01,opcua,UA-F-0046,電力,電力,Measurement,true,5,kW,1000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0046,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-047,電力量,電力量,Metering,false,5,kWh,999999,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,47",1001,47,analogInput
+gw-001,opcua-01,opcua,UA-F-0047,電力量,電力量,Metering,true,5,kWh,999999,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0047,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-048,照度,照度,Measurement,false,5,lux,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,48",1001,48,analogInput
+gw-001,opcua-01,opcua,UA-F-0048,照度,照度,Measurement,true,5,lux,10000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0048,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-049,温度,温度,Measurement,false,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,49",1001,49,analogInput
+gw-001,opcua-01,opcua,UA-F-0049,風速,風速,Measurement,true,5,m/s,50,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0049,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-050,湿度,湿度,Measurement,false,5,%RH,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,50",1001,50,analogInput
+gw-001,opcua-01,opcua,UA-F-0050,圧力,圧力,Measurement,true,5,bar,10,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0050,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-051,温度,温度,Measurement,false,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,51",1001,51,analogInput
+gw-001,opcua-01,opcua,UA-F-0051,温度,温度,Measurement,true,5,degC,50,-10,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0051,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-052,湿度,湿度,Measurement,false,5,%RH,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,52",1001,52,analogInput
+gw-001,opcua-01,opcua,UA-F-0052,湿度,湿度,Measurement,true,5,%RH,100,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0052,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-053,CO2濃度,CO2濃度,Measurement,false,5,ppm,5000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,53",1001,53,analogInput
+gw-001,opcua-01,opcua,UA-F-0053,CO2濃度,CO2濃度,Measurement,true,5,ppm,5000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0053,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-054,差圧,差圧,Measurement,false,5,Pa,1000,-1000,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,54",1001,54,analogInput
+gw-001,opcua-01,opcua,UA-F-0054,差圧,差圧,Measurement,true,5,Pa,1000,-1000,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0054,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-055,風量,流量,Measurement,false,5,m3/h,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,55",1001,55,analogInput
+gw-001,opcua-01,opcua,UA-F-0055,風量,流量,Measurement,true,5,m3/h,10000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0055,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-056,電力,電力,Measurement,false,5,kW,1000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,56",1001,56,analogInput
+gw-001,opcua-01,opcua,UA-F-0056,電力,電力,Measurement,true,5,kW,1000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0056,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-057,電力量,電力量,Metering,false,5,kWh,999999,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,57",1001,57,analogInput
+gw-001,opcua-01,opcua,UA-F-0057,電力量,電力量,Metering,true,5,kWh,999999,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0057,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-058,照度,照度,Measurement,false,5,lux,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,58",1001,58,analogInput
+gw-001,opcua-01,opcua,UA-F-0058,照度,照度,Measurement,true,5,lux,10000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0058,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-059,温度,温度,Measurement,false,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,59",1001,59,analogInput
+gw-001,opcua-01,opcua,UA-F-0059,風速,風速,Measurement,true,5,m/s,50,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0059,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-060,湿度,湿度,Measurement,false,5,%RH,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,60",1001,60,analogInput
+gw-001,opcua-01,opcua,UA-F-0060,圧力,圧力,Measurement,true,5,bar,10,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0060,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-061,温度,温度,Measurement,false,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,61",1001,61,analogInput
+gw-001,opcua-01,opcua,UA-F-0061,温度,温度,Measurement,true,5,degC,50,-10,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0061,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-062,湿度,湿度,Measurement,false,5,%RH,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,62",1001,62,analogInput
+gw-001,opcua-01,opcua,UA-F-0062,湿度,湿度,Measurement,true,5,%RH,100,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0062,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-063,CO2濃度,CO2濃度,Measurement,false,5,ppm,5000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,63",1001,63,analogInput
+gw-001,opcua-01,opcua,UA-F-0063,CO2濃度,CO2濃度,Measurement,true,5,ppm,5000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0063,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-064,差圧,差圧,Measurement,false,5,Pa,1000,-1000,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,64",1001,64,analogInput
+gw-001,opcua-01,opcua,UA-F-0064,差圧,差圧,Measurement,true,5,Pa,1000,-1000,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0064,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-065,風量,流量,Measurement,false,5,m3/h,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,65",1001,65,analogInput
+gw-001,opcua-01,opcua,UA-F-0065,風量,流量,Measurement,true,5,m3/h,10000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0065,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-066,電力,電力,Measurement,false,5,kW,1000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,66",1001,66,analogInput
+gw-001,opcua-01,opcua,UA-F-0066,電力,電力,Measurement,true,5,kW,1000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0066,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-067,電力量,電力量,Metering,false,5,kWh,999999,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,67",1001,67,analogInput
+gw-001,opcua-01,opcua,UA-F-0067,電力量,電力量,Metering,true,5,kWh,999999,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0067,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-068,照度,照度,Measurement,false,5,lux,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,68",1001,68,analogInput
+gw-001,opcua-01,opcua,UA-F-0068,照度,照度,Measurement,true,5,lux,10000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0068,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-069,温度,温度,Measurement,false,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,69",1001,69,analogInput
+gw-001,opcua-01,opcua,UA-F-0069,風速,風速,Measurement,true,5,m/s,50,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0069,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-070,湿度,湿度,Measurement,false,5,%RH,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,70",1001,70,analogInput
+gw-001,opcua-01,opcua,UA-F-0070,圧力,圧力,Measurement,true,5,bar,10,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0070,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-071,温度,温度,Measurement,false,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,71",1001,71,analogInput
+gw-001,opcua-01,opcua,UA-F-0071,温度,温度,Measurement,true,5,degC,50,-10,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0071,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-072,湿度,湿度,Measurement,false,5,%RH,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,72",1001,72,analogInput
+gw-001,opcua-01,opcua,UA-F-0072,湿度,湿度,Measurement,true,5,%RH,100,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0072,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-073,CO2濃度,CO2濃度,Measurement,false,5,ppm,5000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,73",1001,73,analogInput
+gw-001,opcua-01,opcua,UA-F-0073,CO2濃度,CO2濃度,Measurement,true,5,ppm,5000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0073,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-074,差圧,差圧,Measurement,false,5,Pa,1000,-1000,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,74",1001,74,analogInput
+gw-001,opcua-01,opcua,UA-F-0074,差圧,差圧,Measurement,true,5,Pa,1000,-1000,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0074,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-075,風量,流量,Measurement,false,5,m3/h,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,75",1001,75,analogInput
+gw-001,opcua-01,opcua,UA-F-0075,風量,流量,Measurement,true,5,m3/h,10000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0075,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-076,電力,電力,Measurement,false,5,kW,1000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,76",1001,76,analogInput
+gw-001,opcua-01,opcua,UA-F-0076,電力,電力,Measurement,true,5,kW,1000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0076,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-077,電力量,電力量,Metering,false,5,kWh,999999,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,77",1001,77,analogInput
+gw-001,opcua-01,opcua,UA-F-0077,電力量,電力量,Metering,true,5,kWh,999999,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0077,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-078,照度,照度,Measurement,false,5,lux,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,78",1001,78,analogInput
+gw-001,opcua-01,opcua,UA-F-0078,照度,照度,Measurement,true,5,lux,10000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0078,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-079,温度,温度,Measurement,false,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,79",1001,79,analogInput
+gw-001,opcua-01,opcua,UA-F-0079,風速,風速,Measurement,true,5,m/s,50,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0079,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-080,湿度,湿度,Measurement,false,5,%RH,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,80",1001,80,analogInput
+gw-001,opcua-01,opcua,UA-F-0080,圧力,圧力,Measurement,true,5,bar,10,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0080,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-081,温度,温度,Measurement,false,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,81",1001,81,analogInput
+gw-001,opcua-01,opcua,UA-F-0081,温度,温度,Measurement,true,5,degC,50,-10,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0081,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-082,湿度,湿度,Measurement,false,5,%RH,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,82",1001,82,analogInput
+gw-001,opcua-01,opcua,UA-F-0082,湿度,湿度,Measurement,true,5,%RH,100,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0082,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-083,CO2濃度,CO2濃度,Measurement,false,5,ppm,5000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,83",1001,83,analogInput
+gw-001,opcua-01,opcua,UA-F-0083,CO2濃度,CO2濃度,Measurement,true,5,ppm,5000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0083,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-084,差圧,差圧,Measurement,false,5,Pa,1000,-1000,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,84",1001,84,analogInput
+gw-001,opcua-01,opcua,UA-F-0084,差圧,差圧,Measurement,true,5,Pa,1000,-1000,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0084,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-085,風量,流量,Measurement,false,5,m3/h,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,85",1001,85,analogInput
+gw-001,opcua-01,opcua,UA-F-0085,風量,流量,Measurement,true,5,m3/h,10000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0085,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-086,電力,電力,Measurement,false,5,kW,1000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,86",1001,86,analogInput
+gw-001,opcua-01,opcua,UA-F-0086,電力,電力,Measurement,true,5,kW,1000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0086,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-087,電力量,電力量,Metering,false,5,kWh,999999,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,87",1001,87,analogInput
+gw-001,opcua-01,opcua,UA-F-0087,電力量,電力量,Metering,true,5,kWh,999999,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0087,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-088,照度,照度,Measurement,false,5,lux,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,88",1001,88,analogInput
+gw-001,opcua-01,opcua,UA-F-0088,照度,照度,Measurement,true,5,lux,10000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0088,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-089,温度,温度,Measurement,false,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,89",1001,89,analogInput
+gw-001,opcua-01,opcua,UA-F-0089,風速,風速,Measurement,true,5,m/s,50,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0089,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-090,湿度,湿度,Measurement,false,5,%RH,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,90",1001,90,analogInput
+gw-001,opcua-01,opcua,UA-F-0090,圧力,圧力,Measurement,true,5,bar,10,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0090,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-091,温度,温度,Measurement,false,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,91",1001,91,analogInput
+gw-001,opcua-01,opcua,UA-F-0091,温度,温度,Measurement,true,5,degC,50,-10,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0091,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-092,湿度,湿度,Measurement,false,5,%RH,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,92",1001,92,analogInput
+gw-001,opcua-01,opcua,UA-F-0092,湿度,湿度,Measurement,true,5,%RH,100,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0092,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-093,CO2濃度,CO2濃度,Measurement,false,5,ppm,5000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,93",1001,93,analogInput
+gw-001,opcua-01,opcua,UA-F-0093,CO2濃度,CO2濃度,Measurement,true,5,ppm,5000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0093,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-094,差圧,差圧,Measurement,false,5,Pa,1000,-1000,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,94",1001,94,analogInput
+gw-001,opcua-01,opcua,UA-F-0094,差圧,差圧,Measurement,true,5,Pa,1000,-1000,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0094,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-095,風量,流量,Measurement,false,5,m3/h,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,95",1001,95,analogInput
+gw-001,opcua-01,opcua,UA-F-0095,風量,流量,Measurement,true,5,m3/h,10000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0095,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-096,電力,電力,Measurement,false,5,kW,1000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,96",1001,96,analogInput
+gw-001,opcua-01,opcua,UA-F-0096,電力,電力,Measurement,true,5,kW,1000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0096,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-097,電力量,電力量,Metering,false,5,kWh,999999,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,97",1001,97,analogInput
+gw-001,opcua-01,opcua,UA-F-0097,電力量,電力量,Metering,true,5,kWh,999999,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0097,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-098,照度,照度,Measurement,false,5,lux,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,98",1001,98,analogInput
+gw-001,opcua-01,opcua,UA-F-0098,照度,照度,Measurement,true,5,lux,10000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0098,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-099,温度,温度,Measurement,false,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,99",1001,99,analogInput
+gw-001,opcua-01,opcua,UA-F-0099,風速,風速,Measurement,true,5,m/s,50,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0099,,,
+gw-001,bacnet-01,bacnet,BN-01-AI-100,湿度,湿度,Measurement,false,5,%RH,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,100",1001,100,analogInput
+gw-001,opcua-01,opcua,UA-F-0100,圧力,圧力,Measurement,true,5,bar,10,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0100,,,
+gw-001,bacnet-01,bacnet,BN-01-AO-001,温度,温度,Setpoint,true,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,1",1001,1,analogOutput
+gw-001,opcua-01,opcua,UA-F-0101,温度,温度,Measurement,false,5,degC,50,-10,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0101,,,
+gw-001,bacnet-01,bacnet,BN-01-AO-002,開度,開度,Setpoint,true,5,%,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,2",1001,2,analogOutput
+gw-001,opcua-01,opcua,UA-F-0102,湿度,湿度,Measurement,false,5,%RH,100,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0102,,,
+gw-001,bacnet-01,bacnet,BN-01-AO-003,差圧,差圧,Setpoint,true,5,Pa,1000,-1000,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,3",1001,3,analogOutput
+gw-001,opcua-01,opcua,UA-F-0103,CO2濃度,CO2濃度,Measurement,false,5,ppm,5000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0103,,,
+gw-001,bacnet-01,bacnet,BN-01-AO-004,風量,流量,Setpoint,true,5,m3/h,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,4",1001,4,analogOutput
+gw-001,opcua-01,opcua,UA-F-0104,差圧,差圧,Measurement,false,5,Pa,1000,-1000,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0104,,,
+gw-001,bacnet-01,bacnet,BN-01-AO-005,電力,電力,Setpoint,true,5,kW,1000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,5",1001,5,analogOutput
+gw-001,opcua-01,opcua,UA-F-0105,風量,流量,Measurement,false,5,m3/h,10000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0105,,,
+gw-001,bacnet-01,bacnet,BN-01-AO-006,温度,温度,Setpoint,true,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,6",1001,6,analogOutput
+gw-001,opcua-01,opcua,UA-F-0106,電力,電力,Measurement,false,5,kW,1000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0106,,,
+gw-001,bacnet-01,bacnet,BN-01-AO-007,開度,開度,Setpoint,true,5,%,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,7",1001,7,analogOutput
+gw-001,opcua-01,opcua,UA-F-0107,電力量,電力量,Metering,false,5,kWh,999999,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0107,,,
+gw-001,bacnet-01,bacnet,BN-01-AO-008,差圧,差圧,Setpoint,true,5,Pa,1000,-1000,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,8",1001,8,analogOutput
+gw-001,opcua-01,opcua,UA-F-0108,照度,照度,Measurement,false,5,lux,10000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0108,,,
+gw-001,bacnet-01,bacnet,BN-01-AO-009,風量,流量,Setpoint,true,5,m3/h,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,9",1001,9,analogOutput
+gw-001,opcua-01,opcua,UA-F-0109,風速,風速,Measurement,false,5,m/s,50,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0109,,,
+gw-001,bacnet-01,bacnet,BN-01-AO-010,電力,電力,Setpoint,true,5,kW,1000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,10",1001,10,analogOutput
+gw-001,opcua-01,opcua,UA-F-0110,圧力,圧力,Measurement,false,5,bar,10,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0110,,,
+gw-001,bacnet-01,bacnet,BN-01-AO-011,温度,温度,Setpoint,true,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,11",1001,11,analogOutput
+gw-001,opcua-01,opcua,UA-F-0111,温度,温度,Measurement,false,5,degC,50,-10,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0111,,,
+gw-001,bacnet-01,bacnet,BN-01-AO-012,開度,開度,Setpoint,true,5,%,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,12",1001,12,analogOutput
+gw-001,opcua-01,opcua,UA-F-0112,湿度,湿度,Measurement,false,5,%RH,100,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0112,,,
+gw-001,bacnet-01,bacnet,BN-01-AO-013,差圧,差圧,Setpoint,true,5,Pa,1000,-1000,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,13",1001,13,analogOutput
+gw-001,opcua-01,opcua,UA-F-0113,CO2濃度,CO2濃度,Measurement,false,5,ppm,5000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0113,,,
+gw-001,bacnet-01,bacnet,BN-01-AO-014,風量,流量,Setpoint,true,5,m3/h,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,14",1001,14,analogOutput
+gw-001,opcua-01,opcua,UA-F-0114,差圧,差圧,Measurement,false,5,Pa,1000,-1000,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0114,,,
+gw-001,bacnet-01,bacnet,BN-01-AO-015,電力,電力,Setpoint,true,5,kW,1000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,15",1001,15,analogOutput
+gw-001,opcua-01,opcua,UA-F-0115,風量,流量,Measurement,false,5,m3/h,10000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0115,,,
+gw-001,bacnet-01,bacnet,BN-01-AO-016,温度,温度,Setpoint,true,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,16",1001,16,analogOutput
+gw-001,opcua-01,opcua,UA-F-0116,電力,電力,Measurement,false,5,kW,1000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0116,,,
+gw-001,bacnet-01,bacnet,BN-01-AO-017,開度,開度,Setpoint,true,5,%,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,17",1001,17,analogOutput
+gw-001,opcua-01,opcua,UA-F-0117,電力量,電力量,Metering,false,5,kWh,999999,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0117,,,
+gw-001,bacnet-01,bacnet,BN-01-AO-018,差圧,差圧,Setpoint,true,5,Pa,1000,-1000,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,18",1001,18,analogOutput
+gw-001,opcua-01,opcua,UA-F-0118,照度,照度,Measurement,false,5,lux,10000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0118,,,
+gw-001,bacnet-01,bacnet,BN-01-AO-019,風量,流量,Setpoint,true,5,m3/h,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,19",1001,19,analogOutput
+gw-001,opcua-01,opcua,UA-F-0119,風速,風速,Measurement,false,5,m/s,50,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0119,,,
+gw-001,bacnet-01,bacnet,BN-01-AO-020,電力,電力,Setpoint,true,5,kW,1000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,20",1001,20,analogOutput
+gw-001,opcua-01,opcua,UA-F-0120,圧力,圧力,Measurement,false,5,bar,10,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0120,,,
+gw-001,bacnet-01,bacnet,BN-01-AO-021,温度,温度,Setpoint,true,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,21",1001,21,analogOutput
+gw-001,opcua-01,opcua,UA-F-0121,温度,温度,Measurement,false,5,degC,50,-10,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0121,,,
+gw-001,bacnet-01,bacnet,BN-01-AO-022,開度,開度,Setpoint,true,5,%,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,22",1001,22,analogOutput
+gw-001,opcua-01,opcua,UA-F-0122,湿度,湿度,Measurement,false,5,%RH,100,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0122,,,
+gw-001,bacnet-01,bacnet,BN-01-AO-023,差圧,差圧,Setpoint,true,5,Pa,1000,-1000,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,23",1001,23,analogOutput
+gw-001,opcua-01,opcua,UA-F-0123,CO2濃度,CO2濃度,Measurement,false,5,ppm,5000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0123,,,
+gw-001,bacnet-01,bacnet,BN-01-AO-024,風量,流量,Setpoint,true,5,m3/h,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,24",1001,24,analogOutput
+gw-001,opcua-01,opcua,UA-F-0124,差圧,差圧,Measurement,false,5,Pa,1000,-1000,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0124,,,
+gw-001,bacnet-01,bacnet,BN-01-AO-025,電力,電力,Setpoint,true,5,kW,1000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,25",1001,25,analogOutput
+gw-001,opcua-01,opcua,UA-F-0125,風量,流量,Measurement,false,5,m3/h,10000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0125,,,
+gw-001,bacnet-01,bacnet,BN-01-AO-026,温度,温度,Setpoint,true,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,26",1001,26,analogOutput
+gw-001,opcua-01,opcua,UA-F-0126,電力,電力,Measurement,false,5,kW,1000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0126,,,
+gw-001,bacnet-01,bacnet,BN-01-AO-027,開度,開度,Setpoint,true,5,%,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,27",1001,27,analogOutput
+gw-001,opcua-01,opcua,UA-F-0127,電力量,電力量,Metering,false,5,kWh,999999,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0127,,,
+gw-001,bacnet-01,bacnet,BN-01-AO-028,差圧,差圧,Setpoint,true,5,Pa,1000,-1000,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,28",1001,28,analogOutput
+gw-001,opcua-01,opcua,UA-F-0128,照度,照度,Measurement,false,5,lux,10000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0128,,,
+gw-001,bacnet-01,bacnet,BN-01-AO-029,風量,流量,Setpoint,true,5,m3/h,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,29",1001,29,analogOutput
+gw-001,opcua-01,opcua,UA-F-0129,風速,風速,Measurement,false,5,m/s,50,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0129,,,
+gw-001,bacnet-01,bacnet,BN-01-AO-030,電力,電力,Setpoint,true,5,kW,1000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,30",1001,30,analogOutput
+gw-001,opcua-01,opcua,UA-F-0130,圧力,圧力,Measurement,false,5,bar,10,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0130,,,
+gw-001,bacnet-01,bacnet,BN-01-AO-031,温度,温度,Setpoint,true,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,31",1001,31,analogOutput
+gw-001,opcua-01,opcua,UA-F-0131,温度,温度,Measurement,false,5,degC,50,-10,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0131,,,
+gw-001,bacnet-01,bacnet,BN-01-AO-032,開度,開度,Setpoint,true,5,%,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,32",1001,32,analogOutput
+gw-001,opcua-01,opcua,UA-F-0132,湿度,湿度,Measurement,false,5,%RH,100,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0132,,,
+gw-001,bacnet-01,bacnet,BN-01-AO-033,差圧,差圧,Setpoint,true,5,Pa,1000,-1000,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,33",1001,33,analogOutput
+gw-001,opcua-01,opcua,UA-F-0133,CO2濃度,CO2濃度,Measurement,false,5,ppm,5000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0133,,,
+gw-001,bacnet-01,bacnet,BN-01-AO-034,風量,流量,Setpoint,true,5,m3/h,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,34",1001,34,analogOutput
+gw-001,opcua-01,opcua,UA-F-0134,差圧,差圧,Measurement,false,5,Pa,1000,-1000,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0134,,,
+gw-001,bacnet-01,bacnet,BN-01-AO-035,電力,電力,Setpoint,true,5,kW,1000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,35",1001,35,analogOutput
+gw-001,opcua-01,opcua,UA-F-0135,風量,流量,Measurement,false,5,m3/h,10000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0135,,,
+gw-001,bacnet-01,bacnet,BN-01-AO-036,温度,温度,Setpoint,true,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,36",1001,36,analogOutput
+gw-001,opcua-01,opcua,UA-F-0136,電力,電力,Measurement,false,5,kW,1000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0136,,,
+gw-001,bacnet-01,bacnet,BN-01-AO-037,開度,開度,Setpoint,true,5,%,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,37",1001,37,analogOutput
+gw-001,opcua-01,opcua,UA-F-0137,電力量,電力量,Metering,false,5,kWh,999999,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0137,,,
+gw-001,bacnet-01,bacnet,BN-01-AO-038,差圧,差圧,Setpoint,true,5,Pa,1000,-1000,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,38",1001,38,analogOutput
+gw-001,opcua-01,opcua,UA-F-0138,照度,照度,Measurement,false,5,lux,10000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0138,,,
+gw-001,bacnet-01,bacnet,BN-01-AO-039,風量,流量,Setpoint,true,5,m3/h,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,39",1001,39,analogOutput
+gw-001,opcua-01,opcua,UA-F-0139,風速,風速,Measurement,false,5,m/s,50,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0139,,,
+gw-001,bacnet-01,bacnet,BN-01-AO-040,電力,電力,Setpoint,true,5,kW,1000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,40",1001,40,analogOutput
+gw-001,opcua-01,opcua,UA-F-0140,圧力,圧力,Measurement,false,5,bar,10,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0140,,,
+gw-001,bacnet-01,bacnet,BN-01-BI-001,運転状態,状態,Status,false,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,1",1001,1,binaryInput
+gw-001,opcua-01,opcua,UA-F-0141,温度,温度,Measurement,false,5,degC,50,-10,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0141,,,
+gw-001,bacnet-01,bacnet,BN-01-BI-002,運転状態,状態,Status,false,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,2",1001,2,binaryInput
+gw-001,opcua-01,opcua,UA-F-0142,湿度,湿度,Measurement,false,5,%RH,100,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0142,,,
+gw-001,bacnet-01,bacnet,BN-01-BI-003,運転状態,状態,Status,false,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,3",1001,3,binaryInput
+gw-001,opcua-01,opcua,UA-F-0143,CO2濃度,CO2濃度,Measurement,false,5,ppm,5000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0143,,,
+gw-001,bacnet-01,bacnet,BN-01-BI-004,運転状態,状態,Status,false,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,4",1001,4,binaryInput
+gw-001,opcua-01,opcua,UA-F-0144,差圧,差圧,Measurement,false,5,Pa,1000,-1000,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0144,,,
+gw-001,bacnet-01,bacnet,BN-01-BI-005,運転状態,状態,Status,false,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,5",1001,5,binaryInput
+gw-001,opcua-01,opcua,UA-F-0145,風量,流量,Measurement,false,5,m3/h,10000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0145,,,
+gw-001,bacnet-01,bacnet,BN-01-BI-006,運転状態,状態,Status,false,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,6",1001,6,binaryInput
+gw-001,opcua-01,opcua,UA-F-0146,電力,電力,Measurement,false,5,kW,1000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0146,,,
+gw-001,bacnet-01,bacnet,BN-01-BI-007,運転状態,状態,Status,false,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,7",1001,7,binaryInput
+gw-001,opcua-01,opcua,UA-F-0147,電力量,電力量,Metering,false,5,kWh,999999,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0147,,,
+gw-001,bacnet-01,bacnet,BN-01-BI-008,運転状態,状態,Status,false,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,8",1001,8,binaryInput
+gw-001,opcua-01,opcua,UA-F-0148,照度,照度,Measurement,false,5,lux,10000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0148,,,
+gw-001,bacnet-01,bacnet,BN-01-BI-009,運転状態,状態,Status,false,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,9",1001,9,binaryInput
+gw-001,opcua-01,opcua,UA-F-0149,風速,風速,Measurement,false,5,m/s,50,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0149,,,
+gw-001,bacnet-01,bacnet,BN-01-BI-010,運転状態,状態,Status,false,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,10",1001,10,binaryInput
+gw-001,opcua-01,opcua,UA-F-0150,圧力,圧力,Measurement,false,5,bar,10,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0150,,,
+gw-001,bacnet-01,bacnet,BN-01-BI-011,運転状態,状態,Status,false,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,11",1001,11,binaryInput
+gw-001,opcua-01,opcua,UA-F-0151,温度,温度,Measurement,false,5,degC,50,-10,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0151,,,
+gw-001,bacnet-01,bacnet,BN-01-BI-012,運転状態,状態,Status,false,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,12",1001,12,binaryInput
+gw-001,opcua-01,opcua,UA-F-0152,湿度,湿度,Measurement,false,5,%RH,100,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0152,,,
+gw-001,bacnet-01,bacnet,BN-01-BI-013,運転状態,状態,Status,false,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,13",1001,13,binaryInput
+gw-001,opcua-01,opcua,UA-F-0153,CO2濃度,CO2濃度,Measurement,false,5,ppm,5000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0153,,,
+gw-001,bacnet-01,bacnet,BN-01-BI-014,運転状態,状態,Status,false,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,14",1001,14,binaryInput
+gw-001,opcua-01,opcua,UA-F-0154,差圧,差圧,Measurement,false,5,Pa,1000,-1000,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0154,,,
+gw-001,bacnet-01,bacnet,BN-01-BI-015,運転状態,状態,Status,false,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,15",1001,15,binaryInput
+gw-001,opcua-01,opcua,UA-F-0155,風量,流量,Measurement,false,5,m3/h,10000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0155,,,
+gw-001,bacnet-01,bacnet,BN-01-BI-016,運転状態,状態,Status,false,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,16",1001,16,binaryInput
+gw-001,opcua-01,opcua,UA-F-0156,電力,電力,Measurement,false,5,kW,1000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0156,,,
+gw-001,bacnet-01,bacnet,BN-01-BI-017,運転状態,状態,Status,false,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,17",1001,17,binaryInput
+gw-001,opcua-01,opcua,UA-F-0157,電力量,電力量,Metering,false,5,kWh,999999,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0157,,,
+gw-001,bacnet-01,bacnet,BN-01-BI-018,運転状態,状態,Status,false,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,18",1001,18,binaryInput
+gw-001,opcua-01,opcua,UA-F-0158,照度,照度,Measurement,false,5,lux,10000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0158,,,
+gw-001,bacnet-01,bacnet,BN-01-BI-019,運転状態,状態,Status,false,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,19",1001,19,binaryInput
+gw-001,opcua-01,opcua,UA-F-0159,風速,風速,Measurement,false,5,m/s,50,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0159,,,
+gw-001,bacnet-01,bacnet,BN-01-BI-020,運転状態,状態,Status,false,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,20",1001,20,binaryInput
+gw-001,opcua-01,opcua,UA-F-0160,圧力,圧力,Measurement,false,5,bar,10,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0160,,,
+gw-001,bacnet-01,bacnet,BN-01-BI-021,運転状態,状態,Status,false,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,21",1001,21,binaryInput
+gw-001,opcua-01,opcua,UA-F-0161,温度,温度,Measurement,false,5,degC,50,-10,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0161,,,
+gw-001,bacnet-01,bacnet,BN-01-BI-022,運転状態,状態,Status,false,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,22",1001,22,binaryInput
+gw-001,opcua-01,opcua,UA-F-0162,湿度,湿度,Measurement,false,5,%RH,100,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0162,,,
+gw-001,bacnet-01,bacnet,BN-01-BI-023,運転状態,状態,Status,false,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,23",1001,23,binaryInput
+gw-001,opcua-01,opcua,UA-F-0163,CO2濃度,CO2濃度,Measurement,false,5,ppm,5000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0163,,,
+gw-001,bacnet-01,bacnet,BN-01-BI-024,運転状態,状態,Status,false,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,24",1001,24,binaryInput
+gw-001,opcua-01,opcua,UA-F-0164,差圧,差圧,Measurement,false,5,Pa,1000,-1000,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0164,,,
+gw-001,bacnet-01,bacnet,BN-01-BI-025,運転状態,状態,Status,false,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,25",1001,25,binaryInput
+gw-001,opcua-01,opcua,UA-F-0165,風量,流量,Measurement,false,5,m3/h,10000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0165,,,
+gw-001,bacnet-01,bacnet,BN-01-BI-026,運転状態,状態,Status,false,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,26",1001,26,binaryInput
+gw-001,opcua-01,opcua,UA-F-0166,電力,電力,Measurement,false,5,kW,1000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0166,,,
+gw-001,bacnet-01,bacnet,BN-01-BI-027,運転状態,状態,Status,false,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,27",1001,27,binaryInput
+gw-001,opcua-01,opcua,UA-F-0167,電力量,電力量,Metering,false,5,kWh,999999,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0167,,,
+gw-001,bacnet-01,bacnet,BN-01-BI-028,運転状態,状態,Status,false,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,28",1001,28,binaryInput
+gw-001,opcua-01,opcua,UA-F-0168,照度,照度,Measurement,false,5,lux,10000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0168,,,
+gw-001,bacnet-01,bacnet,BN-01-BI-029,運転状態,状態,Status,false,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,29",1001,29,binaryInput
+gw-001,opcua-01,opcua,UA-F-0169,風速,風速,Measurement,false,5,m/s,50,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0169,,,
+gw-001,bacnet-01,bacnet,BN-01-BI-030,運転状態,状態,Status,false,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,30",1001,30,binaryInput
+gw-001,opcua-01,opcua,UA-F-0170,圧力,圧力,Measurement,false,5,bar,10,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0170,,,
+gw-001,bacnet-01,bacnet,BN-01-BI-031,運転状態,状態,Status,false,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,31",1001,31,binaryInput
+gw-001,opcua-01,opcua,UA-F-0171,温度,温度,Measurement,false,5,degC,50,-10,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0171,,,
+gw-001,bacnet-01,bacnet,BN-01-BI-032,運転状態,状態,Status,false,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,32",1001,32,binaryInput
+gw-001,opcua-01,opcua,UA-F-0172,湿度,湿度,Measurement,false,5,%RH,100,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0172,,,
+gw-001,bacnet-01,bacnet,BN-01-BI-033,運転状態,状態,Status,false,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,33",1001,33,binaryInput
+gw-001,opcua-01,opcua,UA-F-0173,CO2濃度,CO2濃度,Measurement,false,5,ppm,5000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0173,,,
+gw-001,bacnet-01,bacnet,BN-01-BI-034,運転状態,状態,Status,false,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,34",1001,34,binaryInput
+gw-001,opcua-01,opcua,UA-F-0174,差圧,差圧,Measurement,false,5,Pa,1000,-1000,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0174,,,
+gw-001,bacnet-01,bacnet,BN-01-BI-035,運転状態,状態,Status,false,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,35",1001,35,binaryInput
+gw-001,opcua-01,opcua,UA-F-0175,風量,流量,Measurement,false,5,m3/h,10000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0175,,,
+gw-001,bacnet-01,bacnet,BN-01-BI-036,運転状態,状態,Status,false,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,36",1001,36,binaryInput
+gw-001,opcua-01,opcua,UA-F-0176,電力,電力,Measurement,false,5,kW,1000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0176,,,
+gw-001,bacnet-01,bacnet,BN-01-BI-037,運転状態,状態,Status,false,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,37",1001,37,binaryInput
+gw-001,opcua-01,opcua,UA-F-0177,電力量,電力量,Metering,false,5,kWh,999999,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0177,,,
+gw-001,bacnet-01,bacnet,BN-01-BI-038,運転状態,状態,Status,false,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,38",1001,38,binaryInput
+gw-001,opcua-01,opcua,UA-F-0178,照度,照度,Measurement,false,5,lux,10000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0178,,,
+gw-001,bacnet-01,bacnet,BN-01-BI-039,運転状態,状態,Status,false,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,39",1001,39,binaryInput
+gw-001,opcua-01,opcua,UA-F-0179,風速,風速,Measurement,false,5,m/s,50,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0179,,,
+gw-001,bacnet-01,bacnet,BN-01-BI-040,運転状態,状態,Status,false,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,40",1001,40,binaryInput
+gw-001,opcua-01,opcua,UA-F-0180,圧力,圧力,Measurement,false,5,bar,10,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0180,,,
+gw-001,bacnet-01,bacnet,BN-01-BO-001,発停指令,発停,Command,true,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryOutput,1",1001,1,binaryOutput
+gw-001,opcua-01,opcua,UA-F-0181,温度,温度,Measurement,false,5,degC,50,-10,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0181,,,
+gw-001,bacnet-01,bacnet,BN-01-BO-002,発停指令,発停,Command,true,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryOutput,2",1001,2,binaryOutput
+gw-001,opcua-01,opcua,UA-F-0182,湿度,湿度,Measurement,false,5,%RH,100,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0182,,,
+gw-001,bacnet-01,bacnet,BN-01-BO-003,発停指令,発停,Command,true,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryOutput,3",1001,3,binaryOutput
+gw-001,opcua-01,opcua,UA-F-0183,CO2濃度,CO2濃度,Measurement,false,5,ppm,5000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0183,,,
+gw-001,bacnet-01,bacnet,BN-01-BO-004,発停指令,発停,Command,true,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryOutput,4",1001,4,binaryOutput
+gw-001,opcua-01,opcua,UA-F-0184,差圧,差圧,Measurement,false,5,Pa,1000,-1000,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0184,,,
+gw-001,bacnet-01,bacnet,BN-01-BO-005,発停指令,発停,Command,true,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryOutput,5",1001,5,binaryOutput
+gw-001,opcua-01,opcua,UA-F-0185,風量,流量,Measurement,false,5,m3/h,10000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0185,,,
+gw-001,bacnet-01,bacnet,BN-01-BO-006,発停指令,発停,Command,true,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryOutput,6",1001,6,binaryOutput
+gw-001,opcua-01,opcua,UA-F-0186,電力,電力,Measurement,false,5,kW,1000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0186,,,
+gw-001,bacnet-01,bacnet,BN-01-BO-007,発停指令,発停,Command,true,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryOutput,7",1001,7,binaryOutput
+gw-001,opcua-01,opcua,UA-F-0187,電力量,電力量,Metering,false,5,kWh,999999,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0187,,,
+gw-001,bacnet-01,bacnet,BN-01-BO-008,発停指令,発停,Command,true,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryOutput,8",1001,8,binaryOutput
+gw-001,opcua-01,opcua,UA-F-0188,照度,照度,Measurement,false,5,lux,10000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0188,,,
+gw-001,bacnet-01,bacnet,BN-01-BO-009,発停指令,発停,Command,true,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryOutput,9",1001,9,binaryOutput
+gw-001,opcua-01,opcua,UA-F-0189,風速,風速,Measurement,false,5,m/s,50,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0189,,,
+gw-001,bacnet-01,bacnet,BN-01-BO-010,発停指令,発停,Command,true,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryOutput,10",1001,10,binaryOutput
+gw-001,opcua-01,opcua,UA-F-0190,圧力,圧力,Measurement,false,5,bar,10,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0190,,,
+gw-001,bacnet-01,bacnet,BN-01-BO-011,発停指令,発停,Command,true,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryOutput,11",1001,11,binaryOutput
+gw-001,opcua-01,opcua,UA-F-0191,温度,温度,Measurement,false,5,degC,50,-10,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0191,,,
+gw-001,bacnet-01,bacnet,BN-01-BO-012,発停指令,発停,Command,true,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryOutput,12",1001,12,binaryOutput
+gw-001,opcua-01,opcua,UA-F-0192,湿度,湿度,Measurement,false,5,%RH,100,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0192,,,
+gw-001,bacnet-01,bacnet,BN-01-BO-013,発停指令,発停,Command,true,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryOutput,13",1001,13,binaryOutput
+gw-001,opcua-01,opcua,UA-F-0193,CO2濃度,CO2濃度,Measurement,false,5,ppm,5000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0193,,,
+gw-001,bacnet-01,bacnet,BN-01-BO-014,発停指令,発停,Command,true,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryOutput,14",1001,14,binaryOutput
+gw-001,opcua-01,opcua,UA-F-0194,差圧,差圧,Measurement,false,5,Pa,1000,-1000,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0194,,,
+gw-001,bacnet-01,bacnet,BN-01-BO-015,発停指令,発停,Command,true,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryOutput,15",1001,15,binaryOutput
+gw-001,opcua-01,opcua,UA-F-0195,風量,流量,Measurement,false,5,m3/h,10000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0195,,,
+gw-001,bacnet-01,bacnet,BN-01-BO-016,発停指令,発停,Command,true,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryOutput,16",1001,16,binaryOutput
+gw-001,opcua-01,opcua,UA-F-0196,電力,電力,Measurement,false,5,kW,1000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0196,,,
+gw-001,bacnet-01,bacnet,BN-01-BO-017,発停指令,発停,Command,true,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryOutput,17",1001,17,binaryOutput
+gw-001,opcua-01,opcua,UA-F-0197,電力量,電力量,Metering,false,5,kWh,999999,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0197,,,
+gw-001,bacnet-01,bacnet,BN-01-BO-018,発停指令,発停,Command,true,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryOutput,18",1001,18,binaryOutput
+gw-001,opcua-01,opcua,UA-F-0198,照度,照度,Measurement,false,5,lux,10000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0198,,,
+gw-001,bacnet-01,bacnet,BN-01-BO-019,発停指令,発停,Command,true,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryOutput,19",1001,19,binaryOutput
+gw-001,opcua-01,opcua,UA-F-0199,風速,風速,Measurement,false,5,m/s,50,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0199,,,
+gw-001,bacnet-01,bacnet,BN-01-BO-020,発停指令,発停,Command,true,5,,,,停止&&運転,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryOutput,20",1001,20,binaryOutput
+gw-001,opcua-01,opcua,UA-F-0200,圧力,圧力,Measurement,false,5,bar,10,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0200,,,
+gw-001,bacnet-02,bacnet,BN-02-AI-001,温度,温度,Measurement,false,5,degC,50,-10,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,1",1002,1,analogInput
+gw-001,opcua-01,opcua,UA-F-0201,温度,温度,Measurement,false,5,degC,50,-10,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0201,,,
+gw-001,bacnet-02,bacnet,BN-02-AI-002,湿度,湿度,Measurement,false,5,%RH,100,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,2",1002,2,analogInput
+gw-001,opcua-01,opcua,UA-F-0202,湿度,湿度,Measurement,false,5,%RH,100,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0202,,,
+gw-001,bacnet-02,bacnet,BN-02-AI-003,CO2濃度,CO2濃度,Measurement,false,5,ppm,5000,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,3",1002,3,analogInput
+gw-001,opcua-01,opcua,UA-F-0203,CO2濃度,CO2濃度,Measurement,false,5,ppm,5000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0203,,,
+gw-001,bacnet-02,bacnet,BN-02-AI-004,差圧,差圧,Measurement,false,5,Pa,1000,-1000,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,4",1002,4,analogInput
+gw-001,opcua-01,opcua,UA-F-0204,差圧,差圧,Measurement,false,5,Pa,1000,-1000,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0204,,,
+gw-001,bacnet-02,bacnet,BN-02-AI-005,風量,流量,Measurement,false,5,m3/h,10000,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,5",1002,5,analogInput
+gw-001,opcua-01,opcua,UA-F-0205,風量,流量,Measurement,false,5,m3/h,10000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0205,,,
+gw-001,bacnet-02,bacnet,BN-02-AI-006,電力,電力,Measurement,false,5,kW,1000,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,6",1002,6,analogInput
+gw-001,opcua-01,opcua,UA-F-0206,電力,電力,Measurement,false,5,kW,1000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0206,,,
+gw-001,bacnet-02,bacnet,BN-02-AI-007,電力量,電力量,Metering,false,5,kWh,999999,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,7",1002,7,analogInput
+gw-001,opcua-01,opcua,UA-F-0207,電力量,電力量,Metering,false,5,kWh,999999,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0207,,,
+gw-001,bacnet-02,bacnet,BN-02-AI-008,照度,照度,Measurement,false,5,lux,10000,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,8",1002,8,analogInput
+gw-001,opcua-01,opcua,UA-F-0208,照度,照度,Measurement,false,5,lux,10000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0208,,,
+gw-001,bacnet-02,bacnet,BN-02-AI-009,温度,温度,Measurement,false,5,degC,50,-10,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,9",1002,9,analogInput
+gw-001,opcua-01,opcua,UA-F-0209,風速,風速,Measurement,false,5,m/s,50,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0209,,,
+gw-001,bacnet-02,bacnet,BN-02-AI-010,湿度,湿度,Measurement,false,5,%RH,100,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,10",1002,10,analogInput
+gw-001,opcua-01,opcua,UA-F-0210,圧力,圧力,Measurement,false,5,bar,10,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0210,,,
+gw-001,bacnet-02,bacnet,BN-02-AI-011,温度,温度,Measurement,false,5,degC,50,-10,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,11",1002,11,analogInput
+gw-001,opcua-01,opcua,UA-F-0211,温度,温度,Measurement,false,5,degC,50,-10,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0211,,,
+gw-001,bacnet-02,bacnet,BN-02-AI-012,湿度,湿度,Measurement,false,5,%RH,100,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,12",1002,12,analogInput
+gw-001,opcua-01,opcua,UA-F-0212,湿度,湿度,Measurement,false,5,%RH,100,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0212,,,
+gw-001,bacnet-02,bacnet,BN-02-AI-013,CO2濃度,CO2濃度,Measurement,false,5,ppm,5000,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,13",1002,13,analogInput
+gw-001,opcua-01,opcua,UA-F-0213,CO2濃度,CO2濃度,Measurement,false,5,ppm,5000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0213,,,
+gw-001,bacnet-02,bacnet,BN-02-AI-014,差圧,差圧,Measurement,false,5,Pa,1000,-1000,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,14",1002,14,analogInput
+gw-001,opcua-01,opcua,UA-F-0214,差圧,差圧,Measurement,false,5,Pa,1000,-1000,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0214,,,
+gw-001,bacnet-02,bacnet,BN-02-AI-015,風量,流量,Measurement,false,5,m3/h,10000,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,15",1002,15,analogInput
+gw-001,opcua-01,opcua,UA-F-0215,風量,流量,Measurement,false,5,m3/h,10000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0215,,,
+gw-001,bacnet-02,bacnet,BN-02-AI-016,電力,電力,Measurement,false,5,kW,1000,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,16",1002,16,analogInput
+gw-001,opcua-01,opcua,UA-F-0216,電力,電力,Measurement,false,5,kW,1000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0216,,,
+gw-001,bacnet-02,bacnet,BN-02-AI-017,電力量,電力量,Metering,false,5,kWh,999999,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,17",1002,17,analogInput
+gw-001,opcua-01,opcua,UA-F-0217,電力量,電力量,Metering,false,5,kWh,999999,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0217,,,
+gw-001,bacnet-02,bacnet,BN-02-AI-018,照度,照度,Measurement,false,5,lux,10000,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,18",1002,18,analogInput
+gw-001,opcua-01,opcua,UA-F-0218,照度,照度,Measurement,false,5,lux,10000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0218,,,
+gw-001,bacnet-02,bacnet,BN-02-AI-019,温度,温度,Measurement,false,5,degC,50,-10,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,19",1002,19,analogInput
+gw-001,opcua-01,opcua,UA-F-0219,風速,風速,Measurement,false,5,m/s,50,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0219,,,
+gw-001,bacnet-02,bacnet,BN-02-AI-020,湿度,湿度,Measurement,false,5,%RH,100,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,20",1002,20,analogInput
+gw-001,opcua-01,opcua,UA-F-0220,圧力,圧力,Measurement,false,5,bar,10,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0220,,,
+gw-001,bacnet-02,bacnet,BN-02-AI-021,温度,温度,Measurement,false,5,degC,50,-10,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,21",1002,21,analogInput
+gw-001,opcua-01,opcua,UA-F-0221,温度,温度,Measurement,false,5,degC,50,-10,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0221,,,
+gw-001,bacnet-02,bacnet,BN-02-AI-022,湿度,湿度,Measurement,false,5,%RH,100,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,22",1002,22,analogInput
+gw-001,opcua-01,opcua,UA-F-0222,湿度,湿度,Measurement,false,5,%RH,100,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0222,,,
+gw-001,bacnet-02,bacnet,BN-02-AI-023,CO2濃度,CO2濃度,Measurement,false,5,ppm,5000,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,23",1002,23,analogInput
+gw-001,opcua-01,opcua,UA-F-0223,CO2濃度,CO2濃度,Measurement,false,5,ppm,5000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0223,,,
+gw-001,bacnet-02,bacnet,BN-02-AI-024,差圧,差圧,Measurement,false,5,Pa,1000,-1000,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,24",1002,24,analogInput
+gw-001,opcua-01,opcua,UA-F-0224,差圧,差圧,Measurement,false,5,Pa,1000,-1000,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0224,,,
+gw-001,bacnet-02,bacnet,BN-02-AI-025,風量,流量,Measurement,false,5,m3/h,10000,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,25",1002,25,analogInput
+gw-001,opcua-01,opcua,UA-F-0225,風量,流量,Measurement,false,5,m3/h,10000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0225,,,
+gw-001,bacnet-02,bacnet,BN-02-AI-026,電力,電力,Measurement,false,5,kW,1000,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,26",1002,26,analogInput
+gw-001,opcua-01,opcua,UA-F-0226,電力,電力,Measurement,false,5,kW,1000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0226,,,
+gw-001,bacnet-02,bacnet,BN-02-AI-027,電力量,電力量,Metering,false,5,kWh,999999,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,27",1002,27,analogInput
+gw-001,opcua-01,opcua,UA-F-0227,電力量,電力量,Metering,false,5,kWh,999999,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0227,,,
+gw-001,bacnet-02,bacnet,BN-02-AI-028,照度,照度,Measurement,false,5,lux,10000,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,28",1002,28,analogInput
+gw-001,opcua-01,opcua,UA-F-0228,照度,照度,Measurement,false,5,lux,10000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0228,,,
+gw-001,bacnet-02,bacnet,BN-02-AI-029,温度,温度,Measurement,false,5,degC,50,-10,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,29",1002,29,analogInput
+gw-001,opcua-01,opcua,UA-F-0229,風速,風速,Measurement,false,5,m/s,50,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0229,,,
+gw-001,bacnet-02,bacnet,BN-02-AI-030,湿度,湿度,Measurement,false,5,%RH,100,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,30",1002,30,analogInput
+gw-001,opcua-01,opcua,UA-F-0230,圧力,圧力,Measurement,false,5,bar,10,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0230,,,
+gw-001,bacnet-02,bacnet,BN-02-AI-031,温度,温度,Measurement,false,5,degC,50,-10,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,31",1002,31,analogInput
+gw-001,opcua-01,opcua,UA-F-0231,温度,温度,Measurement,false,5,degC,50,-10,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0231,,,
+gw-001,bacnet-02,bacnet,BN-02-AI-032,湿度,湿度,Measurement,false,5,%RH,100,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,32",1002,32,analogInput
+gw-001,opcua-01,opcua,UA-F-0232,湿度,湿度,Measurement,false,5,%RH,100,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0232,,,
+gw-001,bacnet-02,bacnet,BN-02-AI-033,CO2濃度,CO2濃度,Measurement,false,5,ppm,5000,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,33",1002,33,analogInput
+gw-001,opcua-01,opcua,UA-F-0233,CO2濃度,CO2濃度,Measurement,false,5,ppm,5000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0233,,,
+gw-001,bacnet-02,bacnet,BN-02-AI-034,差圧,差圧,Measurement,false,5,Pa,1000,-1000,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,34",1002,34,analogInput
+gw-001,opcua-01,opcua,UA-F-0234,差圧,差圧,Measurement,false,5,Pa,1000,-1000,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0234,,,
+gw-001,bacnet-02,bacnet,BN-02-AI-035,風量,流量,Measurement,false,5,m3/h,10000,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,35",1002,35,analogInput
+gw-001,opcua-01,opcua,UA-F-0235,風量,流量,Measurement,false,5,m3/h,10000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0235,,,
+gw-001,bacnet-02,bacnet,BN-02-AI-036,電力,電力,Measurement,false,5,kW,1000,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,36",1002,36,analogInput
+gw-001,opcua-01,opcua,UA-F-0236,電力,電力,Measurement,false,5,kW,1000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0236,,,
+gw-001,bacnet-02,bacnet,BN-02-AI-037,電力量,電力量,Metering,false,5,kWh,999999,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,37",1002,37,analogInput
+gw-001,opcua-01,opcua,UA-F-0237,電力量,電力量,Metering,false,5,kWh,999999,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0237,,,
+gw-001,bacnet-02,bacnet,BN-02-AI-038,照度,照度,Measurement,false,5,lux,10000,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,38",1002,38,analogInput
+gw-001,opcua-01,opcua,UA-F-0238,照度,照度,Measurement,false,5,lux,10000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0238,,,
+gw-001,bacnet-02,bacnet,BN-02-AI-039,温度,温度,Measurement,false,5,degC,50,-10,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,39",1002,39,analogInput
+gw-001,opcua-01,opcua,UA-F-0239,風速,風速,Measurement,false,5,m/s,50,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0239,,,
+gw-001,bacnet-02,bacnet,BN-02-AI-040,湿度,湿度,Measurement,false,5,%RH,100,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,40",1002,40,analogInput
+gw-001,opcua-01,opcua,UA-F-0240,圧力,圧力,Measurement,false,5,bar,10,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0240,,,
+gw-001,bacnet-02,bacnet,BN-02-AI-041,温度,温度,Measurement,false,5,degC,50,-10,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,41",1002,41,analogInput
+gw-001,opcua-01,opcua,UA-F-0241,温度,温度,Measurement,false,5,degC,50,-10,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0241,,,
+gw-001,bacnet-02,bacnet,BN-02-AI-042,湿度,湿度,Measurement,false,5,%RH,100,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,42",1002,42,analogInput
+gw-001,opcua-01,opcua,UA-F-0242,湿度,湿度,Measurement,false,5,%RH,100,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0242,,,
+gw-001,bacnet-02,bacnet,BN-02-AI-043,CO2濃度,CO2濃度,Measurement,false,5,ppm,5000,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,43",1002,43,analogInput
+gw-001,opcua-01,opcua,UA-F-0243,CO2濃度,CO2濃度,Measurement,false,5,ppm,5000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0243,,,
+gw-001,bacnet-02,bacnet,BN-02-AI-044,差圧,差圧,Measurement,false,5,Pa,1000,-1000,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,44",1002,44,analogInput
+gw-001,opcua-01,opcua,UA-F-0244,差圧,差圧,Measurement,false,5,Pa,1000,-1000,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0244,,,
+gw-001,bacnet-02,bacnet,BN-02-AI-045,風量,流量,Measurement,false,5,m3/h,10000,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,45",1002,45,analogInput
+gw-001,opcua-01,opcua,UA-F-0245,風量,流量,Measurement,false,5,m3/h,10000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0245,,,
+gw-001,bacnet-02,bacnet,BN-02-AI-046,電力,電力,Measurement,false,5,kW,1000,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,46",1002,46,analogInput
+gw-001,opcua-01,opcua,UA-F-0246,電力,電力,Measurement,false,5,kW,1000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0246,,,
+gw-001,bacnet-02,bacnet,BN-02-AI-047,電力量,電力量,Metering,false,5,kWh,999999,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,47",1002,47,analogInput
+gw-001,opcua-01,opcua,UA-F-0247,電力量,電力量,Metering,false,5,kWh,999999,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0247,,,
+gw-001,bacnet-02,bacnet,BN-02-AI-048,照度,照度,Measurement,false,5,lux,10000,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,48",1002,48,analogInput
+gw-001,opcua-01,opcua,UA-F-0248,照度,照度,Measurement,false,5,lux,10000,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0248,,,
+gw-001,bacnet-02,bacnet,BN-02-AI-049,温度,温度,Measurement,false,5,degC,50,-10,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,49",1002,49,analogInput
+gw-001,opcua-01,opcua,UA-F-0249,風速,風速,Measurement,false,5,m/s,50,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0249,,,
+gw-001,bacnet-02,bacnet,BN-02-AI-050,湿度,湿度,Measurement,false,5,%RH,100,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,50",1002,50,analogInput
+gw-001,opcua-01,opcua,UA-F-0250,圧力,圧力,Measurement,false,5,bar,10,0,,1.0,opcua-server,OPCUA Server,Server,Site01,Building01,1F,Area01,,,,,,,ns=2;s=UA-F-0250,,,
