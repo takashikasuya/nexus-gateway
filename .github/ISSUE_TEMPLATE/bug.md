@@ -6,7 +6,7 @@ labels: bug
 
 ## Expected behaviour
 
-<!-- From which spec? -->
+<!-- Which spec, ADR, or documented contract does this violate? -->
 
 ## Actual behaviour
 
@@ -15,6 +15,12 @@ labels: bug
 1.
 2.
 
-## Notes for AI agent
+## Environment
 
-<!-- Suspected location in code, related pitfall in docs/memory/pitfalls.md -->
+- nexus-gateway version / commit:
+- Connector type(s):
+- OS / platform:
+
+## Context for implementers
+
+<!-- Suspected location in code, related pitfall, constraints, or adjacent code that may be relevant -->
