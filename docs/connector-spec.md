@@ -260,6 +260,7 @@ The gateway passes these through from the connector registration. Protocol-speci
 | `BACNET_DEVICE_ID` | — | BACnet device instance number. |
 | `BACNET_POINTS` | `[]` | JSON array of point configs (see §6.1). |
 | `BACNET_POLL_INTERVAL` | `30` | Seconds between full polls. |
+| `BACNET_RPM_CHUNK_SIZE` | `20` | Max points per ReadPropertyMultiple. Polling in chunks keeps each response within the device's APDU; devices without segmentation otherwise reject large reads with `segmentation-not-supported`. Lower it for devices with a small max APDU. |
 | `BACNET_LOCAL_ADDRESS` | `0.0.0.0` | Local BACnet interface. |
 | `BACNET_DEFAULT_WRITE_PRIORITY` | `8` | BACnet priority 1–16 used when `priority` is 0. |
 | `BACNET_WRITE_TIMEOUT` | `10` | Device write timeout in seconds. |

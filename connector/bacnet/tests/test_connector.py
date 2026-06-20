@@ -18,7 +18,10 @@ from bacnet_connector.event import bacnet_quality, make_event
 
 # ── helpers ──────────────────────────────────────────────────────────────────
 
-def make_config(points: list[PointConfig] | None = None) -> Config:
+def make_config(
+    points: list[PointConfig] | None = None,
+    rpm_chunk_size: int = 20,
+) -> Config:
     return Config(
         connector_id="test-conn",
         nats_url="nats://localhost:4222",
@@ -26,6 +29,7 @@ def make_config(points: list[PointConfig] | None = None) -> Config:
         bacnet_device_id=42,
         points=points or [],
         poll_interval=999,  # large value — tests control timing via stop_event
+        rpm_chunk_size=rpm_chunk_size,
     )
 
 
@@ -88,6 +92,75 @@ async def test_poll_publishes_event_for_each_point():
     assert local_ids == {"analogInput,0", "analogInput,1"}
     assert all(b["protocol"] == "bacnet" for b in bodies)
     assert all(b["connector_id"] == "test-conn" for b in bodies)
+
+
+class ChunkRecordingClient(BACnetClient):
+    """Records the requests of each read_property_multiple call (one call per chunk).
+
+    Returns ``value_for(obj_id)`` for every requested point, so the number and
+    composition of chunks the connector issues is observable. A chunk whose start
+    index is in ``fail_chunks`` raises, simulating a per-chunk device error.
+    """
+
+    def __init__(self, fail_chunks: set[int] | None = None):
+        self.calls: list[list[str]] = []  # obj_ids per call, in order
+        self._fail_chunks = fail_chunks or set()
+
+    async def read_property_multiple(self, address, device_id, requests):
+        obj_ids = [obj_id for obj_id, _ in requests]
+        self.calls.append(obj_ids)
+        if (len(self.calls) - 1) in self._fail_chunks:
+            raise OSError("simulated chunk failure")
+        return [(obj_id, float(i), None) for i, obj_id in enumerate(obj_ids)]
+
+    async def subscribe_cov(self, address, device_id, obj_id, callback, lifetime=300):
+        pass
+
+    async def close(self):
+        pass
+
+
+def _points(n: int) -> list[PointConfig]:
+    return [PointConfig(local_id=f"analogInput,{i}", device_ref="d") for i in range(n)]
+
+
+@pytest.mark.asyncio
+async def test_poll_chunks_requests():
+    """Points must be read in chunks of rpm_chunk_size; every point still publishes."""
+    bacnet = ChunkRecordingClient()
+    js = MockJetStream()
+    cfg = make_config(_points(5), rpm_chunk_size=2)
+    stop = asyncio.Event()
+    stop.set()  # stop after first poll cycle
+
+    conn = Connector(cfg, bacnet, js)
+    await conn.run(stop_event=stop)
+
+    # 5 points / chunk 2 → 3 RPM calls of sizes [2, 2, 1].
+    assert [len(c) for c in bacnet.calls] == [2, 2, 1]
+    # Chunks cover every point exactly once, in order.
+    assert [oid for c in bacnet.calls for oid in c] == [f"analogInput,{i}" for i in range(5)]
+    # All five points published.
+    published_ids = {json.loads(d)["local_id"] for _, d in js.published}
+    assert published_ids == {f"analogInput,{i}" for i in range(5)}
+
+
+@pytest.mark.asyncio
+async def test_poll_chunk_failure_is_isolated():
+    """A failed chunk must not prevent the other chunks from publishing."""
+    # 5 points, chunk 2 → chunks [0:2], [2:4], [4:5]; fail the middle chunk (index 1).
+    bacnet = ChunkRecordingClient(fail_chunks={1})
+    js = MockJetStream()
+    cfg = make_config(_points(5), rpm_chunk_size=2)
+    stop = asyncio.Event()
+    stop.set()
+
+    conn = Connector(cfg, bacnet, js)
+    await conn.run(stop_event=stop)
+
+    # Surviving chunks publish points 0,1 (chunk 0) and 4 (chunk 2) — point 2,3 dropped.
+    published_ids = {json.loads(d)["local_id"] for _, d in js.published}
+    assert published_ids == {"analogInput,0", "analogInput,1", "analogInput,4"}
 
 
 @pytest.mark.asyncio
