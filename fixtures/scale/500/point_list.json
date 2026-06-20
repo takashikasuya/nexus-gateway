@@ -1,0 +1,4502 @@
+[
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,1",
+    "point_id": "BN-01-AI-001",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,2",
+    "point_id": "BN-01-AI-002",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,3",
+    "point_id": "BN-01-AI-003",
+    "unit": "ppm",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,4",
+    "point_id": "BN-01-AI-004",
+    "unit": "Pa",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,5",
+    "point_id": "BN-01-AI-005",
+    "unit": "m3/h",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,6",
+    "point_id": "BN-01-AI-006",
+    "unit": "kW",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,7",
+    "point_id": "BN-01-AI-007",
+    "unit": "kWh",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,8",
+    "point_id": "BN-01-AI-008",
+    "unit": "lux",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,9",
+    "point_id": "BN-01-AI-009",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,10",
+    "point_id": "BN-01-AI-010",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,11",
+    "point_id": "BN-01-AI-011",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,12",
+    "point_id": "BN-01-AI-012",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,13",
+    "point_id": "BN-01-AI-013",
+    "unit": "ppm",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,14",
+    "point_id": "BN-01-AI-014",
+    "unit": "Pa",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,15",
+    "point_id": "BN-01-AI-015",
+    "unit": "m3/h",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,16",
+    "point_id": "BN-01-AI-016",
+    "unit": "kW",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,17",
+    "point_id": "BN-01-AI-017",
+    "unit": "kWh",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,18",
+    "point_id": "BN-01-AI-018",
+    "unit": "lux",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,19",
+    "point_id": "BN-01-AI-019",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,20",
+    "point_id": "BN-01-AI-020",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,21",
+    "point_id": "BN-01-AI-021",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,22",
+    "point_id": "BN-01-AI-022",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,23",
+    "point_id": "BN-01-AI-023",
+    "unit": "ppm",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,24",
+    "point_id": "BN-01-AI-024",
+    "unit": "Pa",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,25",
+    "point_id": "BN-01-AI-025",
+    "unit": "m3/h",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,26",
+    "point_id": "BN-01-AI-026",
+    "unit": "kW",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,27",
+    "point_id": "BN-01-AI-027",
+    "unit": "kWh",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,28",
+    "point_id": "BN-01-AI-028",
+    "unit": "lux",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,29",
+    "point_id": "BN-01-AI-029",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,30",
+    "point_id": "BN-01-AI-030",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,31",
+    "point_id": "BN-01-AI-031",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,32",
+    "point_id": "BN-01-AI-032",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,33",
+    "point_id": "BN-01-AI-033",
+    "unit": "ppm",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,34",
+    "point_id": "BN-01-AI-034",
+    "unit": "Pa",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,35",
+    "point_id": "BN-01-AI-035",
+    "unit": "m3/h",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,36",
+    "point_id": "BN-01-AI-036",
+    "unit": "kW",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,37",
+    "point_id": "BN-01-AI-037",
+    "unit": "kWh",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,38",
+    "point_id": "BN-01-AI-038",
+    "unit": "lux",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,39",
+    "point_id": "BN-01-AI-039",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,40",
+    "point_id": "BN-01-AI-040",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,41",
+    "point_id": "BN-01-AI-041",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,42",
+    "point_id": "BN-01-AI-042",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,43",
+    "point_id": "BN-01-AI-043",
+    "unit": "ppm",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,44",
+    "point_id": "BN-01-AI-044",
+    "unit": "Pa",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,45",
+    "point_id": "BN-01-AI-045",
+    "unit": "m3/h",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,46",
+    "point_id": "BN-01-AI-046",
+    "unit": "kW",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,47",
+    "point_id": "BN-01-AI-047",
+    "unit": "kWh",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,48",
+    "point_id": "BN-01-AI-048",
+    "unit": "lux",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,49",
+    "point_id": "BN-01-AI-049",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,50",
+    "point_id": "BN-01-AI-050",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,51",
+    "point_id": "BN-01-AI-051",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,52",
+    "point_id": "BN-01-AI-052",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,53",
+    "point_id": "BN-01-AI-053",
+    "unit": "ppm",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,54",
+    "point_id": "BN-01-AI-054",
+    "unit": "Pa",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,55",
+    "point_id": "BN-01-AI-055",
+    "unit": "m3/h",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,56",
+    "point_id": "BN-01-AI-056",
+    "unit": "kW",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,57",
+    "point_id": "BN-01-AI-057",
+    "unit": "kWh",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,58",
+    "point_id": "BN-01-AI-058",
+    "unit": "lux",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,59",
+    "point_id": "BN-01-AI-059",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,60",
+    "point_id": "BN-01-AI-060",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,61",
+    "point_id": "BN-01-AI-061",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,62",
+    "point_id": "BN-01-AI-062",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,63",
+    "point_id": "BN-01-AI-063",
+    "unit": "ppm",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,64",
+    "point_id": "BN-01-AI-064",
+    "unit": "Pa",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,65",
+    "point_id": "BN-01-AI-065",
+    "unit": "m3/h",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,66",
+    "point_id": "BN-01-AI-066",
+    "unit": "kW",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,67",
+    "point_id": "BN-01-AI-067",
+    "unit": "kWh",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,68",
+    "point_id": "BN-01-AI-068",
+    "unit": "lux",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,69",
+    "point_id": "BN-01-AI-069",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,70",
+    "point_id": "BN-01-AI-070",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,71",
+    "point_id": "BN-01-AI-071",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,72",
+    "point_id": "BN-01-AI-072",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,73",
+    "point_id": "BN-01-AI-073",
+    "unit": "ppm",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,74",
+    "point_id": "BN-01-AI-074",
+    "unit": "Pa",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,75",
+    "point_id": "BN-01-AI-075",
+    "unit": "m3/h",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,76",
+    "point_id": "BN-01-AI-076",
+    "unit": "kW",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,77",
+    "point_id": "BN-01-AI-077",
+    "unit": "kWh",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,78",
+    "point_id": "BN-01-AI-078",
+    "unit": "lux",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,79",
+    "point_id": "BN-01-AI-079",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,80",
+    "point_id": "BN-01-AI-080",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,81",
+    "point_id": "BN-01-AI-081",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,82",
+    "point_id": "BN-01-AI-082",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,83",
+    "point_id": "BN-01-AI-083",
+    "unit": "ppm",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,84",
+    "point_id": "BN-01-AI-084",
+    "unit": "Pa",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,85",
+    "point_id": "BN-01-AI-085",
+    "unit": "m3/h",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,86",
+    "point_id": "BN-01-AI-086",
+    "unit": "kW",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,87",
+    "point_id": "BN-01-AI-087",
+    "unit": "kWh",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,88",
+    "point_id": "BN-01-AI-088",
+    "unit": "lux",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,89",
+    "point_id": "BN-01-AI-089",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,90",
+    "point_id": "BN-01-AI-090",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,91",
+    "point_id": "BN-01-AI-091",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,92",
+    "point_id": "BN-01-AI-092",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,93",
+    "point_id": "BN-01-AI-093",
+    "unit": "ppm",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,94",
+    "point_id": "BN-01-AI-094",
+    "unit": "Pa",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,95",
+    "point_id": "BN-01-AI-095",
+    "unit": "m3/h",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,96",
+    "point_id": "BN-01-AI-096",
+    "unit": "kW",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,97",
+    "point_id": "BN-01-AI-097",
+    "unit": "kWh",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,98",
+    "point_id": "BN-01-AI-098",
+    "unit": "lux",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,99",
+    "point_id": "BN-01-AI-099",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogInput,100",
+    "point_id": "BN-01-AI-100",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,1",
+    "point_id": "BN-01-AO-001",
+    "unit": "degC",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,2",
+    "point_id": "BN-01-AO-002",
+    "unit": "%",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,3",
+    "point_id": "BN-01-AO-003",
+    "unit": "Pa",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,4",
+    "point_id": "BN-01-AO-004",
+    "unit": "m3/h",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,5",
+    "point_id": "BN-01-AO-005",
+    "unit": "kW",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,6",
+    "point_id": "BN-01-AO-006",
+    "unit": "degC",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,7",
+    "point_id": "BN-01-AO-007",
+    "unit": "%",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,8",
+    "point_id": "BN-01-AO-008",
+    "unit": "Pa",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,9",
+    "point_id": "BN-01-AO-009",
+    "unit": "m3/h",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,10",
+    "point_id": "BN-01-AO-010",
+    "unit": "kW",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,11",
+    "point_id": "BN-01-AO-011",
+    "unit": "degC",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,12",
+    "point_id": "BN-01-AO-012",
+    "unit": "%",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,13",
+    "point_id": "BN-01-AO-013",
+    "unit": "Pa",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,14",
+    "point_id": "BN-01-AO-014",
+    "unit": "m3/h",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,15",
+    "point_id": "BN-01-AO-015",
+    "unit": "kW",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,16",
+    "point_id": "BN-01-AO-016",
+    "unit": "degC",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,17",
+    "point_id": "BN-01-AO-017",
+    "unit": "%",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,18",
+    "point_id": "BN-01-AO-018",
+    "unit": "Pa",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,19",
+    "point_id": "BN-01-AO-019",
+    "unit": "m3/h",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,20",
+    "point_id": "BN-01-AO-020",
+    "unit": "kW",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,21",
+    "point_id": "BN-01-AO-021",
+    "unit": "degC",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,22",
+    "point_id": "BN-01-AO-022",
+    "unit": "%",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,23",
+    "point_id": "BN-01-AO-023",
+    "unit": "Pa",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,24",
+    "point_id": "BN-01-AO-024",
+    "unit": "m3/h",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,25",
+    "point_id": "BN-01-AO-025",
+    "unit": "kW",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,26",
+    "point_id": "BN-01-AO-026",
+    "unit": "degC",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,27",
+    "point_id": "BN-01-AO-027",
+    "unit": "%",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,28",
+    "point_id": "BN-01-AO-028",
+    "unit": "Pa",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,29",
+    "point_id": "BN-01-AO-029",
+    "unit": "m3/h",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,30",
+    "point_id": "BN-01-AO-030",
+    "unit": "kW",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,31",
+    "point_id": "BN-01-AO-031",
+    "unit": "degC",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,32",
+    "point_id": "BN-01-AO-032",
+    "unit": "%",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,33",
+    "point_id": "BN-01-AO-033",
+    "unit": "Pa",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,34",
+    "point_id": "BN-01-AO-034",
+    "unit": "m3/h",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,35",
+    "point_id": "BN-01-AO-035",
+    "unit": "kW",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,36",
+    "point_id": "BN-01-AO-036",
+    "unit": "degC",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,37",
+    "point_id": "BN-01-AO-037",
+    "unit": "%",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,38",
+    "point_id": "BN-01-AO-038",
+    "unit": "Pa",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,39",
+    "point_id": "BN-01-AO-039",
+    "unit": "m3/h",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,40",
+    "point_id": "BN-01-AO-040",
+    "unit": "kW",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,1",
+    "point_id": "BN-01-BI-001",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,2",
+    "point_id": "BN-01-BI-002",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,3",
+    "point_id": "BN-01-BI-003",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,4",
+    "point_id": "BN-01-BI-004",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,5",
+    "point_id": "BN-01-BI-005",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,6",
+    "point_id": "BN-01-BI-006",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,7",
+    "point_id": "BN-01-BI-007",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,8",
+    "point_id": "BN-01-BI-008",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,9",
+    "point_id": "BN-01-BI-009",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,10",
+    "point_id": "BN-01-BI-010",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,11",
+    "point_id": "BN-01-BI-011",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,12",
+    "point_id": "BN-01-BI-012",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,13",
+    "point_id": "BN-01-BI-013",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,14",
+    "point_id": "BN-01-BI-014",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,15",
+    "point_id": "BN-01-BI-015",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,16",
+    "point_id": "BN-01-BI-016",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,17",
+    "point_id": "BN-01-BI-017",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,18",
+    "point_id": "BN-01-BI-018",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,19",
+    "point_id": "BN-01-BI-019",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,20",
+    "point_id": "BN-01-BI-020",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,21",
+    "point_id": "BN-01-BI-021",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,22",
+    "point_id": "BN-01-BI-022",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,23",
+    "point_id": "BN-01-BI-023",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,24",
+    "point_id": "BN-01-BI-024",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,25",
+    "point_id": "BN-01-BI-025",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,26",
+    "point_id": "BN-01-BI-026",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,27",
+    "point_id": "BN-01-BI-027",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,28",
+    "point_id": "BN-01-BI-028",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,29",
+    "point_id": "BN-01-BI-029",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,30",
+    "point_id": "BN-01-BI-030",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,31",
+    "point_id": "BN-01-BI-031",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,32",
+    "point_id": "BN-01-BI-032",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,33",
+    "point_id": "BN-01-BI-033",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,34",
+    "point_id": "BN-01-BI-034",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,35",
+    "point_id": "BN-01-BI-035",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,36",
+    "point_id": "BN-01-BI-036",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,37",
+    "point_id": "BN-01-BI-037",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,38",
+    "point_id": "BN-01-BI-038",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,39",
+    "point_id": "BN-01-BI-039",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,40",
+    "point_id": "BN-01-BI-040",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryOutput,1",
+    "point_id": "BN-01-BO-001",
+    "unit": "",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryOutput,2",
+    "point_id": "BN-01-BO-002",
+    "unit": "",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryOutput,3",
+    "point_id": "BN-01-BO-003",
+    "unit": "",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryOutput,4",
+    "point_id": "BN-01-BO-004",
+    "unit": "",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryOutput,5",
+    "point_id": "BN-01-BO-005",
+    "unit": "",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryOutput,6",
+    "point_id": "BN-01-BO-006",
+    "unit": "",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryOutput,7",
+    "point_id": "BN-01-BO-007",
+    "unit": "",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryOutput,8",
+    "point_id": "BN-01-BO-008",
+    "unit": "",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryOutput,9",
+    "point_id": "BN-01-BO-009",
+    "unit": "",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryOutput,10",
+    "point_id": "BN-01-BO-010",
+    "unit": "",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryOutput,11",
+    "point_id": "BN-01-BO-011",
+    "unit": "",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryOutput,12",
+    "point_id": "BN-01-BO-012",
+    "unit": "",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryOutput,13",
+    "point_id": "BN-01-BO-013",
+    "unit": "",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryOutput,14",
+    "point_id": "BN-01-BO-014",
+    "unit": "",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryOutput,15",
+    "point_id": "BN-01-BO-015",
+    "unit": "",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryOutput,16",
+    "point_id": "BN-01-BO-016",
+    "unit": "",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryOutput,17",
+    "point_id": "BN-01-BO-017",
+    "unit": "",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryOutput,18",
+    "point_id": "BN-01-BO-018",
+    "unit": "",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryOutput,19",
+    "point_id": "BN-01-BO-019",
+    "unit": "",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-01",
+    "protocol": "bacnet",
+    "local_id": "binaryOutput,20",
+    "point_id": "BN-01-BO-020",
+    "unit": "",
+    "writable": true,
+    "device_ref": "ahu-01"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,1",
+    "point_id": "BN-02-AI-001",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,2",
+    "point_id": "BN-02-AI-002",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,3",
+    "point_id": "BN-02-AI-003",
+    "unit": "ppm",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,4",
+    "point_id": "BN-02-AI-004",
+    "unit": "Pa",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,5",
+    "point_id": "BN-02-AI-005",
+    "unit": "m3/h",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,6",
+    "point_id": "BN-02-AI-006",
+    "unit": "kW",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,7",
+    "point_id": "BN-02-AI-007",
+    "unit": "kWh",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,8",
+    "point_id": "BN-02-AI-008",
+    "unit": "lux",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,9",
+    "point_id": "BN-02-AI-009",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,10",
+    "point_id": "BN-02-AI-010",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,11",
+    "point_id": "BN-02-AI-011",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,12",
+    "point_id": "BN-02-AI-012",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,13",
+    "point_id": "BN-02-AI-013",
+    "unit": "ppm",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,14",
+    "point_id": "BN-02-AI-014",
+    "unit": "Pa",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,15",
+    "point_id": "BN-02-AI-015",
+    "unit": "m3/h",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,16",
+    "point_id": "BN-02-AI-016",
+    "unit": "kW",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,17",
+    "point_id": "BN-02-AI-017",
+    "unit": "kWh",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,18",
+    "point_id": "BN-02-AI-018",
+    "unit": "lux",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,19",
+    "point_id": "BN-02-AI-019",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,20",
+    "point_id": "BN-02-AI-020",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,21",
+    "point_id": "BN-02-AI-021",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,22",
+    "point_id": "BN-02-AI-022",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,23",
+    "point_id": "BN-02-AI-023",
+    "unit": "ppm",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,24",
+    "point_id": "BN-02-AI-024",
+    "unit": "Pa",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,25",
+    "point_id": "BN-02-AI-025",
+    "unit": "m3/h",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,26",
+    "point_id": "BN-02-AI-026",
+    "unit": "kW",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,27",
+    "point_id": "BN-02-AI-027",
+    "unit": "kWh",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,28",
+    "point_id": "BN-02-AI-028",
+    "unit": "lux",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,29",
+    "point_id": "BN-02-AI-029",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,30",
+    "point_id": "BN-02-AI-030",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,31",
+    "point_id": "BN-02-AI-031",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,32",
+    "point_id": "BN-02-AI-032",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,33",
+    "point_id": "BN-02-AI-033",
+    "unit": "ppm",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,34",
+    "point_id": "BN-02-AI-034",
+    "unit": "Pa",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,35",
+    "point_id": "BN-02-AI-035",
+    "unit": "m3/h",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,36",
+    "point_id": "BN-02-AI-036",
+    "unit": "kW",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,37",
+    "point_id": "BN-02-AI-037",
+    "unit": "kWh",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,38",
+    "point_id": "BN-02-AI-038",
+    "unit": "lux",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,39",
+    "point_id": "BN-02-AI-039",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,40",
+    "point_id": "BN-02-AI-040",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,41",
+    "point_id": "BN-02-AI-041",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,42",
+    "point_id": "BN-02-AI-042",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,43",
+    "point_id": "BN-02-AI-043",
+    "unit": "ppm",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,44",
+    "point_id": "BN-02-AI-044",
+    "unit": "Pa",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,45",
+    "point_id": "BN-02-AI-045",
+    "unit": "m3/h",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,46",
+    "point_id": "BN-02-AI-046",
+    "unit": "kW",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,47",
+    "point_id": "BN-02-AI-047",
+    "unit": "kWh",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,48",
+    "point_id": "BN-02-AI-048",
+    "unit": "lux",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,49",
+    "point_id": "BN-02-AI-049",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,50",
+    "point_id": "BN-02-AI-050",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,51",
+    "point_id": "BN-02-AI-051",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,52",
+    "point_id": "BN-02-AI-052",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,53",
+    "point_id": "BN-02-AI-053",
+    "unit": "ppm",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,54",
+    "point_id": "BN-02-AI-054",
+    "unit": "Pa",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,55",
+    "point_id": "BN-02-AI-055",
+    "unit": "m3/h",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,56",
+    "point_id": "BN-02-AI-056",
+    "unit": "kW",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,57",
+    "point_id": "BN-02-AI-057",
+    "unit": "kWh",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,58",
+    "point_id": "BN-02-AI-058",
+    "unit": "lux",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,59",
+    "point_id": "BN-02-AI-059",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,60",
+    "point_id": "BN-02-AI-060",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,61",
+    "point_id": "BN-02-AI-061",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,62",
+    "point_id": "BN-02-AI-062",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,63",
+    "point_id": "BN-02-AI-063",
+    "unit": "ppm",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,64",
+    "point_id": "BN-02-AI-064",
+    "unit": "Pa",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,65",
+    "point_id": "BN-02-AI-065",
+    "unit": "m3/h",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,66",
+    "point_id": "BN-02-AI-066",
+    "unit": "kW",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,67",
+    "point_id": "BN-02-AI-067",
+    "unit": "kWh",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,68",
+    "point_id": "BN-02-AI-068",
+    "unit": "lux",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,69",
+    "point_id": "BN-02-AI-069",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,70",
+    "point_id": "BN-02-AI-070",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,71",
+    "point_id": "BN-02-AI-071",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,72",
+    "point_id": "BN-02-AI-072",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,73",
+    "point_id": "BN-02-AI-073",
+    "unit": "ppm",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,74",
+    "point_id": "BN-02-AI-074",
+    "unit": "Pa",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,75",
+    "point_id": "BN-02-AI-075",
+    "unit": "m3/h",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,76",
+    "point_id": "BN-02-AI-076",
+    "unit": "kW",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,77",
+    "point_id": "BN-02-AI-077",
+    "unit": "kWh",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,78",
+    "point_id": "BN-02-AI-078",
+    "unit": "lux",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,79",
+    "point_id": "BN-02-AI-079",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,80",
+    "point_id": "BN-02-AI-080",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,81",
+    "point_id": "BN-02-AI-081",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,82",
+    "point_id": "BN-02-AI-082",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,83",
+    "point_id": "BN-02-AI-083",
+    "unit": "ppm",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,84",
+    "point_id": "BN-02-AI-084",
+    "unit": "Pa",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,85",
+    "point_id": "BN-02-AI-085",
+    "unit": "m3/h",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,86",
+    "point_id": "BN-02-AI-086",
+    "unit": "kW",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,87",
+    "point_id": "BN-02-AI-087",
+    "unit": "kWh",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,88",
+    "point_id": "BN-02-AI-088",
+    "unit": "lux",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,89",
+    "point_id": "BN-02-AI-089",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,90",
+    "point_id": "BN-02-AI-090",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,91",
+    "point_id": "BN-02-AI-091",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,92",
+    "point_id": "BN-02-AI-092",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,93",
+    "point_id": "BN-02-AI-093",
+    "unit": "ppm",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,94",
+    "point_id": "BN-02-AI-094",
+    "unit": "Pa",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,95",
+    "point_id": "BN-02-AI-095",
+    "unit": "m3/h",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,96",
+    "point_id": "BN-02-AI-096",
+    "unit": "kW",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,97",
+    "point_id": "BN-02-AI-097",
+    "unit": "kWh",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,98",
+    "point_id": "BN-02-AI-098",
+    "unit": "lux",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,99",
+    "point_id": "BN-02-AI-099",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogInput,100",
+    "point_id": "BN-02-AI-100",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,1",
+    "point_id": "BN-02-AO-001",
+    "unit": "degC",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,2",
+    "point_id": "BN-02-AO-002",
+    "unit": "%",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,3",
+    "point_id": "BN-02-AO-003",
+    "unit": "Pa",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,4",
+    "point_id": "BN-02-AO-004",
+    "unit": "m3/h",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,5",
+    "point_id": "BN-02-AO-005",
+    "unit": "kW",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,6",
+    "point_id": "BN-02-AO-006",
+    "unit": "degC",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,7",
+    "point_id": "BN-02-AO-007",
+    "unit": "%",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,8",
+    "point_id": "BN-02-AO-008",
+    "unit": "Pa",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,9",
+    "point_id": "BN-02-AO-009",
+    "unit": "m3/h",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,10",
+    "point_id": "BN-02-AO-010",
+    "unit": "kW",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,11",
+    "point_id": "BN-02-AO-011",
+    "unit": "degC",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,12",
+    "point_id": "BN-02-AO-012",
+    "unit": "%",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,13",
+    "point_id": "BN-02-AO-013",
+    "unit": "Pa",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,14",
+    "point_id": "BN-02-AO-014",
+    "unit": "m3/h",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,15",
+    "point_id": "BN-02-AO-015",
+    "unit": "kW",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,16",
+    "point_id": "BN-02-AO-016",
+    "unit": "degC",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,17",
+    "point_id": "BN-02-AO-017",
+    "unit": "%",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,18",
+    "point_id": "BN-02-AO-018",
+    "unit": "Pa",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,19",
+    "point_id": "BN-02-AO-019",
+    "unit": "m3/h",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,20",
+    "point_id": "BN-02-AO-020",
+    "unit": "kW",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,21",
+    "point_id": "BN-02-AO-021",
+    "unit": "degC",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,22",
+    "point_id": "BN-02-AO-022",
+    "unit": "%",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,23",
+    "point_id": "BN-02-AO-023",
+    "unit": "Pa",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,24",
+    "point_id": "BN-02-AO-024",
+    "unit": "m3/h",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,25",
+    "point_id": "BN-02-AO-025",
+    "unit": "kW",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,26",
+    "point_id": "BN-02-AO-026",
+    "unit": "degC",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,27",
+    "point_id": "BN-02-AO-027",
+    "unit": "%",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,28",
+    "point_id": "BN-02-AO-028",
+    "unit": "Pa",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,29",
+    "point_id": "BN-02-AO-029",
+    "unit": "m3/h",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,30",
+    "point_id": "BN-02-AO-030",
+    "unit": "kW",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,31",
+    "point_id": "BN-02-AO-031",
+    "unit": "degC",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,32",
+    "point_id": "BN-02-AO-032",
+    "unit": "%",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,33",
+    "point_id": "BN-02-AO-033",
+    "unit": "Pa",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,34",
+    "point_id": "BN-02-AO-034",
+    "unit": "m3/h",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,35",
+    "point_id": "BN-02-AO-035",
+    "unit": "kW",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,36",
+    "point_id": "BN-02-AO-036",
+    "unit": "degC",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,37",
+    "point_id": "BN-02-AO-037",
+    "unit": "%",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,38",
+    "point_id": "BN-02-AO-038",
+    "unit": "Pa",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,39",
+    "point_id": "BN-02-AO-039",
+    "unit": "m3/h",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "analogOutput,40",
+    "point_id": "BN-02-AO-040",
+    "unit": "kW",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,1",
+    "point_id": "BN-02-BI-001",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,2",
+    "point_id": "BN-02-BI-002",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,3",
+    "point_id": "BN-02-BI-003",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,4",
+    "point_id": "BN-02-BI-004",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,5",
+    "point_id": "BN-02-BI-005",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,6",
+    "point_id": "BN-02-BI-006",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,7",
+    "point_id": "BN-02-BI-007",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,8",
+    "point_id": "BN-02-BI-008",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,9",
+    "point_id": "BN-02-BI-009",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,10",
+    "point_id": "BN-02-BI-010",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,11",
+    "point_id": "BN-02-BI-011",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,12",
+    "point_id": "BN-02-BI-012",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,13",
+    "point_id": "BN-02-BI-013",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,14",
+    "point_id": "BN-02-BI-014",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,15",
+    "point_id": "BN-02-BI-015",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,16",
+    "point_id": "BN-02-BI-016",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,17",
+    "point_id": "BN-02-BI-017",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,18",
+    "point_id": "BN-02-BI-018",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,19",
+    "point_id": "BN-02-BI-019",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,20",
+    "point_id": "BN-02-BI-020",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,21",
+    "point_id": "BN-02-BI-021",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,22",
+    "point_id": "BN-02-BI-022",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,23",
+    "point_id": "BN-02-BI-023",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,24",
+    "point_id": "BN-02-BI-024",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,25",
+    "point_id": "BN-02-BI-025",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,26",
+    "point_id": "BN-02-BI-026",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,27",
+    "point_id": "BN-02-BI-027",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,28",
+    "point_id": "BN-02-BI-028",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,29",
+    "point_id": "BN-02-BI-029",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,30",
+    "point_id": "BN-02-BI-030",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,31",
+    "point_id": "BN-02-BI-031",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,32",
+    "point_id": "BN-02-BI-032",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,33",
+    "point_id": "BN-02-BI-033",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,34",
+    "point_id": "BN-02-BI-034",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,35",
+    "point_id": "BN-02-BI-035",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,36",
+    "point_id": "BN-02-BI-036",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,37",
+    "point_id": "BN-02-BI-037",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,38",
+    "point_id": "BN-02-BI-038",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,39",
+    "point_id": "BN-02-BI-039",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryInput,40",
+    "point_id": "BN-02-BI-040",
+    "unit": "",
+    "writable": false,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryOutput,1",
+    "point_id": "BN-02-BO-001",
+    "unit": "",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryOutput,2",
+    "point_id": "BN-02-BO-002",
+    "unit": "",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryOutput,3",
+    "point_id": "BN-02-BO-003",
+    "unit": "",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryOutput,4",
+    "point_id": "BN-02-BO-004",
+    "unit": "",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryOutput,5",
+    "point_id": "BN-02-BO-005",
+    "unit": "",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryOutput,6",
+    "point_id": "BN-02-BO-006",
+    "unit": "",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryOutput,7",
+    "point_id": "BN-02-BO-007",
+    "unit": "",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryOutput,8",
+    "point_id": "BN-02-BO-008",
+    "unit": "",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryOutput,9",
+    "point_id": "BN-02-BO-009",
+    "unit": "",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryOutput,10",
+    "point_id": "BN-02-BO-010",
+    "unit": "",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryOutput,11",
+    "point_id": "BN-02-BO-011",
+    "unit": "",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryOutput,12",
+    "point_id": "BN-02-BO-012",
+    "unit": "",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryOutput,13",
+    "point_id": "BN-02-BO-013",
+    "unit": "",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryOutput,14",
+    "point_id": "BN-02-BO-014",
+    "unit": "",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryOutput,15",
+    "point_id": "BN-02-BO-015",
+    "unit": "",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryOutput,16",
+    "point_id": "BN-02-BO-016",
+    "unit": "",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryOutput,17",
+    "point_id": "BN-02-BO-017",
+    "unit": "",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryOutput,18",
+    "point_id": "BN-02-BO-018",
+    "unit": "",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryOutput,19",
+    "point_id": "BN-02-BO-019",
+    "unit": "",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-02",
+    "protocol": "bacnet",
+    "local_id": "binaryOutput,20",
+    "point_id": "BN-02-BO-020",
+    "unit": "",
+    "writable": true,
+    "device_ref": "ahu-02"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,1",
+    "point_id": "BN-03-AI-001",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,2",
+    "point_id": "BN-03-AI-002",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,3",
+    "point_id": "BN-03-AI-003",
+    "unit": "ppm",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,4",
+    "point_id": "BN-03-AI-004",
+    "unit": "Pa",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,5",
+    "point_id": "BN-03-AI-005",
+    "unit": "m3/h",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,6",
+    "point_id": "BN-03-AI-006",
+    "unit": "kW",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,7",
+    "point_id": "BN-03-AI-007",
+    "unit": "kWh",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,8",
+    "point_id": "BN-03-AI-008",
+    "unit": "lux",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,9",
+    "point_id": "BN-03-AI-009",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,10",
+    "point_id": "BN-03-AI-010",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,11",
+    "point_id": "BN-03-AI-011",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,12",
+    "point_id": "BN-03-AI-012",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,13",
+    "point_id": "BN-03-AI-013",
+    "unit": "ppm",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,14",
+    "point_id": "BN-03-AI-014",
+    "unit": "Pa",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,15",
+    "point_id": "BN-03-AI-015",
+    "unit": "m3/h",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,16",
+    "point_id": "BN-03-AI-016",
+    "unit": "kW",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,17",
+    "point_id": "BN-03-AI-017",
+    "unit": "kWh",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,18",
+    "point_id": "BN-03-AI-018",
+    "unit": "lux",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,19",
+    "point_id": "BN-03-AI-019",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,20",
+    "point_id": "BN-03-AI-020",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,21",
+    "point_id": "BN-03-AI-021",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,22",
+    "point_id": "BN-03-AI-022",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,23",
+    "point_id": "BN-03-AI-023",
+    "unit": "ppm",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,24",
+    "point_id": "BN-03-AI-024",
+    "unit": "Pa",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,25",
+    "point_id": "BN-03-AI-025",
+    "unit": "m3/h",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,26",
+    "point_id": "BN-03-AI-026",
+    "unit": "kW",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,27",
+    "point_id": "BN-03-AI-027",
+    "unit": "kWh",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,28",
+    "point_id": "BN-03-AI-028",
+    "unit": "lux",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,29",
+    "point_id": "BN-03-AI-029",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,30",
+    "point_id": "BN-03-AI-030",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,31",
+    "point_id": "BN-03-AI-031",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,32",
+    "point_id": "BN-03-AI-032",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,33",
+    "point_id": "BN-03-AI-033",
+    "unit": "ppm",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,34",
+    "point_id": "BN-03-AI-034",
+    "unit": "Pa",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,35",
+    "point_id": "BN-03-AI-035",
+    "unit": "m3/h",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,36",
+    "point_id": "BN-03-AI-036",
+    "unit": "kW",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,37",
+    "point_id": "BN-03-AI-037",
+    "unit": "kWh",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,38",
+    "point_id": "BN-03-AI-038",
+    "unit": "lux",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,39",
+    "point_id": "BN-03-AI-039",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,40",
+    "point_id": "BN-03-AI-040",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,41",
+    "point_id": "BN-03-AI-041",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,42",
+    "point_id": "BN-03-AI-042",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,43",
+    "point_id": "BN-03-AI-043",
+    "unit": "ppm",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,44",
+    "point_id": "BN-03-AI-044",
+    "unit": "Pa",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,45",
+    "point_id": "BN-03-AI-045",
+    "unit": "m3/h",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,46",
+    "point_id": "BN-03-AI-046",
+    "unit": "kW",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,47",
+    "point_id": "BN-03-AI-047",
+    "unit": "kWh",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,48",
+    "point_id": "BN-03-AI-048",
+    "unit": "lux",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,49",
+    "point_id": "BN-03-AI-049",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,50",
+    "point_id": "BN-03-AI-050",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,51",
+    "point_id": "BN-03-AI-051",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,52",
+    "point_id": "BN-03-AI-052",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,53",
+    "point_id": "BN-03-AI-053",
+    "unit": "ppm",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,54",
+    "point_id": "BN-03-AI-054",
+    "unit": "Pa",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,55",
+    "point_id": "BN-03-AI-055",
+    "unit": "m3/h",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,56",
+    "point_id": "BN-03-AI-056",
+    "unit": "kW",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,57",
+    "point_id": "BN-03-AI-057",
+    "unit": "kWh",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,58",
+    "point_id": "BN-03-AI-058",
+    "unit": "lux",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,59",
+    "point_id": "BN-03-AI-059",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,60",
+    "point_id": "BN-03-AI-060",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,61",
+    "point_id": "BN-03-AI-061",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,62",
+    "point_id": "BN-03-AI-062",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,63",
+    "point_id": "BN-03-AI-063",
+    "unit": "ppm",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,64",
+    "point_id": "BN-03-AI-064",
+    "unit": "Pa",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,65",
+    "point_id": "BN-03-AI-065",
+    "unit": "m3/h",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,66",
+    "point_id": "BN-03-AI-066",
+    "unit": "kW",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,67",
+    "point_id": "BN-03-AI-067",
+    "unit": "kWh",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,68",
+    "point_id": "BN-03-AI-068",
+    "unit": "lux",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,69",
+    "point_id": "BN-03-AI-069",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,70",
+    "point_id": "BN-03-AI-070",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,71",
+    "point_id": "BN-03-AI-071",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,72",
+    "point_id": "BN-03-AI-072",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,73",
+    "point_id": "BN-03-AI-073",
+    "unit": "ppm",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,74",
+    "point_id": "BN-03-AI-074",
+    "unit": "Pa",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,75",
+    "point_id": "BN-03-AI-075",
+    "unit": "m3/h",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,76",
+    "point_id": "BN-03-AI-076",
+    "unit": "kW",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,77",
+    "point_id": "BN-03-AI-077",
+    "unit": "kWh",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,78",
+    "point_id": "BN-03-AI-078",
+    "unit": "lux",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,79",
+    "point_id": "BN-03-AI-079",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,80",
+    "point_id": "BN-03-AI-080",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,81",
+    "point_id": "BN-03-AI-081",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,82",
+    "point_id": "BN-03-AI-082",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,83",
+    "point_id": "BN-03-AI-083",
+    "unit": "ppm",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,84",
+    "point_id": "BN-03-AI-084",
+    "unit": "Pa",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,85",
+    "point_id": "BN-03-AI-085",
+    "unit": "m3/h",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,86",
+    "point_id": "BN-03-AI-086",
+    "unit": "kW",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,87",
+    "point_id": "BN-03-AI-087",
+    "unit": "kWh",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,88",
+    "point_id": "BN-03-AI-088",
+    "unit": "lux",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,89",
+    "point_id": "BN-03-AI-089",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,90",
+    "point_id": "BN-03-AI-090",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,91",
+    "point_id": "BN-03-AI-091",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,92",
+    "point_id": "BN-03-AI-092",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,93",
+    "point_id": "BN-03-AI-093",
+    "unit": "ppm",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,94",
+    "point_id": "BN-03-AI-094",
+    "unit": "Pa",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,95",
+    "point_id": "BN-03-AI-095",
+    "unit": "m3/h",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,96",
+    "point_id": "BN-03-AI-096",
+    "unit": "kW",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,97",
+    "point_id": "BN-03-AI-097",
+    "unit": "kWh",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,98",
+    "point_id": "BN-03-AI-098",
+    "unit": "lux",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,99",
+    "point_id": "BN-03-AI-099",
+    "unit": "degC",
+    "writable": false,
+    "device_ref": "fcu-01"
+  },
+  {
+    "connector_id": "bacnet-03",
+    "protocol": "bacnet",
+    "local_id": "analogInput,100",
+    "point_id": "BN-03-AI-100",
+    "unit": "%RH",
+    "writable": false,
+    "device_ref": "fcu-01"
+  }
+]
