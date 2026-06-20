@@ -60,6 +60,80 @@ func TestStartDevSim_RegistersAndRunsSim(t *testing.T) {
 	require.NoError(t, err, "dev-sim connector should publish to evt.sim.sim-01")
 }
 
+func TestParseConnectorMap_EmptyString(t *testing.T) {
+	m, err := parseConnectorMap("")
+	if err != nil {
+		t.Fatalf("empty string must not error, got %v", err)
+	}
+	if len(m) != 0 {
+		t.Fatalf("empty string must return empty map, got %v", m)
+	}
+}
+
+func TestParseConnectorMap_SingleProtocol(t *testing.T) {
+	m, err := parseConnectorMap("bacnet:bacnet-01")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if m["bacnet"] != "bacnet-01" {
+		t.Fatalf("want bacnet→bacnet-01, got %v", m)
+	}
+}
+
+func TestParseConnectorMap_MultipleProtocols(t *testing.T) {
+	m, err := parseConnectorMap("bacnet:bacnet-01,opcua:opcua-01")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if m["bacnet"] != "bacnet-01" || m["opcua"] != "opcua-01" {
+		t.Fatalf("want bacnet→bacnet-01 and opcua→opcua-01, got %v", m)
+	}
+	if len(m) != 2 {
+		t.Fatalf("want exactly 2 entries, got %d", len(m))
+	}
+}
+
+func TestParseConnectorMap_Whitespace(t *testing.T) {
+	m, err := parseConnectorMap(" bacnet : bacnet-01 , opcua : opcua-01 ")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if m["bacnet"] != "bacnet-01" || m["opcua"] != "opcua-01" {
+		t.Fatalf("whitespace must be trimmed, got %v", m)
+	}
+}
+
+func TestParseConnectorMap_TrailingCommaIgnored(t *testing.T) {
+	m, err := parseConnectorMap("bacnet:bacnet-01,")
+	if err != nil {
+		t.Fatalf("trailing comma must be tolerated, got err=%v", err)
+	}
+	if m["bacnet"] != "bacnet-01" || len(m) != 1 {
+		t.Fatalf("want {bacnet:bacnet-01}, got %v", m)
+	}
+}
+
+func TestParseConnectorMap_InvalidNoColon(t *testing.T) {
+	_, err := parseConnectorMap("bacnet-bacnet-01")
+	if err == nil {
+		t.Fatal("must error on entry without ':'")
+	}
+}
+
+func TestParseConnectorMap_InvalidEmptyValue(t *testing.T) {
+	_, err := parseConnectorMap("bacnet:")
+	if err == nil {
+		t.Fatal("must error on empty connector ID")
+	}
+}
+
+func TestParseConnectorMap_InvalidEmptyKey(t *testing.T) {
+	_, err := parseConnectorMap(":bacnet-01")
+	if err == nil {
+		t.Fatal("must error on empty protocol key")
+	}
+}
+
 func TestResolveBOSAddr_FallsBackToBosAddr(t *testing.T) {
 	got := resolveBOSAddr("host:5051", "")
 	if got != "host:5051" {
