@@ -10,6 +10,7 @@ import (
 	"google.golang.org/grpc/credentials"
 
 	pb "nexus-gateway/gen"
+	"nexus-gateway/internal/retry"
 	"nexus-gateway/internal/storeforward"
 )
 
@@ -49,11 +50,14 @@ func (u *Ingress) Run(ctx context.Context) {
 	defer u.conn.Close()
 	client := pb.NewGatewayIngressClient(u.conn)
 
+	bo := &retry.Backoff{Min: time.Second, Max: 60 * time.Second, Factor: 2.0}
 	for ctx.Err() == nil {
 		fwd := NewForwarder(u.buf, &grpcSink{client: client}, u.cfg)
 		if err := fwd.Run(ctx); err != nil && ctx.Err() == nil {
 			slog.Warn("ingress stream error, reconnecting", "err", err)
-			time.Sleep(time.Second)
+			bo.Wait(ctx) //nolint:errcheck // ctx cancel exits the outer loop
+		} else {
+			bo.Reset()
 		}
 	}
 }

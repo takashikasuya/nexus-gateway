@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"flag"
+	"fmt"
 	"log/slog"
 	"os"
 	"os/signal"
@@ -50,6 +51,9 @@ func main() {
 	provURL := flag.String("provisioning-url", envOrDefault("PROVISIONING_URL", ""), "Provisioning API base URL (empty = fixture only)")
 	provFile := flag.String("provisioning-file", envOrDefault("PROVISIONING_FILE", ""), "File-backed Point List provisioning source (.csv or .json); overridden by --provisioning-url")
 	provConnID := flag.String("provisioning-connector-id", envOrDefault("PROVISIONING_CONNECTOR_ID", "bacnet-01"), "Connector id stamped on entries loaded from a provisioning CSV")
+	connectorMapStr := flag.String("connector-map", envOrDefault("CONNECTOR_MAP", ""),
+		`Comma-separated protocol:connectorID pairs for the provisioning HTTP API
+(e.g. "bacnet:bacnet-01,opcua:opcua-01"). When empty, falls back to bacnet:<provisioning-connector-id>.`)
 	sfDB := flag.String("sf-db", envOrDefault("SF_DB", "data/storeforward.db"), "Store-and-Forward SQLite database path")
 	sfCap := flag.Int("sf-cap", 100_000, "Store-and-Forward ring buffer capacity (frames)")
 	devSim := flag.Bool("dev-sim", envOrDefault("DEV_SIM", "") == "true", "Run an in-process sim connector (dev/smoke only, non-production; ADR-0001)")
@@ -70,6 +74,17 @@ func main() {
 	flag.Parse()
 	*bosIngressAddr = resolveBOSAddr(*bosAddr, *bosIngressAddr)
 	*bosEgressAddr = resolveBOSAddr(*bosAddr, *bosEgressAddr)
+
+	// Resolve the protocol→connectorID map for the HTTP provisioning path.
+	// Falls back to {"bacnet": provConnID} when CONNECTOR_MAP is unset for backward compatibility.
+	cmap, err := parseConnectorMap(*connectorMapStr)
+	if err != nil {
+		slog.Error("invalid --connector-map / CONNECTOR_MAP", "err", err)
+		os.Exit(1)
+	}
+	if len(cmap) == 0 {
+		cmap = map[string]string{"bacnet": *provConnID}
+	}
 
 	// Build the gRPC transport credentials for both Building OS links (ADR-0007).
 	bosCreds, err := transport.ClientCredentials(transport.Config{
@@ -129,9 +144,7 @@ func main() {
 	var provClient provisioning.Client
 	switch {
 	case *provURL != "":
-		// connectorMap maps protocol names to connector IDs. Default: bacnet → provConnID.
-		// Extend via flags if additional protocols are provisioned from the same API.
-		provClient = provisioning.NewHTTPClient(*provURL, *gatewayID, map[string]string{"bacnet": *provConnID})
+		provClient = provisioning.NewHTTPClient(*provURL, *gatewayID, cmap)
 	case *provFile != "":
 		// Fail fast on a bad path rather than spinning the startup wait and then
 		// running with an empty Point List.
@@ -368,6 +381,23 @@ func resolveBOSAddr(bosAddr, override string) string {
 		return override
 	}
 	return bosAddr
+}
+
+// parseConnectorMap parses a comma-separated "protocol:connectorID" string into a map.
+// Empty string and trailing/extra commas are tolerated (empty entries are skipped).
+// Returns an error for malformed entries (missing colon, empty key, or empty value after trim).
+func parseConnectorMap(s string) (map[string]string, error) {
+	m := make(map[string]string)
+	for _, pair := range splitComma(s) { // splitComma handles empty entries and outer whitespace
+		k, v, ok := strings.Cut(pair, ":")
+		k = strings.TrimSpace(k)
+		v = strings.TrimSpace(v)
+		if !ok || k == "" || v == "" {
+			return nil, fmt.Errorf("invalid connector-map entry %q: must be protocol:connectorID", pair)
+		}
+		m[k] = v
+	}
+	return m, nil
 }
 
 func splitComma(s string) []string {

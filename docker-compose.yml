@@ -83,6 +83,10 @@ services:
       #- BOS_INGRESS_ADDR=<bos-host>:5051
       #- BOS_EGRESS_ADDR=<bos-host>:5052
       - POINT_LIST_FILE=/fixtures/point_list.json
+      # CONNECTOR_MAP maps BOS native.protocol values to connector IDs for the HTTP provisioning path.
+      # When unset, falls back to {"bacnet": PROVISIONING_CONNECTOR_ID} for backward compatibility.
+      # For multi-protocol deployments (BACnet + OPC-UA), set e.g.:
+      #- CONNECTOR_MAP=bacnet:bacnet-01,opcua:opcua-01
       - ADMIN_ADDR=:8080
       # Connector Catalog (ADR-0006): file-backed for dev; replace with CATALOG_URL in production.
       - CATALOG_FILE=/fixtures/catalog.json

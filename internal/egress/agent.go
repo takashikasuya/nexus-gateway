@@ -9,6 +9,7 @@ import (
 	"google.golang.org/grpc/credentials"
 
 	pb "nexus-gateway/gen"
+	"nexus-gateway/internal/retry"
 )
 
 // Executor dispatches a ControlCommand and returns the result.
@@ -54,10 +55,13 @@ func (a *Agent) Run(ctx context.Context) {
 
 	client := pb.NewGatewayEgressClient(conn)
 
+	bo := &retry.Backoff{Min: time.Second, Max: 60 * time.Second, Factor: 2.0}
 	for ctx.Err() == nil {
 		if err := a.runStream(ctx, client); err != nil && ctx.Err() == nil {
 			slog.Warn("egress stream error, reconnecting", "err", err)
-			time.Sleep(time.Second)
+			bo.Wait(ctx) //nolint:errcheck // ctx cancel exits the outer loop
+		} else {
+			bo.Reset()
 		}
 	}
 }
