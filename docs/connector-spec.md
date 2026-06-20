@@ -1,0 +1,474 @@
+# Connector Wire Protocol Specification
+
+Version: 1.0 (nexus-gateway v0.x)  
+Status: Normative
+
+This document defines the complete contract a connector container must satisfy to interoperate with nexus-gateway. It covers NATS topics, message schemas, container environment, point list format, and the Connector Catalog manifest.
+
+Reference implementations: [`connector/bacnet/`](../connector/bacnet/), [`connector/opcua/`](../connector/opcua/), [`connector/mqtt/`](../connector/mqtt/)
+
+---
+
+## Contents
+
+1. [Architecture overview](#1-architecture-overview)
+2. [NATS topology](#2-nats-topology)
+3. [Telemetry channel — Common Event](#3-telemetry-channel--common-event)
+4. [Control channel — Write command](#4-control-channel--write-command)
+5. [Container contract](#5-container-contract)
+6. [Point list format](#6-point-list-format)
+7. [Connector Catalog manifest](#7-connector-catalog-manifest)
+8. [Idempotency requirements](#8-idempotency-requirements)
+9. [Behaviour rules summary](#9-behaviour-rules-summary)
+
+---
+
+## 1. Architecture overview
+
+```
+Field device
+    │  (BACnet / OPC-UA / MQTT / …)
+    ▼
+┌─────────────────────┐
+│  Connector container │   publishes Common Events
+│  (your code here)   │ ─────────────────────────────►  NATS JetStream
+│                     │                                  stream: EVENTS
+│                     │ ◄───────────────────────────── NATS core request-reply
+│                     │   receives write commands        subject: cmd.<proto>.<id>
+└─────────────────────┘
+                                    │
+                          ┌─────────▼───────────┐
+                          │   nexus-gateway core  │
+                          │  (normalizer / egress)│
+                          └───────────────────────┘
+                                    │  gRPC
+                                    ▼
+                             Building OS (BOS)
+```
+
+A connector has exactly two NATS interactions:
+
+| Direction | Mechanism | Subject |
+|-----------|-----------|---------|
+| Connector → Gateway | JetStream publish | `evt.<protocol>.<connector_id>` |
+| Gateway → Connector | Core request-reply | `cmd.<protocol>.<connector_id>` |
+
+The gateway is responsible for everything above NATS: normalization, BOS provisioning, store-and-forward, and mTLS to BOS.
+
+---
+
+## 2. NATS topology
+
+### 2.1 EVENTS stream
+
+The gateway provisions the stream. Connectors do not create it; they only publish to it.
+
+| Parameter | Value |
+|-----------|-------|
+| Stream name | `EVENTS` |
+| Subject filter | `evt.>` |
+| Retention | Limits (not Work Queue) |
+| Storage | File |
+| Max age | 48 hours |
+| Max bytes | 2 GiB |
+| Discard policy | Old (drop head when full) |
+
+### 2.2 Subject naming
+
+```
+evt.<protocol>.<connector_id>
+```
+
+Examples:
+- `evt.bacnet.bacnet-01`
+- `evt.opcua.opcua-01`
+- `evt.mqtt.mqtt-edge`
+
+**Rules:**
+- `<protocol>` must be a lowercase ASCII identifier matching the CONNECTOR_MAP key (see §5.3).
+- `<connector_id>` must match the `CONNECTOR_ID` environment variable.
+- Connectors **must not** publish to subjects outside `evt.<protocol>.<connector_id>`.
+
+### 2.3 Control subject
+
+```
+cmd.<protocol>.<connector_id>
+```
+
+The gateway sends a NATS core `Request` to this subject. Connectors **subscribe** to it and must **reply** synchronously (within the request timeout, default 10 s). This is not JetStream; it is NATS core request-reply.
+
+---
+
+## 3. Telemetry channel — Common Event
+
+### 3.1 Schema
+
+All fields are required. Published as UTF-8 JSON, no envelope or framing.
+
+```json
+{
+  "protocol":     "bacnet",
+  "connector_id": "bacnet-01",
+  "local_id":     "analogInput,0",
+  "device_ref":   "device-001",
+  "value":        23.5,
+  "unit":         "degC",
+  "quality":      "Good",
+  "timestamp":    "2026-06-20T04:30:00Z"
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `protocol` | string | Protocol name. Must match the subject prefix (`evt.<protocol>.*`). |
+| `connector_id` | string | Value of `CONNECTOR_ID` env var. Must match the subject suffix. |
+| `local_id` | string | Native protocol address of the data point. **Never** a canonical `point_id`. |
+| `device_ref` | string | Opaque device identifier. Passed through to the gateway; used for reverse-lookup only. |
+| `value` | number | Numeric present-value. Non-numeric values are not supported in v1. |
+| `unit` | string | Engineering unit string (e.g. `"degC"`, `"Pa"`, `""`). May be empty. |
+| `quality` | string | One of `"Good"`, `"Bad"`, `"Uncertain"`. |
+| `timestamp` | string | RFC 3339 UTC timestamp of the observation (`…Z` suffix required). |
+
+### 3.2 `local_id` format
+
+`local_id` is the connector's native address for the data point, taken directly from the point list (see §6). The gateway never interprets it. Examples:
+
+| Protocol | Example `local_id` |
+|----------|--------------------|
+| BACnet | `"analogInput,0"` |
+| OPC-UA | `"ns=2;s=Temperature"` |
+| MQTT | `"sensors/floor3/temp"` |
+
+### 3.3 `quality` semantics
+
+| Value | Meaning |
+|-------|---------|
+| `"Good"` | Device read succeeded; value is reliable. |
+| `"Bad"` | Device unreachable, comm failure, or hardware fault. |
+| `"Uncertain"` | Device responded but with a non-fatal warning status. |
+
+Publish `"Bad"` quality events rather than dropping them — the gateway forwards quality to BOS so it can alert operators.
+
+### 3.4 Publish behaviour
+
+- Use JetStream `Publish` (acknowledged publish), not core `Publish`.
+- On NATS publish error, **log and skip** — do not terminate. The gateway's store-and-forward handles downstream outages; the connector must remain healthy.
+- Do not buffer events in memory for retry. Each poll cycle publishes fresh values.
+
+---
+
+## 4. Control channel — Write command
+
+### 4.1 WriteRequest
+
+Sent by the gateway as the body of a NATS core `Request`. The connector receives it on `cmd.<protocol>.<connector_id>`.
+
+```json
+{
+  "control_id": "ctrl-abc123",
+  "local_id":   "analogOutput,0",
+  "device_ref": "device-001",
+  "value":      22.0,
+  "priority":   8
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `control_id` | string | Globally unique command identifier. Used for idempotency (§8). |
+| `local_id` | string | Native address of the point to write. Matches a `local_id` in the point list. |
+| `device_ref` | string | Opaque device reference from the point list. |
+| `value` | number | Value to write as present-value. |
+| `priority` | integer | Write priority. `0` means "use connector default". For BACnet: 1 (highest) – 16 (lowest). |
+
+### 4.2 WriteReply
+
+The connector **must reply** to every `Request` with a WriteReply JSON body.
+
+```json
+{ "success": true,  "response": "ok" }
+{ "success": false, "response": "not_writable" }
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `success` | boolean | `true` if the write reached the device without error. |
+| `response` | string | Human-readable result token. See §4.3. |
+
+### 4.3 Standard `response` tokens
+
+| Token | Meaning |
+|-------|---------|
+| `"ok"` | Write succeeded. |
+| `"not_writable"` | The point exists but is not writable. |
+| `"bad_request"` | Cannot parse the WriteRequest. |
+| `"timeout"` | Device did not respond within the write timeout. |
+| `"device_error: <detail>"` | Device returned an error. Include the error message. |
+| `"in_flight"` | A duplicate `control_id` is already being processed (in-flight). |
+
+Custom tokens are allowed but the above set must be used where semantically appropriate.
+
+### 4.4 Timeout
+
+Reply **before** the request context deadline. The gateway's default request timeout is 10 seconds. If the device write takes longer, reply `"timeout"` rather than missing the deadline entirely — a missed NATS reply leaves the gateway blocking until it times out on its side.
+
+---
+
+## 5. Container contract
+
+### 5.1 Required environment variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `CONNECTOR_ID` | **Yes** | Unique connector identifier. Must match the `CONNECTOR_MAP` value for this protocol. Used as the subject suffix for both `evt.*` and `cmd.*`. |
+| `NATS_URL` | **Yes** | NATS server URL. Default: `nats://localhost:4222`. Injected by the gateway at container start. |
+
+### 5.2 Protocol-specific environment variables
+
+The gateway passes these through from the connector registration. Protocol-specific connectors define their own variable names.
+
+**BACnet connector:**
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `BACNET_ADDRESS` | — | BACnet device IP address or CIDR (`host/24`). |
+| `BACNET_DEVICE_ID` | — | BACnet device instance number. |
+| `BACNET_POINTS` | `[]` | JSON array of point configs (see §6.1). |
+| `BACNET_POLL_INTERVAL` | `30` | Seconds between full polls. |
+| `BACNET_LOCAL_ADDRESS` | `0.0.0.0` | Local BACnet interface. |
+| `BACNET_DEFAULT_WRITE_PRIORITY` | `8` | BACnet priority 1–16 used when `priority` is 0. |
+| `BACNET_WRITE_TIMEOUT` | `10` | Device write timeout in seconds. |
+
+**OPC-UA connector:**
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `OPCUA_ENDPOINT` | — | OPC-UA endpoint URL, e.g. `opc.tcp://host:4840`. |
+| `OPCUA_POINTS` | `[]` | JSON array of point configs (see §6.2). |
+| `OPCUA_POLL_INTERVAL` | `30` | Seconds between subscription renewals / poll fallback. |
+
+### 5.3 CONNECTOR_MAP
+
+The gateway `CONNECTOR_MAP` env var maps `protocol → connector_id`:
+
+```
+CONNECTOR_MAP=bacnet:bacnet-01,opcua:opcua-01
+```
+
+Each connector's `CONNECTOR_ID` must match the value for its protocol entry in this map. The gateway uses CONNECTOR_MAP to route provisioning updates and control commands to the right connector.
+
+### 5.4 Network
+
+Connectors run on the same Docker network as the gateway and NATS. The gateway injects `NATS_URL` pointing to the NATS container. Connectors must not assume a fixed NATS hostname; always read from `NATS_URL`.
+
+Field device connectivity (BACnet UDP broadcast, OPC-UA TCP, MQTT TCP) requires appropriate Docker network access. For BACnet UDP broadcast, `host` network mode or a MACVLAN network is typically required.
+
+### 5.5 Health check
+
+Docker health check: the gateway inspects the container state. Connectors may expose a minimal HTTP `/health` endpoint that returns `{"status":"ok"}`, though it is not strictly required — container `running` state is the primary liveness signal.
+
+If implemented, the health response must include the literal string `"status":"ok"` for the gateway's health monitor grep to detect it.
+
+### 5.6 Graceful shutdown
+
+Handle `SIGTERM`: close device connections, flush pending publishes, and exit within 10 seconds. The gateway sends `SIGTERM` before `SIGKILL`.
+
+### 5.7 Dockerfile requirements
+
+```dockerfile
+FROM <base image>
+# ...
+ENTRYPOINT ["<connector-binary>"]
+# No CMD required; config comes from environment variables.
+```
+
+- Do not embed credentials or device addresses in the image.
+- All config must come from environment variables.
+- Log to stdout/stderr (JSON or plain text). The gateway captures container logs via Docker API.
+
+---
+
+## 6. Point list format
+
+The point list tells a connector which data points to poll and how to address them. It is injected via environment variables at container startup.
+
+### 6.1 BACnet point config (per element of `BACNET_POINTS`)
+
+```json
+{
+  "local_id":   "analogInput,0",
+  "device_ref": "device-001",
+  "unit":       "degC",
+  "writable":   false
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `local_id` | string | BACnet object identifier: `"<objectType>,<instance>"`. |
+| `device_ref` | string | Opaque device reference. Echo this in all events and write replies. |
+| `unit` | string | Engineering unit. Echo this in events. |
+| `writable` | boolean | Whether the gateway may send write commands for this point. |
+
+### 6.2 OPC-UA point config (per element of `OPCUA_POINTS`)
+
+```json
+{
+  "local_id":   "ns=2;s=Temperature",
+  "device_ref": "opcua-device-01",
+  "unit":       "degC",
+  "writable":   false
+}
+```
+
+`local_id` is the OPC-UA NodeId string as returned by the Browse service.
+
+### 6.3 Connector responsibilities
+
+- Only poll points whose `local_id` is in the point list.
+- Set `writable: false` points as read-only; reply `"not_writable"` to any write command for them.
+- Echo `device_ref` and `unit` unchanged in every Common Event.
+- **Do not** resolve `point_id` — that is the gateway's responsibility, not the connector's.
+
+---
+
+## 7. Connector Catalog manifest
+
+To be installable via the gateway Admin API (`POST /connectors/{name}/install`), a connector image must be listed in the Connector Catalog. The catalog is a JSON array of manifests.
+
+### 7.1 Manifest schema
+
+```json
+{
+  "name":                "bacnet-connector",
+  "version":             "1.2.3",
+  "image":               "ghcr.io/myorg/bacnet-connector",
+  "digest":              "sha256:abc123...64hexchars",
+  "min_gateway_version": "0.2.0",
+  "permissions": {
+    "network": ["bacnet-udp"],
+    "mounts":  []
+  },
+  "signature_required": true
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `name` | string | Unique name in the catalog. Used as the URL path component. |
+| `version` | string | Semantic version of the connector. |
+| `image` | string | OCI image reference without tag or digest (registry + path only). |
+| `digest` | string | `sha256:<64 hex chars>` pinned digest. Required; tag-only references are rejected. |
+| `min_gateway_version` | string | Minimum nexus-gateway version required. Omit or `""` for no restriction. |
+| `permissions.network` | string[] | Network capabilities declared (informational for v0.x; not enforced). |
+| `permissions.mounts` | string[] | Host paths to bind-mount read-only into the container. |
+| `signature_required` | boolean | If `true`, the gateway verifies a cosign signature before install (ADR-0006). |
+
+### 7.2 Registry allowlist
+
+By default, only images from `ghcr.io` are allowed. The gateway operator sets `CATALOG_ALLOWLIST` (comma-separated) to expand the allowlist.
+
+### 7.3 Keyless vs. keyed signature verification
+
+When `signature_required: true`:
+
+- **Keyed**: set `COSIGN_KEY_FILE` on the gateway. The image signature must match the public key.
+- **Keyless (Sigstore)**: set `COSIGN_IDENTITY` and `COSIGN_OIDC_ISSUER`. The certificate chain is verified against the Sigstore transparency log.
+
+---
+
+## 8. Idempotency requirements
+
+The gateway may re-deliver a write command if it receives no reply (network partition, connector restart). Connectors **must** deduplicate by `control_id`.
+
+### 8.1 Required dedup behaviour
+
+```
+On receiving WriteRequest with control_id C:
+  if C is cached → return cached WriteReply immediately
+  if C is in-flight → return {"success": false, "response": "in_flight"}
+  otherwise:
+    mark C as in-flight
+    execute the device write
+    cache the WriteReply
+    return the WriteReply
+```
+
+### 8.2 Cache bounds
+
+Keep at least the last **1000** `control_id` → WriteReply entries. Evict the oldest on overflow (LRU or insertion order). The gateway's own dispatcher also deduplicates on its side; connector-side dedup prevents double-writes during connector restart.
+
+---
+
+## 9. Behaviour rules summary
+
+| Rule | Must / Should / May |
+|------|---------------------|
+| Publish on `evt.<protocol>.<connector_id>` only | **Must** |
+| Use JetStream acknowledged publish | **Must** |
+| Reply to every `cmd.*` Request within timeout | **Must** |
+| Deduplicate write commands by `control_id` | **Must** |
+| Never resolve `point_id` | **Must** |
+| Echo `device_ref`, `unit` unchanged in events | **Must** |
+| Read all config from environment variables | **Must** |
+| Log to stdout/stderr | **Must** |
+| Handle SIGTERM within 10 s | **Must** |
+| Publish `"Bad"` quality on device comm failure | **Should** |
+| Expose `GET /health` → `{"status":"ok"}` | **Should** |
+| Avoid unbounded in-memory event buffering | **Should** |
+| Implement BACnet COV subscriptions (in addition to poll) | **May** |
+
+---
+
+## Appendix: JSON Schema (informative)
+
+### Common Event
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["protocol","connector_id","local_id","device_ref","value","unit","quality","timestamp"],
+  "properties": {
+    "protocol":     { "type": "string" },
+    "connector_id": { "type": "string" },
+    "local_id":     { "type": "string" },
+    "device_ref":   { "type": "string" },
+    "value":        { "type": "number" },
+    "unit":         { "type": "string" },
+    "quality":      { "type": "string", "enum": ["Good","Bad","Uncertain"] },
+    "timestamp":    { "type": "string", "format": "date-time" }
+  }
+}
+```
+
+### WriteRequest
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["control_id","local_id","device_ref","value","priority"],
+  "properties": {
+    "control_id": { "type": "string" },
+    "local_id":   { "type": "string" },
+    "device_ref": { "type": "string" },
+    "value":      { "type": "number" },
+    "priority":   { "type": "integer", "minimum": 0 }
+  }
+}
+```
+
+### WriteReply
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["success","response"],
+  "properties": {
+    "success":  { "type": "boolean" },
+    "response": { "type": "string" }
+  }
+}
+```
