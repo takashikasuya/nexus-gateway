@@ -21,6 +21,7 @@ from bacnet_connector.event import bacnet_quality, make_event
 def make_config(
     points: list[PointConfig] | None = None,
     rpm_chunk_size: int = 20,
+    cov_enabled: bool = True,
 ) -> Config:
     return Config(
         connector_id="test-conn",
@@ -30,6 +31,7 @@ def make_config(
         points=points or [],
         poll_interval=999,  # large value — tests control timing via stop_event
         rpm_chunk_size=rpm_chunk_size,
+        cov_enabled=cov_enabled,
     )
 
 
@@ -161,6 +163,22 @@ async def test_poll_chunk_failure_is_isolated():
     # Surviving chunks publish points 0,1 (chunk 0) and 4 (chunk 2) — point 2,3 dropped.
     published_ids = {json.loads(d)["local_id"] for _, d in js.published}
     assert published_ids == {"analogInput,0", "analogInput,1", "analogInput,4"}
+
+
+@pytest.mark.asyncio
+async def test_cov_disabled_skips_subscriptions():
+    """With cov_enabled=False the connector must not open any COV subscription."""
+    bacnet = MockBACnetClient(poll_results=[("analogInput,0", 1.0, None)])
+    js = MockJetStream()
+    cfg = make_config([PointConfig(local_id="analogInput,0", device_ref="d")], cov_enabled=False)
+    stop = asyncio.Event()
+    stop.set()
+
+    conn = Connector(cfg, bacnet, js)
+    await conn.run(stop_event=stop)
+
+    assert bacnet.cov_callbacks == {}      # no subscribe_cov calls
+    assert len(js.published) == 1          # polling still publishes
 
 
 @pytest.mark.asyncio

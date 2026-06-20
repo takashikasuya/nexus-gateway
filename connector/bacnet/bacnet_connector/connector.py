@@ -83,12 +83,15 @@ class Connector:
         await self._poll_all()
 
         # Subscribe to COV for every point — tasks are cancelled on shutdown.
-        for pt in self._cfg.points:
-            task = asyncio.create_task(
-                self._subscribe_cov(pt),
-                name=f"cov-{pt.local_id}",
-            )
-            self._cov_tasks.append(task)
+        # Skipped in poll-only mode: thousands of long-lived COV sessions can
+        # overwhelm a device, so large deployments rely on periodic polling alone.
+        if self._cfg.cov_enabled:
+            for pt in self._cfg.points:
+                task = asyncio.create_task(
+                    self._subscribe_cov(pt),
+                    name=f"cov-{pt.local_id}",
+                )
+                self._cov_tasks.append(task)
 
         # Periodic poll loop — keeps values fresh even when COV subscriptions lapse.
         # Uses stop_event.wait() with a timeout so shutdown is immediate.
