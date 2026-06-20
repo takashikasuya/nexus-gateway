@@ -1179,17 +1179,21 @@ Gateway  ←→  BOS  ← import fixtures/scale/&lt;N&gt;/point_list.csv</pre>
     <thead><tr><th>ティア（BACnet / OPC-UA 設定）</th><th>BACnet 取り込み</th><th>OPC-UA 取り込み</th><th>segmentation エラー</th><th>read タイムアウト</th></tr></thead>
     <tbody>
       <tr><td>100 / 100</td><td>100（Good）</td><td>100（Good）</td><td>0</td><td>0</td></tr>
-      <tr><td>250 / 250</td><td>200（Good）</td><td>250（Good）</td><td>0</td><td>0</td></tr>
-      <tr><td>500 / 500</td><td>200（Good）</td><td>500（Good）</td><td>0</td><td>0</td></tr>
-      <tr><td>1000 / 1000</td><td>200（Good）</td><td>1000（Good）</td><td>0</td><td>0</td></tr>
+      <tr><td>250 / 250</td><td>再試験予定</td><td>250（Good）</td><td>0</td><td>0</td></tr>
+      <tr><td>500 / 500</td><td>再試験予定</td><td>500（Good）</td><td>0</td><td>0</td></tr>
+      <tr><td>1000 / 1000</td><td>再試験予定</td><td>1000（Good）</td><td>0</td><td>0</td></tr>
     </tbody>
   </table>
 
   <div class="fact">
     <strong>OPC-UA は 1000/1000 まで線形にスケール</strong>（全 Good）。
-    <strong>BACnet はシミュレータの提供点数（analogInput 200 オブジェクト）が上限</strong>で、
-    250 設定以上では実在 200 点を取り込む。これはシミュレータ在庫の制約であり、
-    コネクタ側の制約ではない（1000 点設定 = 50 チャンク/poll を segmentation・タイムアウト 0 で実行）。
+    BACnet は当初 250 設定以上で 200 点しか取り込めなかったが、<strong>原因はスケール
+    フィクスチャの欠陥</strong>だった：マスターが BACnet を 5 コネクタで同一 200 アドレスを
+    再利用しており（distinct local_id が 200）、単一物理デバイス（device 1001）に対して
+    衝突していた。フィクスチャを<strong>単一デバイス・distinct 1000 点</strong>へ修正済み
+    （<code>fixtures/scale/gen_master.py</code>）。コネクタは 1000 点設定 = 50 チャンク/poll を
+    segmentation・タイムアウト 0 で実行できており、上限はコネクタでもシミュレータでもない。
+    BACnet の最終スケール値は、修正フィクスチャをシミュレータに反映後に再試験して確定する。
   </div>
 
   <div class="fact">
