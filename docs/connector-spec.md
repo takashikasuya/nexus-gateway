@@ -155,6 +155,31 @@ Publish `"Bad"` quality events rather than dropping them — the gateway forward
 - On NATS publish error, **log and skip** — do not terminate. The gateway's store-and-forward handles downstream outages; the connector must remain healthy.
 - Do not buffer events in memory for retry. Each poll cycle publishes fresh values.
 
+### 3.5 BACnet COV subscription behaviour
+
+The BACnet connector implements COV subscriptions **in parallel with polling** (not as a replacement). The design and its pipeline implications are:
+
+- On startup, after the initial full poll, a `_cov_loop` task is spawned for every configured point. It calls `SubscribeCOV` with `lifetime=300 s` and renews the subscription before expiry.
+- Each COV notification fires `js.publish()` immediately — there is no batching or rate-limiting at the connector level.
+- If `SubscribeCOV` fails for a point five consecutive times, the loop exits and that point relies on polling only. This is the correct fallback for devices or object types that do not support COV.
+- COV events enter JetStream on the same subject (`evt.bacnet.<connector_id>`) and are processed by the Normalizer identically to polled events. **The `TelemetryFrame` delivered to Building OS carries no flag indicating whether the event was COV- or poll-triggered.**
+
+The periodic poll loop continues running alongside COV subscriptions, acting as a backstop for values missed during subscription gaps.
+
+**Latency path for a COV notification reaching Building OS:**
+
+```
+BACnet device (covIncrement threshold crossed)
+  → connector _cov_loop  [< 5 ms]
+  → NATS JetStream publish  [< 1 ms]
+  → Normalizer Fetch (maxWait=500 ms)  [0–500 ms; typically < 50 ms under load]
+  → storeforward.Buffer.Write + WriteNotify  [< 2 ms]
+  → Forwarder.drain → grpcSink.Send  [< 5 ms; no send-side batching]
+  → Building OS GatewayIngress StreamTelemetry
+```
+
+Total gateway-side latency is dominated by the Normalizer `maxWait` (up to 500 ms in the worst case of an otherwise-idle stream).
+
 ---
 
 ## 4. Control channel — Write command

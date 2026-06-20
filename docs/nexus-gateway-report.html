@@ -908,6 +908,82 @@
     <text x="649" y="70" text-anchor="middle" fill="#7b82a8" font-size="8" font-family="sans-serif">StreamAck</text>
   </svg>
 
+  <h3>BACnet COV リアルタイムパス</h3>
+
+  <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">
+    BACnet COV 通知はポーリングと<strong>並列</strong>で動作し、同一の JetStream パイプラインを通じて Building OS に届く。
+    ゲートウェイ側での追加バッファリングはなく、COV 発火から BOS 到達まで通常 <strong>50 ms 未満</strong>（最悪 500 ms）。
+  </p>
+
+  <!-- COV timing SVG -->
+  <svg viewBox="0 0 860 130" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:860px;margin-bottom:4px;display:block;">
+    <defs>
+      <marker id="arr6" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+        <polygon points="0 0, 7 2.5, 0 5" fill="#3ec98d"/>
+      </marker>
+    </defs>
+    <!-- boxes -->
+    <rect x="2"   y="24" width="106" height="36" rx="5" fill="#1a1d27" stroke="#3ec98d"/>
+    <text x="55"  y="40" text-anchor="middle" fill="#3ec98d" font-size="9.5" font-family="sans-serif">BACnet device</text>
+    <text x="55"  y="53" text-anchor="middle" fill="#7b82a8" font-size="8"   font-family="sans-serif">COV threshold</text>
+
+    <line x1="110" y1="42" x2="148" y2="42" stroke="#3ec98d" stroke-width="1.5" marker-end="url(#arr6)"/>
+    <text x="129"  y="36" text-anchor="middle" fill="#7b82a8" font-size="7.5" font-family="sans-serif">notify</text>
+
+    <rect x="150" y="24" width="106" height="36" rx="5" fill="#1a1d27" stroke="#3ec98d"/>
+    <text x="203" y="40" text-anchor="middle" fill="#3ec98d" font-size="9.5" font-family="sans-serif">_cov_loop</text>
+    <text x="203" y="53" text-anchor="middle" fill="#7b82a8" font-size="8"   font-family="sans-serif">js.publish() &lt;5ms</text>
+
+    <line x1="258" y1="42" x2="296" y2="42" stroke="#3ec98d" stroke-width="1.5" marker-end="url(#arr6)"/>
+    <text x="277"  y="36" text-anchor="middle" fill="#7b82a8" font-size="7.5" font-family="sans-serif">evt.bacnet.*</text>
+
+    <rect x="298" y="24" width="106" height="36" rx="5" fill="#1a1d27" stroke="#7c5bf0"/>
+    <text x="351" y="40" text-anchor="middle" fill="#7c5bf0" font-size="9.5" font-family="sans-serif">NATS JetStream</text>
+    <text x="351" y="53" text-anchor="middle" fill="#7b82a8" font-size="8"   font-family="sans-serif">&lt;1ms</text>
+
+    <line x1="406" y1="42" x2="444" y2="42" stroke="#3ec98d" stroke-width="1.5" marker-end="url(#arr6)"/>
+    <text x="425"  y="36" text-anchor="middle" fill="#7b82a8" font-size="7.5" font-family="sans-serif">Fetch</text>
+
+    <rect x="446" y="24" width="106" height="36" rx="5" fill="#1a1d27" stroke="#3ec98d"/>
+    <text x="499" y="40" text-anchor="middle" fill="#3ec98d" font-size="9.5" font-family="sans-serif">Normalizer</text>
+    <text x="499" y="53" text-anchor="middle" fill="#7b82a8" font-size="8"   font-family="sans-serif">maxWait 0–500ms</text>
+
+    <line x1="554" y1="42" x2="592" y2="42" stroke="#3ec98d" stroke-width="1.5" marker-end="url(#arr6)"/>
+    <text x="573"  y="36" text-anchor="middle" fill="#7b82a8" font-size="7.5" font-family="sans-serif">WriteNotify</text>
+
+    <rect x="594" y="24" width="106" height="36" rx="5" fill="#1a1d27" stroke="#f0c040"/>
+    <text x="647" y="40" text-anchor="middle" fill="#f0c040" font-size="9.5" font-family="sans-serif">S&amp;F Forwarder</text>
+    <text x="647" y="53" text-anchor="middle" fill="#7b82a8" font-size="8"   font-family="sans-serif">drain() &lt;5ms</text>
+
+    <line x1="702" y1="42" x2="740" y2="42" stroke="#3ec98d" stroke-width="1.5" marker-end="url(#arr6)"/>
+    <text x="721"  y="36" text-anchor="middle" fill="#7b82a8" font-size="7.5" font-family="sans-serif">gRPC Send</text>
+
+    <rect x="742" y="24" width="108" height="36" rx="5" fill="#1a1d27" stroke="#f0904e"/>
+    <text x="796" y="40" text-anchor="middle" fill="#f0904e" font-size="9.5" font-family="sans-serif">Building OS</text>
+    <text x="796" y="53" text-anchor="middle" fill="#7b82a8" font-size="8"   font-family="sans-serif">StreamTelemetry</text>
+
+    <!-- footnote -->
+    <text x="430" y="100" text-anchor="middle" fill="#7b82a8" font-size="8" font-family="sans-serif">
+      ポーリングと COV は同一 JetStream subject (evt.bacnet.&lt;id&gt;) を共有。TelemetryFrame にトリガー種別フラグなし。
+    </text>
+    <text x="430" y="115" text-anchor="middle" fill="#7b82a8" font-size="8" font-family="sans-serif">
+      連続 5 回 SubscribeCOV 失敗で COV ループ終了 → そのポイントはポーリング専用にフォールバック。
+    </text>
+  </svg>
+
+  <!-- latency table -->
+  <table style="font-size:12px;margin-bottom:20px;">
+    <thead><tr><th>ステージ</th><th>レイテンシ</th><th>備考</th></tr></thead>
+    <tbody>
+      <tr><td><code>_cov_loop → js.publish()</code></td><td>&lt; 5 ms</td><td>非同期 publish、バッチなし</td></tr>
+      <tr><td>NATS JetStream キューイング</td><td>&lt; 1 ms</td><td>ローカルプロセス間</td></tr>
+      <tr><td>Normalizer pull Fetch</td><td>0–500 ms</td><td><code>maxWait=500ms</code>。負荷時は即時返却</td></tr>
+      <tr><td>S&amp;F Buffer.Write + WriteNotify</td><td>&lt; 2 ms</td><td>SQLite WAL モード</td></tr>
+      <tr><td>Forwarder.drain → grpcSink.Send</td><td>&lt; 5 ms</td><td>WriteNotify で即時起動、送信側バッチなし</td></tr>
+      <tr><td>gRPC client-streaming → BOS</td><td>ネットワーク RTT</td><td>Checkpoint（ACK 収集）は送信をブロックしない</td></tr>
+    </tbody>
+  </table>
+
   <h3>制御下り経路（Control Downlink）</h3>
 
   <svg viewBox="0 0 820 100" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:820px;margin-bottom:20px;display:block;">
