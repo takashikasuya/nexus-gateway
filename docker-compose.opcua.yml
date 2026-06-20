@@ -6,7 +6,7 @@ version: "3.9"
 services:
   opcua-sim:
     build:
-      context: connector/opcua/sim
+      context: simulator/opcua
       dockerfile: Dockerfile
     environment:
       - OPCUA_SERVER_ENDPOINT=opc.tcp://0.0.0.0:4840/freeopcua/server/

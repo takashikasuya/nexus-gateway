@@ -62,9 +62,9 @@ if [[ "$phase" == "setup" ]]; then
 
     echo ""
     echo "Start multi-device BACnet simulator:"
-    echo "  python3 connector/bacnet/sim/device_multi.py"
+    echo "  python3 simulator/bacnet/device_multi.py"
     echo "Start OPC-UA simulator:"
-    echo "  python3 connector/opcua/sim/server_1000.py"
+    echo "  python3 simulator/opcua/server_scale.py"
     echo "Then run: bash fixtures/scale/run_scale_test.sh start"
 fi
 
@@ -196,12 +196,12 @@ if [[ "$phase" == "burst" ]]; then
     echo "Before burst: written=$BEFORE_WRITTEN"
 
     echo "Restarting simulators to trigger initial subscription flood..."
-    pkill -f "server_1000.py"  2>/dev/null || true
+    pkill -f "server_scale.py" 2>/dev/null || true
     pkill -f "device_multi.py" 2>/dev/null || true
     sleep 2
 
-    python3 "$REPO_ROOT/connector/opcua/sim/server_1000.py" &
-    python3 "$REPO_ROOT/connector/bacnet/sim/device_multi.py" &
+    python3 "$REPO_ROOT/simulator/opcua/server_scale.py" &
+    python3 "$REPO_ROOT/simulator/bacnet/device_multi.py" &
 
     echo "Measuring peak buffer depth over 30s..."
     PEAK_DEPTH=0
@@ -233,7 +233,7 @@ if [[ "$phase" == "stop" ]]; then
     done
     docker stop nexus-gateway opcua-connector 2>/dev/null || true
     docker rm   nexus-gateway opcua-connector 2>/dev/null || true
-    pkill -f "server_1000.py"  2>/dev/null || true
+    pkill -f "server_scale.py" 2>/dev/null || true
     pkill -f "device_multi.py" 2>/dev/null || true
     echo "Stopped."
 fi
