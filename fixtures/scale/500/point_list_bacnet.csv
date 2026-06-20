@@ -1,0 +1,251 @@
+gateway_id,connector_id,protocol,point_id,point_name,point_type,point_specification,writable,interval,unit,max_pres_value,min_pres_value,labels,scale,device_id,device_name,device_type,site,building,floor,installation_area,target_area,panel,tags,supplier,owner,description,local_id,device_id_bacnet,instance_no_bacnet,object_type_bacnet
+gw-001,bacnet-01,bacnet,BN-01-AI-001,Temperature,Temperature,Measurement,false,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,1",1001,1,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-002,Humidity,Humidity,Measurement,false,5,%RH,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,2",1001,2,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-003,CO2 Concentration,CO2 Concentration,Measurement,false,5,ppm,5000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,3",1001,3,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-004,Differential Pressure,Differential Pressure,Measurement,false,5,Pa,1000,-1000,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,4",1001,4,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-005,Flow Rate,Flow Rate,Measurement,false,5,m3/h,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,5",1001,5,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-006,Power,Power,Measurement,false,5,kW,1000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,6",1001,6,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-007,Energy,Energy,Metering,false,5,kWh,999999,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,7",1001,7,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-008,Illuminance,Illuminance,Measurement,false,5,lux,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,8",1001,8,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-009,Temperature,Temperature,Measurement,false,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,9",1001,9,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-010,Humidity,Humidity,Measurement,false,5,%RH,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,10",1001,10,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-011,Temperature,Temperature,Measurement,false,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,11",1001,11,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-012,Humidity,Humidity,Measurement,false,5,%RH,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,12",1001,12,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-013,CO2 Concentration,CO2 Concentration,Measurement,false,5,ppm,5000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,13",1001,13,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-014,Differential Pressure,Differential Pressure,Measurement,false,5,Pa,1000,-1000,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,14",1001,14,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-015,Flow Rate,Flow Rate,Measurement,false,5,m3/h,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,15",1001,15,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-016,Power,Power,Measurement,false,5,kW,1000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,16",1001,16,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-017,Energy,Energy,Metering,false,5,kWh,999999,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,17",1001,17,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-018,Illuminance,Illuminance,Measurement,false,5,lux,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,18",1001,18,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-019,Temperature,Temperature,Measurement,false,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,19",1001,19,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-020,Humidity,Humidity,Measurement,false,5,%RH,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,20",1001,20,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-021,Temperature,Temperature,Measurement,false,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,21",1001,21,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-022,Humidity,Humidity,Measurement,false,5,%RH,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,22",1001,22,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-023,CO2 Concentration,CO2 Concentration,Measurement,false,5,ppm,5000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,23",1001,23,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-024,Differential Pressure,Differential Pressure,Measurement,false,5,Pa,1000,-1000,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,24",1001,24,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-025,Flow Rate,Flow Rate,Measurement,false,5,m3/h,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,25",1001,25,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-026,Power,Power,Measurement,false,5,kW,1000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,26",1001,26,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-027,Energy,Energy,Metering,false,5,kWh,999999,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,27",1001,27,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-028,Illuminance,Illuminance,Measurement,false,5,lux,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,28",1001,28,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-029,Temperature,Temperature,Measurement,false,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,29",1001,29,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-030,Humidity,Humidity,Measurement,false,5,%RH,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,30",1001,30,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-031,Temperature,Temperature,Measurement,false,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,31",1001,31,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-032,Humidity,Humidity,Measurement,false,5,%RH,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,32",1001,32,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-033,CO2 Concentration,CO2 Concentration,Measurement,false,5,ppm,5000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,33",1001,33,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-034,Differential Pressure,Differential Pressure,Measurement,false,5,Pa,1000,-1000,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,34",1001,34,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-035,Flow Rate,Flow Rate,Measurement,false,5,m3/h,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,35",1001,35,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-036,Power,Power,Measurement,false,5,kW,1000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,36",1001,36,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-037,Energy,Energy,Metering,false,5,kWh,999999,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,37",1001,37,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-038,Illuminance,Illuminance,Measurement,false,5,lux,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,38",1001,38,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-039,Temperature,Temperature,Measurement,false,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,39",1001,39,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-040,Humidity,Humidity,Measurement,false,5,%RH,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,40",1001,40,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-041,Temperature,Temperature,Measurement,false,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,41",1001,41,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-042,Humidity,Humidity,Measurement,false,5,%RH,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,42",1001,42,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-043,CO2 Concentration,CO2 Concentration,Measurement,false,5,ppm,5000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,43",1001,43,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-044,Differential Pressure,Differential Pressure,Measurement,false,5,Pa,1000,-1000,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,44",1001,44,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-045,Flow Rate,Flow Rate,Measurement,false,5,m3/h,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,45",1001,45,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-046,Power,Power,Measurement,false,5,kW,1000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,46",1001,46,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-047,Energy,Energy,Metering,false,5,kWh,999999,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,47",1001,47,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-048,Illuminance,Illuminance,Measurement,false,5,lux,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,48",1001,48,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-049,Temperature,Temperature,Measurement,false,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,49",1001,49,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-050,Humidity,Humidity,Measurement,false,5,%RH,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,50",1001,50,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-051,Temperature,Temperature,Measurement,false,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,51",1001,51,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-052,Humidity,Humidity,Measurement,false,5,%RH,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,52",1001,52,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-053,CO2 Concentration,CO2 Concentration,Measurement,false,5,ppm,5000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,53",1001,53,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-054,Differential Pressure,Differential Pressure,Measurement,false,5,Pa,1000,-1000,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,54",1001,54,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-055,Flow Rate,Flow Rate,Measurement,false,5,m3/h,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,55",1001,55,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-056,Power,Power,Measurement,false,5,kW,1000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,56",1001,56,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-057,Energy,Energy,Metering,false,5,kWh,999999,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,57",1001,57,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-058,Illuminance,Illuminance,Measurement,false,5,lux,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,58",1001,58,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-059,Temperature,Temperature,Measurement,false,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,59",1001,59,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-060,Humidity,Humidity,Measurement,false,5,%RH,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,60",1001,60,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-061,Temperature,Temperature,Measurement,false,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,61",1001,61,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-062,Humidity,Humidity,Measurement,false,5,%RH,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,62",1001,62,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-063,CO2 Concentration,CO2 Concentration,Measurement,false,5,ppm,5000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,63",1001,63,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-064,Differential Pressure,Differential Pressure,Measurement,false,5,Pa,1000,-1000,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,64",1001,64,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-065,Flow Rate,Flow Rate,Measurement,false,5,m3/h,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,65",1001,65,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-066,Power,Power,Measurement,false,5,kW,1000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,66",1001,66,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-067,Energy,Energy,Metering,false,5,kWh,999999,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,67",1001,67,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-068,Illuminance,Illuminance,Measurement,false,5,lux,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,68",1001,68,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-069,Temperature,Temperature,Measurement,false,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,69",1001,69,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-070,Humidity,Humidity,Measurement,false,5,%RH,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,70",1001,70,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-071,Temperature,Temperature,Measurement,false,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,71",1001,71,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-072,Humidity,Humidity,Measurement,false,5,%RH,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,72",1001,72,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-073,CO2 Concentration,CO2 Concentration,Measurement,false,5,ppm,5000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,73",1001,73,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-074,Differential Pressure,Differential Pressure,Measurement,false,5,Pa,1000,-1000,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,74",1001,74,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-075,Flow Rate,Flow Rate,Measurement,false,5,m3/h,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,75",1001,75,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-076,Power,Power,Measurement,false,5,kW,1000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,76",1001,76,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-077,Energy,Energy,Metering,false,5,kWh,999999,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,77",1001,77,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-078,Illuminance,Illuminance,Measurement,false,5,lux,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,78",1001,78,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-079,Temperature,Temperature,Measurement,false,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,79",1001,79,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-080,Humidity,Humidity,Measurement,false,5,%RH,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,80",1001,80,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-081,Temperature,Temperature,Measurement,false,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,81",1001,81,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-082,Humidity,Humidity,Measurement,false,5,%RH,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,82",1001,82,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-083,CO2 Concentration,CO2 Concentration,Measurement,false,5,ppm,5000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,83",1001,83,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-084,Differential Pressure,Differential Pressure,Measurement,false,5,Pa,1000,-1000,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,84",1001,84,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-085,Flow Rate,Flow Rate,Measurement,false,5,m3/h,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,85",1001,85,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-086,Power,Power,Measurement,false,5,kW,1000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,86",1001,86,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-087,Energy,Energy,Metering,false,5,kWh,999999,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,87",1001,87,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-088,Illuminance,Illuminance,Measurement,false,5,lux,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,88",1001,88,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-089,Temperature,Temperature,Measurement,false,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,89",1001,89,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-090,Humidity,Humidity,Measurement,false,5,%RH,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,90",1001,90,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-091,Temperature,Temperature,Measurement,false,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,91",1001,91,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-092,Humidity,Humidity,Measurement,false,5,%RH,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,92",1001,92,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-093,CO2 Concentration,CO2 Concentration,Measurement,false,5,ppm,5000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,93",1001,93,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-094,Differential Pressure,Differential Pressure,Measurement,false,5,Pa,1000,-1000,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,94",1001,94,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-095,Flow Rate,Flow Rate,Measurement,false,5,m3/h,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,95",1001,95,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-096,Power,Power,Measurement,false,5,kW,1000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,96",1001,96,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-097,Energy,Energy,Metering,false,5,kWh,999999,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,97",1001,97,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-098,Illuminance,Illuminance,Measurement,false,5,lux,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,98",1001,98,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-099,Temperature,Temperature,Measurement,false,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,99",1001,99,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AI-100,Humidity,Humidity,Measurement,false,5,%RH,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,100",1001,100,analogInput
+gw-001,bacnet-01,bacnet,BN-01-AO-001,Temperature,Temperature,Setpoint,true,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,1",1001,1,analogOutput
+gw-001,bacnet-01,bacnet,BN-01-AO-002,Setpoint,Setpoint,Setpoint,true,5,%,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,2",1001,2,analogOutput
+gw-001,bacnet-01,bacnet,BN-01-AO-003,Differential Pressure,Differential Pressure,Setpoint,true,5,Pa,1000,-1000,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,3",1001,3,analogOutput
+gw-001,bacnet-01,bacnet,BN-01-AO-004,Flow Rate,Flow Rate,Setpoint,true,5,m3/h,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,4",1001,4,analogOutput
+gw-001,bacnet-01,bacnet,BN-01-AO-005,Power,Power,Setpoint,true,5,kW,1000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,5",1001,5,analogOutput
+gw-001,bacnet-01,bacnet,BN-01-AO-006,Temperature,Temperature,Setpoint,true,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,6",1001,6,analogOutput
+gw-001,bacnet-01,bacnet,BN-01-AO-007,Setpoint,Setpoint,Setpoint,true,5,%,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,7",1001,7,analogOutput
+gw-001,bacnet-01,bacnet,BN-01-AO-008,Differential Pressure,Differential Pressure,Setpoint,true,5,Pa,1000,-1000,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,8",1001,8,analogOutput
+gw-001,bacnet-01,bacnet,BN-01-AO-009,Flow Rate,Flow Rate,Setpoint,true,5,m3/h,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,9",1001,9,analogOutput
+gw-001,bacnet-01,bacnet,BN-01-AO-010,Power,Power,Setpoint,true,5,kW,1000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,10",1001,10,analogOutput
+gw-001,bacnet-01,bacnet,BN-01-AO-011,Temperature,Temperature,Setpoint,true,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,11",1001,11,analogOutput
+gw-001,bacnet-01,bacnet,BN-01-AO-012,Setpoint,Setpoint,Setpoint,true,5,%,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,12",1001,12,analogOutput
+gw-001,bacnet-01,bacnet,BN-01-AO-013,Differential Pressure,Differential Pressure,Setpoint,true,5,Pa,1000,-1000,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,13",1001,13,analogOutput
+gw-001,bacnet-01,bacnet,BN-01-AO-014,Flow Rate,Flow Rate,Setpoint,true,5,m3/h,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,14",1001,14,analogOutput
+gw-001,bacnet-01,bacnet,BN-01-AO-015,Power,Power,Setpoint,true,5,kW,1000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,15",1001,15,analogOutput
+gw-001,bacnet-01,bacnet,BN-01-AO-016,Temperature,Temperature,Setpoint,true,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,16",1001,16,analogOutput
+gw-001,bacnet-01,bacnet,BN-01-AO-017,Setpoint,Setpoint,Setpoint,true,5,%,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,17",1001,17,analogOutput
+gw-001,bacnet-01,bacnet,BN-01-AO-018,Differential Pressure,Differential Pressure,Setpoint,true,5,Pa,1000,-1000,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,18",1001,18,analogOutput
+gw-001,bacnet-01,bacnet,BN-01-AO-019,Flow Rate,Flow Rate,Setpoint,true,5,m3/h,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,19",1001,19,analogOutput
+gw-001,bacnet-01,bacnet,BN-01-AO-020,Power,Power,Setpoint,true,5,kW,1000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,20",1001,20,analogOutput
+gw-001,bacnet-01,bacnet,BN-01-AO-021,Temperature,Temperature,Setpoint,true,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,21",1001,21,analogOutput
+gw-001,bacnet-01,bacnet,BN-01-AO-022,Setpoint,Setpoint,Setpoint,true,5,%,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,22",1001,22,analogOutput
+gw-001,bacnet-01,bacnet,BN-01-AO-023,Differential Pressure,Differential Pressure,Setpoint,true,5,Pa,1000,-1000,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,23",1001,23,analogOutput
+gw-001,bacnet-01,bacnet,BN-01-AO-024,Flow Rate,Flow Rate,Setpoint,true,5,m3/h,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,24",1001,24,analogOutput
+gw-001,bacnet-01,bacnet,BN-01-AO-025,Power,Power,Setpoint,true,5,kW,1000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,25",1001,25,analogOutput
+gw-001,bacnet-01,bacnet,BN-01-AO-026,Temperature,Temperature,Setpoint,true,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,26",1001,26,analogOutput
+gw-001,bacnet-01,bacnet,BN-01-AO-027,Setpoint,Setpoint,Setpoint,true,5,%,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,27",1001,27,analogOutput
+gw-001,bacnet-01,bacnet,BN-01-AO-028,Differential Pressure,Differential Pressure,Setpoint,true,5,Pa,1000,-1000,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,28",1001,28,analogOutput
+gw-001,bacnet-01,bacnet,BN-01-AO-029,Flow Rate,Flow Rate,Setpoint,true,5,m3/h,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,29",1001,29,analogOutput
+gw-001,bacnet-01,bacnet,BN-01-AO-030,Power,Power,Setpoint,true,5,kW,1000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,30",1001,30,analogOutput
+gw-001,bacnet-01,bacnet,BN-01-AO-031,Temperature,Temperature,Setpoint,true,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,31",1001,31,analogOutput
+gw-001,bacnet-01,bacnet,BN-01-AO-032,Setpoint,Setpoint,Setpoint,true,5,%,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,32",1001,32,analogOutput
+gw-001,bacnet-01,bacnet,BN-01-AO-033,Differential Pressure,Differential Pressure,Setpoint,true,5,Pa,1000,-1000,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,33",1001,33,analogOutput
+gw-001,bacnet-01,bacnet,BN-01-AO-034,Flow Rate,Flow Rate,Setpoint,true,5,m3/h,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,34",1001,34,analogOutput
+gw-001,bacnet-01,bacnet,BN-01-AO-035,Power,Power,Setpoint,true,5,kW,1000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,35",1001,35,analogOutput
+gw-001,bacnet-01,bacnet,BN-01-AO-036,Temperature,Temperature,Setpoint,true,5,degC,50,-10,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,36",1001,36,analogOutput
+gw-001,bacnet-01,bacnet,BN-01-AO-037,Setpoint,Setpoint,Setpoint,true,5,%,100,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,37",1001,37,analogOutput
+gw-001,bacnet-01,bacnet,BN-01-AO-038,Differential Pressure,Differential Pressure,Setpoint,true,5,Pa,1000,-1000,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,38",1001,38,analogOutput
+gw-001,bacnet-01,bacnet,BN-01-AO-039,Flow Rate,Flow Rate,Setpoint,true,5,m3/h,10000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,39",1001,39,analogOutput
+gw-001,bacnet-01,bacnet,BN-01-AO-040,Power,Power,Setpoint,true,5,kW,1000,0,,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"analogOutput,40",1001,40,analogOutput
+gw-001,bacnet-01,bacnet,BN-01-BI-001,Operation Status,Status,Status,false,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,1",1001,1,binaryInput
+gw-001,bacnet-01,bacnet,BN-01-BI-002,Operation Status,Status,Status,false,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,2",1001,2,binaryInput
+gw-001,bacnet-01,bacnet,BN-01-BI-003,Operation Status,Status,Status,false,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,3",1001,3,binaryInput
+gw-001,bacnet-01,bacnet,BN-01-BI-004,Operation Status,Status,Status,false,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,4",1001,4,binaryInput
+gw-001,bacnet-01,bacnet,BN-01-BI-005,Operation Status,Status,Status,false,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,5",1001,5,binaryInput
+gw-001,bacnet-01,bacnet,BN-01-BI-006,Operation Status,Status,Status,false,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,6",1001,6,binaryInput
+gw-001,bacnet-01,bacnet,BN-01-BI-007,Operation Status,Status,Status,false,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,7",1001,7,binaryInput
+gw-001,bacnet-01,bacnet,BN-01-BI-008,Operation Status,Status,Status,false,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,8",1001,8,binaryInput
+gw-001,bacnet-01,bacnet,BN-01-BI-009,Operation Status,Status,Status,false,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,9",1001,9,binaryInput
+gw-001,bacnet-01,bacnet,BN-01-BI-010,Operation Status,Status,Status,false,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,10",1001,10,binaryInput
+gw-001,bacnet-01,bacnet,BN-01-BI-011,Operation Status,Status,Status,false,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,11",1001,11,binaryInput
+gw-001,bacnet-01,bacnet,BN-01-BI-012,Operation Status,Status,Status,false,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,12",1001,12,binaryInput
+gw-001,bacnet-01,bacnet,BN-01-BI-013,Operation Status,Status,Status,false,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,13",1001,13,binaryInput
+gw-001,bacnet-01,bacnet,BN-01-BI-014,Operation Status,Status,Status,false,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,14",1001,14,binaryInput
+gw-001,bacnet-01,bacnet,BN-01-BI-015,Operation Status,Status,Status,false,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,15",1001,15,binaryInput
+gw-001,bacnet-01,bacnet,BN-01-BI-016,Operation Status,Status,Status,false,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,16",1001,16,binaryInput
+gw-001,bacnet-01,bacnet,BN-01-BI-017,Operation Status,Status,Status,false,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,17",1001,17,binaryInput
+gw-001,bacnet-01,bacnet,BN-01-BI-018,Operation Status,Status,Status,false,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,18",1001,18,binaryInput
+gw-001,bacnet-01,bacnet,BN-01-BI-019,Operation Status,Status,Status,false,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,19",1001,19,binaryInput
+gw-001,bacnet-01,bacnet,BN-01-BI-020,Operation Status,Status,Status,false,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,20",1001,20,binaryInput
+gw-001,bacnet-01,bacnet,BN-01-BI-021,Operation Status,Status,Status,false,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,21",1001,21,binaryInput
+gw-001,bacnet-01,bacnet,BN-01-BI-022,Operation Status,Status,Status,false,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,22",1001,22,binaryInput
+gw-001,bacnet-01,bacnet,BN-01-BI-023,Operation Status,Status,Status,false,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,23",1001,23,binaryInput
+gw-001,bacnet-01,bacnet,BN-01-BI-024,Operation Status,Status,Status,false,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,24",1001,24,binaryInput
+gw-001,bacnet-01,bacnet,BN-01-BI-025,Operation Status,Status,Status,false,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,25",1001,25,binaryInput
+gw-001,bacnet-01,bacnet,BN-01-BI-026,Operation Status,Status,Status,false,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,26",1001,26,binaryInput
+gw-001,bacnet-01,bacnet,BN-01-BI-027,Operation Status,Status,Status,false,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,27",1001,27,binaryInput
+gw-001,bacnet-01,bacnet,BN-01-BI-028,Operation Status,Status,Status,false,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,28",1001,28,binaryInput
+gw-001,bacnet-01,bacnet,BN-01-BI-029,Operation Status,Status,Status,false,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,29",1001,29,binaryInput
+gw-001,bacnet-01,bacnet,BN-01-BI-030,Operation Status,Status,Status,false,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,30",1001,30,binaryInput
+gw-001,bacnet-01,bacnet,BN-01-BI-031,Operation Status,Status,Status,false,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,31",1001,31,binaryInput
+gw-001,bacnet-01,bacnet,BN-01-BI-032,Operation Status,Status,Status,false,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,32",1001,32,binaryInput
+gw-001,bacnet-01,bacnet,BN-01-BI-033,Operation Status,Status,Status,false,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,33",1001,33,binaryInput
+gw-001,bacnet-01,bacnet,BN-01-BI-034,Operation Status,Status,Status,false,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,34",1001,34,binaryInput
+gw-001,bacnet-01,bacnet,BN-01-BI-035,Operation Status,Status,Status,false,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,35",1001,35,binaryInput
+gw-001,bacnet-01,bacnet,BN-01-BI-036,Operation Status,Status,Status,false,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,36",1001,36,binaryInput
+gw-001,bacnet-01,bacnet,BN-01-BI-037,Operation Status,Status,Status,false,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,37",1001,37,binaryInput
+gw-001,bacnet-01,bacnet,BN-01-BI-038,Operation Status,Status,Status,false,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,38",1001,38,binaryInput
+gw-001,bacnet-01,bacnet,BN-01-BI-039,Operation Status,Status,Status,false,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,39",1001,39,binaryInput
+gw-001,bacnet-01,bacnet,BN-01-BI-040,Operation Status,Status,Status,false,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryInput,40",1001,40,binaryInput
+gw-001,bacnet-01,bacnet,BN-01-BO-001,Start/Stop Command,HVAC Control,Command,true,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryOutput,1",1001,1,binaryOutput
+gw-001,bacnet-01,bacnet,BN-01-BO-002,Start/Stop Command,HVAC Control,Command,true,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryOutput,2",1001,2,binaryOutput
+gw-001,bacnet-01,bacnet,BN-01-BO-003,Start/Stop Command,HVAC Control,Command,true,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryOutput,3",1001,3,binaryOutput
+gw-001,bacnet-01,bacnet,BN-01-BO-004,Start/Stop Command,HVAC Control,Command,true,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryOutput,4",1001,4,binaryOutput
+gw-001,bacnet-01,bacnet,BN-01-BO-005,Start/Stop Command,HVAC Control,Command,true,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryOutput,5",1001,5,binaryOutput
+gw-001,bacnet-01,bacnet,BN-01-BO-006,Start/Stop Command,HVAC Control,Command,true,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryOutput,6",1001,6,binaryOutput
+gw-001,bacnet-01,bacnet,BN-01-BO-007,Start/Stop Command,HVAC Control,Command,true,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryOutput,7",1001,7,binaryOutput
+gw-001,bacnet-01,bacnet,BN-01-BO-008,Start/Stop Command,HVAC Control,Command,true,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryOutput,8",1001,8,binaryOutput
+gw-001,bacnet-01,bacnet,BN-01-BO-009,Start/Stop Command,HVAC Control,Command,true,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryOutput,9",1001,9,binaryOutput
+gw-001,bacnet-01,bacnet,BN-01-BO-010,Start/Stop Command,HVAC Control,Command,true,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryOutput,10",1001,10,binaryOutput
+gw-001,bacnet-01,bacnet,BN-01-BO-011,Start/Stop Command,HVAC Control,Command,true,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryOutput,11",1001,11,binaryOutput
+gw-001,bacnet-01,bacnet,BN-01-BO-012,Start/Stop Command,HVAC Control,Command,true,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryOutput,12",1001,12,binaryOutput
+gw-001,bacnet-01,bacnet,BN-01-BO-013,Start/Stop Command,HVAC Control,Command,true,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryOutput,13",1001,13,binaryOutput
+gw-001,bacnet-01,bacnet,BN-01-BO-014,Start/Stop Command,HVAC Control,Command,true,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryOutput,14",1001,14,binaryOutput
+gw-001,bacnet-01,bacnet,BN-01-BO-015,Start/Stop Command,HVAC Control,Command,true,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryOutput,15",1001,15,binaryOutput
+gw-001,bacnet-01,bacnet,BN-01-BO-016,Start/Stop Command,HVAC Control,Command,true,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryOutput,16",1001,16,binaryOutput
+gw-001,bacnet-01,bacnet,BN-01-BO-017,Start/Stop Command,HVAC Control,Command,true,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryOutput,17",1001,17,binaryOutput
+gw-001,bacnet-01,bacnet,BN-01-BO-018,Start/Stop Command,HVAC Control,Command,true,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryOutput,18",1001,18,binaryOutput
+gw-001,bacnet-01,bacnet,BN-01-BO-019,Start/Stop Command,HVAC Control,Command,true,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryOutput,19",1001,19,binaryOutput
+gw-001,bacnet-01,bacnet,BN-01-BO-020,Start/Stop Command,HVAC Control,Command,true,5,,,,Off&&On,1.0,ahu-01,AHU-01,AHU,Site01,Building01,1F,Area01,,,,,,,"binaryOutput,20",1001,20,binaryOutput
+gw-001,bacnet-02,bacnet,BN-02-AI-001,Temperature,Temperature,Measurement,false,5,degC,50,-10,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,1",1002,1,analogInput
+gw-001,bacnet-02,bacnet,BN-02-AI-002,Humidity,Humidity,Measurement,false,5,%RH,100,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,2",1002,2,analogInput
+gw-001,bacnet-02,bacnet,BN-02-AI-003,CO2 Concentration,CO2 Concentration,Measurement,false,5,ppm,5000,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,3",1002,3,analogInput
+gw-001,bacnet-02,bacnet,BN-02-AI-004,Differential Pressure,Differential Pressure,Measurement,false,5,Pa,1000,-1000,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,4",1002,4,analogInput
+gw-001,bacnet-02,bacnet,BN-02-AI-005,Flow Rate,Flow Rate,Measurement,false,5,m3/h,10000,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,5",1002,5,analogInput
+gw-001,bacnet-02,bacnet,BN-02-AI-006,Power,Power,Measurement,false,5,kW,1000,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,6",1002,6,analogInput
+gw-001,bacnet-02,bacnet,BN-02-AI-007,Energy,Energy,Metering,false,5,kWh,999999,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,7",1002,7,analogInput
+gw-001,bacnet-02,bacnet,BN-02-AI-008,Illuminance,Illuminance,Measurement,false,5,lux,10000,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,8",1002,8,analogInput
+gw-001,bacnet-02,bacnet,BN-02-AI-009,Temperature,Temperature,Measurement,false,5,degC,50,-10,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,9",1002,9,analogInput
+gw-001,bacnet-02,bacnet,BN-02-AI-010,Humidity,Humidity,Measurement,false,5,%RH,100,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,10",1002,10,analogInput
+gw-001,bacnet-02,bacnet,BN-02-AI-011,Temperature,Temperature,Measurement,false,5,degC,50,-10,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,11",1002,11,analogInput
+gw-001,bacnet-02,bacnet,BN-02-AI-012,Humidity,Humidity,Measurement,false,5,%RH,100,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,12",1002,12,analogInput
+gw-001,bacnet-02,bacnet,BN-02-AI-013,CO2 Concentration,CO2 Concentration,Measurement,false,5,ppm,5000,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,13",1002,13,analogInput
+gw-001,bacnet-02,bacnet,BN-02-AI-014,Differential Pressure,Differential Pressure,Measurement,false,5,Pa,1000,-1000,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,14",1002,14,analogInput
+gw-001,bacnet-02,bacnet,BN-02-AI-015,Flow Rate,Flow Rate,Measurement,false,5,m3/h,10000,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,15",1002,15,analogInput
+gw-001,bacnet-02,bacnet,BN-02-AI-016,Power,Power,Measurement,false,5,kW,1000,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,16",1002,16,analogInput
+gw-001,bacnet-02,bacnet,BN-02-AI-017,Energy,Energy,Metering,false,5,kWh,999999,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,17",1002,17,analogInput
+gw-001,bacnet-02,bacnet,BN-02-AI-018,Illuminance,Illuminance,Measurement,false,5,lux,10000,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,18",1002,18,analogInput
+gw-001,bacnet-02,bacnet,BN-02-AI-019,Temperature,Temperature,Measurement,false,5,degC,50,-10,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,19",1002,19,analogInput
+gw-001,bacnet-02,bacnet,BN-02-AI-020,Humidity,Humidity,Measurement,false,5,%RH,100,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,20",1002,20,analogInput
+gw-001,bacnet-02,bacnet,BN-02-AI-021,Temperature,Temperature,Measurement,false,5,degC,50,-10,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,21",1002,21,analogInput
+gw-001,bacnet-02,bacnet,BN-02-AI-022,Humidity,Humidity,Measurement,false,5,%RH,100,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,22",1002,22,analogInput
+gw-001,bacnet-02,bacnet,BN-02-AI-023,CO2 Concentration,CO2 Concentration,Measurement,false,5,ppm,5000,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,23",1002,23,analogInput
+gw-001,bacnet-02,bacnet,BN-02-AI-024,Differential Pressure,Differential Pressure,Measurement,false,5,Pa,1000,-1000,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,24",1002,24,analogInput
+gw-001,bacnet-02,bacnet,BN-02-AI-025,Flow Rate,Flow Rate,Measurement,false,5,m3/h,10000,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,25",1002,25,analogInput
+gw-001,bacnet-02,bacnet,BN-02-AI-026,Power,Power,Measurement,false,5,kW,1000,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,26",1002,26,analogInput
+gw-001,bacnet-02,bacnet,BN-02-AI-027,Energy,Energy,Metering,false,5,kWh,999999,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,27",1002,27,analogInput
+gw-001,bacnet-02,bacnet,BN-02-AI-028,Illuminance,Illuminance,Measurement,false,5,lux,10000,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,28",1002,28,analogInput
+gw-001,bacnet-02,bacnet,BN-02-AI-029,Temperature,Temperature,Measurement,false,5,degC,50,-10,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,29",1002,29,analogInput
+gw-001,bacnet-02,bacnet,BN-02-AI-030,Humidity,Humidity,Measurement,false,5,%RH,100,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,30",1002,30,analogInput
+gw-001,bacnet-02,bacnet,BN-02-AI-031,Temperature,Temperature,Measurement,false,5,degC,50,-10,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,31",1002,31,analogInput
+gw-001,bacnet-02,bacnet,BN-02-AI-032,Humidity,Humidity,Measurement,false,5,%RH,100,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,32",1002,32,analogInput
+gw-001,bacnet-02,bacnet,BN-02-AI-033,CO2 Concentration,CO2 Concentration,Measurement,false,5,ppm,5000,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,33",1002,33,analogInput
+gw-001,bacnet-02,bacnet,BN-02-AI-034,Differential Pressure,Differential Pressure,Measurement,false,5,Pa,1000,-1000,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,34",1002,34,analogInput
+gw-001,bacnet-02,bacnet,BN-02-AI-035,Flow Rate,Flow Rate,Measurement,false,5,m3/h,10000,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,35",1002,35,analogInput
+gw-001,bacnet-02,bacnet,BN-02-AI-036,Power,Power,Measurement,false,5,kW,1000,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,36",1002,36,analogInput
+gw-001,bacnet-02,bacnet,BN-02-AI-037,Energy,Energy,Metering,false,5,kWh,999999,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,37",1002,37,analogInput
+gw-001,bacnet-02,bacnet,BN-02-AI-038,Illuminance,Illuminance,Measurement,false,5,lux,10000,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,38",1002,38,analogInput
+gw-001,bacnet-02,bacnet,BN-02-AI-039,Temperature,Temperature,Measurement,false,5,degC,50,-10,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,39",1002,39,analogInput
+gw-001,bacnet-02,bacnet,BN-02-AI-040,Humidity,Humidity,Measurement,false,5,%RH,100,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,40",1002,40,analogInput
+gw-001,bacnet-02,bacnet,BN-02-AI-041,Temperature,Temperature,Measurement,false,5,degC,50,-10,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,41",1002,41,analogInput
+gw-001,bacnet-02,bacnet,BN-02-AI-042,Humidity,Humidity,Measurement,false,5,%RH,100,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,42",1002,42,analogInput
+gw-001,bacnet-02,bacnet,BN-02-AI-043,CO2 Concentration,CO2 Concentration,Measurement,false,5,ppm,5000,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,43",1002,43,analogInput
+gw-001,bacnet-02,bacnet,BN-02-AI-044,Differential Pressure,Differential Pressure,Measurement,false,5,Pa,1000,-1000,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,44",1002,44,analogInput
+gw-001,bacnet-02,bacnet,BN-02-AI-045,Flow Rate,Flow Rate,Measurement,false,5,m3/h,10000,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,45",1002,45,analogInput
+gw-001,bacnet-02,bacnet,BN-02-AI-046,Power,Power,Measurement,false,5,kW,1000,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,46",1002,46,analogInput
+gw-001,bacnet-02,bacnet,BN-02-AI-047,Energy,Energy,Metering,false,5,kWh,999999,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,47",1002,47,analogInput
+gw-001,bacnet-02,bacnet,BN-02-AI-048,Illuminance,Illuminance,Measurement,false,5,lux,10000,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,48",1002,48,analogInput
+gw-001,bacnet-02,bacnet,BN-02-AI-049,Temperature,Temperature,Measurement,false,5,degC,50,-10,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,49",1002,49,analogInput
+gw-001,bacnet-02,bacnet,BN-02-AI-050,Humidity,Humidity,Measurement,false,5,%RH,100,0,,1.0,ahu-02,AHU-02,AHU,Site01,Building01,1F,Area01,,,,,,,"analogInput,50",1002,50,analogInput

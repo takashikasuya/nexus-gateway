@@ -266,6 +266,10 @@ def generate_bos_import(size: int, master: list[dict],
     if not csv_only:
         write_json(out / "point_list.json", points)
     write_csv(out / "point_list.csv", points)
+    for proto in ("bacnet", "opcua"):
+        proto_points = [p for p in points if p["protocol"] == proto]
+        if proto_points:
+            write_csv(out / f"point_list_{proto}.csv", proto_points)
 
 
 def generate_connector_configs(master: list[dict], dry_run: bool) -> None:
