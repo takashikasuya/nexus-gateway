@@ -1,53 +1,62 @@
 #!/usr/bin/env python3
-"""Scale fixture generator.
+"""Scale fixture generator for BOS resource management verification.
 
-Point list (2000/point_list.json) is the single source of truth.
-Connector files are DERIVED from it — never edit them directly.
+Verification scenario
+---------------------
+The simulator (bacnet-sim-gateway, opcua-sim-gateway) runs with the FULL
+set of points at all times.  Connectors are configured with the full set so
+they can receive any data the simulator publishes.
 
-The master list is interleaved 1:1 (BACnet, OPC-UA, BACnet, OPC-UA …)
-so any N-point slice always contains a proportional mix of both protocols.
+The BOS (Building OS) is the system under test.  Point lists of increasing
+size are imported into the BOS, which provisions the gateway accordingly.
+The gateway normalises Common Events using what the BOS says — not a local
+file.
 
-Usage:
-    # Standard scales
-    python3 fixtures/scale/gen_fixtures.py
+    Simulator (full 2000 pts always on)
+        ↕  BACnet/OPC-UA
+    Connectors (full config — fixtures/scale/connectors/<id>.json)
+        ↕  NATS
+    Gateway  ←→  BOS  ← import fixtures/scale/<N>/point_list.csv
+                          to test resource management at scale N
 
-    # Custom sizes
-    python3 fixtures/scale/gen_fixtures.py --sizes 100 300 800
+File layout
+-----------
+  fixtures/scale/
+    connectors/             Full connector configs (BACNET_POINTS / OPCUA_POINTS).
+      bacnet-01.json        One file per connector, always the full point set.
+      bacnet-02.json        Derived from the 2000-pt master; never edited directly.
+      ...
+      opcua-01.json
+    2000/                   Master / source of truth
+      point_list.json
+      point_list.csv
+    1000/                   BOS import fixture — 1000-pt verification
+      point_list.json
+      point_list.csv
+    500/                    BOS import fixture — 500-pt verification
+    200/                    BOS import fixture — 200-pt verification
+    gen_fixtures.py         This script
 
-    # CSV only (no JSON/connector update)
-    python3 fixtures/scale/gen_fixtures.py --csv-only
+Protocol distribution (master list is interleaved 1:1)
+-------------------------------------------------------
+   200 pts  → BACnet 100  + OPC-UA 100
+   500 pts  → BACnet 250  + OPC-UA 250
+  1000 pts  → BACnet 500  + OPC-UA 500
+  2000 pts  → BACnet 1000 + OPC-UA 1000
 
-    # Show protocol distribution without generating files
-    python3 fixtures/scale/gen_fixtures.py --dry-run
+Usage
+-----
+  # Regenerate all scale tiers and connector files
+  python3 fixtures/scale/gen_fixtures.py
 
-Scale tiers and expected protocol distribution:
-    200  →  100 BACnet (bacnet-01 partial)  + 100 OPC-UA
-    500  →  250 BACnet (bacnet-01..02 + partial)  + 250 OPC-UA
-   1000  →  500 BACnet (bacnet-01..03 + partials) + 500 OPC-UA
-   2000  →  1000 BACnet (bacnet-01..05 full)      + 1000 OPC-UA
+  # Custom sizes
+  python3 fixtures/scale/gen_fixtures.py --sizes 100 300
 
-BACnet scaling model (analogous to multi-device BACnet):
-    Each connector (bacnet-01..05) owns up to 200 points for one physical device.
-    As point count grows, new connectors (= new BACnet devices) come online.
+  # Preview distribution without writing files
+  python3 fixtures/scale/gen_fixtures.py --dry-run
 
-OPC-UA scaling model:
-    Single connector (opcua-01) subscribes to all OPC-UA nodes on one server.
-    One OPC-UA server can host thousands of nodes, so no new connectors needed
-    until a second OPC-UA server is introduced.
-    To add a second OPC-UA server: add opcua-02 entries to the master list with
-    connector_id="opcua-02" and rerun this script.
-
-point_list.json fields:
-    point_id      globally unique identifier (used by BOS / normalizer)
-    connector_id  which connector owns this point
-    protocol      bacnet | opcua
-    local_id      native address ("analogInput,1" or "ns=2;s=UA-F-0001")
-    device_ref    device label forwarded in Common Events
-    unit          engineering unit (may be empty)
-    writable      whether write commands are accepted
-
-Connector JSON (subset — no point_id / protocol / connector_id):
-    local_id / device_ref / unit / writable
+  # CSV only (e.g. after point metadata update)
+  python3 fixtures/scale/gen_fixtures.py --csv-only
 """
 from __future__ import annotations
 
@@ -88,7 +97,7 @@ def write_csv(path: Path, points: list[dict]) -> None:
 
 
 def derive_connector_points(points: list[dict]) -> dict[str, list[dict]]:
-    """Group points by connector_id, stripping gateway-side fields."""
+    """Strip gateway-side fields, group by connector_id."""
     by_connector: dict[str, list[dict]] = defaultdict(list)
     for p in points:
         by_connector[p["connector_id"]].append({
@@ -100,33 +109,38 @@ def derive_connector_points(points: list[dict]) -> dict[str, list[dict]]:
     return by_connector
 
 
-def generate(size: int, master: list[dict], *, csv_only: bool, dry_run: bool) -> None:
+def generate_bos_import(size: int, master: list[dict],
+                        *, csv_only: bool, dry_run: bool) -> None:
+    """Generate BOS import fixtures for a given point count."""
     if size > len(master):
         print(f"  WARN: {size} > master ({len(master)}), capped")
         size = len(master)
 
     points = master[:size]
-    proto_counts = Counter(p["protocol"] for p in points)
-    proto_str = "  ".join(f"{k}={v}" for k, v in sorted(proto_counts.items()))
-
-    by_connector = derive_connector_points(points)
-    connector_summary = "  ".join(
-        f"{cid}({len(v)})" for cid, v in sorted(by_connector.items())
-    )
-
-    print(f"  {size:>5} pts  [{proto_str}]  connectors: {connector_summary}")
+    proto = Counter(p["protocol"] for p in points)
+    cids  = Counter(p["connector_id"] for p in points)
+    print(f"  {size:>5} pts  "
+          f"BACnet={proto.get('bacnet',0):>4}  OPC-UA={proto.get('opcua',0):>4}  "
+          f"connectors: {dict(sorted(cids.items()))}")
 
     if dry_run:
         return
 
-    out_dir = OUT_ROOT / str(size)
-
+    out = OUT_ROOT / str(size)
     if not csv_only:
-        write_json(out_dir / "point_list.json", points)
-        for cid, cpts in by_connector.items():
-            write_json(out_dir / "connectors" / f"{cid}.json", cpts)
+        write_json(out / "point_list.json", points)
+    write_csv(out / "point_list.csv", points)
 
-    write_csv(out_dir / "point_list.csv", points)
+
+def generate_connector_configs(master: list[dict], dry_run: bool) -> None:
+    """Derive full connector configs from the master list."""
+    by_connector = derive_connector_points(master)
+    out_dir = OUT_ROOT / "connectors"
+    print(f"\nConnector configs → {out_dir}/")
+    for cid, pts in sorted(by_connector.items()):
+        print(f"  {cid}.json  ({len(pts)} pts)")
+        if not dry_run:
+            write_json(out_dir / f"{cid}.json", pts)
 
 
 def main() -> None:
@@ -134,27 +148,33 @@ def main() -> None:
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
     parser.add_argument("--sizes", type=int, nargs="+", default=DEFAULT_SIZES,
-                        help=f"point counts to generate (default: {DEFAULT_SIZES})")
+                        help=f"BOS import sizes to generate (default: {DEFAULT_SIZES})")
     parser.add_argument("--master", type=Path, default=MASTER,
-                        help=f"master point list JSON (default: {MASTER})")
+                        help=f"master point list (default: {MASTER})")
     parser.add_argument("--csv-only", action="store_true",
-                        help="only (re)generate CSV, skip JSON and connector files")
+                        help="only regenerate CSV files, skip JSON")
     parser.add_argument("--dry-run", action="store_true",
-                        help="show distribution without writing files")
+                        help="show what would be generated without writing")
+    parser.add_argument("--no-connectors", action="store_true",
+                        help="skip regenerating connector config files")
     args = parser.parse_args()
 
     master = load_master(args.master)
     proto_total = Counter(p["protocol"] for p in master)
-    print(f"Master: {args.master.name}  total={len(master)}  {dict(proto_total)}")
-    print()
+    print(f"Master: {args.master}  total={len(master)}  {dict(proto_total)}")
+    print(f"\nBOS import fixtures ({['generating','dry-run'][args.dry_run]}):")
 
     for size in sorted(args.sizes):
-        generate(size, master, csv_only=args.csv_only, dry_run=args.dry_run)
+        generate_bos_import(size, master, csv_only=args.csv_only, dry_run=args.dry_run)
+
+    if not args.no_connectors and not args.csv_only:
+        generate_connector_configs(master, args.dry_run)
 
     if not args.dry_run:
-        print()
-        print("Gateway env:  POINT_LIST_FILE=/fixtures/scale/<N>/point_list.json")
-        print("Regen CSV:    python3 fixtures/scale/gen_fixtures.py --csv-only")
+        print("\n--- Usage ---")
+        print("BOS import:  fixtures/scale/<N>/point_list.csv  (import into BOS)")
+        print("Connectors:  BACNET_POINTS=$(cat fixtures/scale/connectors/bacnet-01.json)")
+        print("             OPCUA_POINTS=$(cat fixtures/scale/connectors/opcua-01.json)")
 
 
 if __name__ == "__main__":
