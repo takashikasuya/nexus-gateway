@@ -85,18 +85,18 @@ CSV_FIELDS = [
     "local_id", "device_id_bacnet", "instance_no_bacnet", "object_type_bacnet",
 ]
 
-# unit → point metadata
+# unit → point metadata  (point_type must match _POINT_SEED in bacnet-sim-gateway/semantic/brick.py)
 _UNIT_META: dict[str, dict] = {
-    "degC": {"point_type": "温度",    "point_name": "温度",    "point_specification": "Measurement", "max_pres_value": "50",     "min_pres_value": "-10"},
-    "%RH":  {"point_type": "湿度",    "point_name": "湿度",    "point_specification": "Measurement", "max_pres_value": "100",    "min_pres_value": "0"},
-    "ppm":  {"point_type": "CO2濃度", "point_name": "CO2濃度", "point_specification": "Measurement", "max_pres_value": "5000",   "min_pres_value": "0"},
-    "Pa":   {"point_type": "差圧",    "point_name": "差圧",    "point_specification": "Measurement", "max_pres_value": "1000",   "min_pres_value": "-1000"},
-    "m3/h": {"point_type": "流量",    "point_name": "風量",    "point_specification": "Measurement", "max_pres_value": "10000",  "min_pres_value": "0"},
-    "kW":   {"point_type": "電力",    "point_name": "電力",    "point_specification": "Measurement", "max_pres_value": "1000",   "min_pres_value": "0"},
-    "kWh":  {"point_type": "電力量",  "point_name": "電力量",  "point_specification": "Metering",    "max_pres_value": "999999", "min_pres_value": "0"},
-    "lux":  {"point_type": "照度",    "point_name": "照度",    "point_specification": "Measurement", "max_pres_value": "10000",  "min_pres_value": "0"},
-    "m/s":  {"point_type": "風速",    "point_name": "風速",    "point_specification": "Measurement", "max_pres_value": "50",     "min_pres_value": "0"},
-    "bar":  {"point_type": "圧力",    "point_name": "圧力",    "point_specification": "Measurement", "max_pres_value": "10",     "min_pres_value": "0"},
+    "degC": {"point_type": "Temperature",          "point_name": "Temperature",          "point_specification": "Measurement", "max_pres_value": "50",     "min_pres_value": "-10"},
+    "%RH":  {"point_type": "Humidity",             "point_name": "Humidity",             "point_specification": "Measurement", "max_pres_value": "100",    "min_pres_value": "0"},
+    "ppm":  {"point_type": "CO2 Concentration",    "point_name": "CO2 Concentration",    "point_specification": "Measurement", "max_pres_value": "5000",   "min_pres_value": "0"},
+    "Pa":   {"point_type": "Differential Pressure","point_name": "Differential Pressure","point_specification": "Measurement", "max_pres_value": "1000",   "min_pres_value": "-1000"},
+    "m3/h": {"point_type": "Flow Rate",            "point_name": "Flow Rate",            "point_specification": "Measurement", "max_pres_value": "10000",  "min_pres_value": "0"},
+    "kW":   {"point_type": "Power",                "point_name": "Power",                "point_specification": "Measurement", "max_pres_value": "1000",   "min_pres_value": "0"},
+    "kWh":  {"point_type": "Energy",               "point_name": "Energy",               "point_specification": "Metering",    "max_pres_value": "999999", "min_pres_value": "0"},
+    "lux":  {"point_type": "Illuminance",          "point_name": "Illuminance",          "point_specification": "Measurement", "max_pres_value": "10000",  "min_pres_value": "0"},
+    "m/s":  {"point_type": "Wind Speed",           "point_name": "Wind Speed",           "point_specification": "Measurement", "max_pres_value": "50",     "min_pres_value": "0"},
+    "bar":  {"point_type": "Pressure",             "point_name": "Pressure",             "point_specification": "Measurement", "max_pres_value": "10",     "min_pres_value": "0"},
 }
 
 # device_ref → device metadata
@@ -122,15 +122,15 @@ def _derive_point_meta(p: dict) -> dict:
     if protocol == "bacnet" and "," in local_id:
         obj_type = local_id.split(",")[0]
         if obj_type == "binaryInput":
-            return {"point_type": "状態", "point_name": "運転状態", "point_specification": "Status",
-                    "max_pres_value": "", "min_pres_value": "", "labels": "停止&&運転"}
+            return {"point_type": "Status", "point_name": "Operation Status", "point_specification": "Status",
+                    "max_pres_value": "", "min_pres_value": "", "labels": "Off&&On"}
         if obj_type == "binaryOutput":
-            return {"point_type": "発停", "point_name": "発停指令", "point_specification": "Command",
-                    "max_pres_value": "", "min_pres_value": "", "labels": "停止&&運転"}
+            return {"point_type": "HVAC Control", "point_name": "Start/Stop Command", "point_specification": "Command",
+                    "max_pres_value": "", "min_pres_value": "", "labels": "Off&&On"}
         # analogOutput: keep unit-based type/range but set Setpoint
         if obj_type == "analogOutput":
             base = _UNIT_META.get(unit, {
-                "point_type": "開度", "point_name": "開度",
+                "point_type": "Setpoint", "point_name": "Setpoint",
                 "max_pres_value": "100", "min_pres_value": "0",
             })
             return {**base, "point_specification": "Setpoint", "labels": ""}
@@ -138,17 +138,22 @@ def _derive_point_meta(p: dict) -> dict:
     # OPC-UA binary (UA-B-*): boolean on/off points
     if protocol == "opcua" and point_id.startswith("UA-B-"):
         if writable:
-            return {"point_type": "発停", "point_name": "発停指令", "point_specification": "Command",
-                    "max_pres_value": "", "min_pres_value": "", "labels": "停止&&運転"}
-        return {"point_type": "状態", "point_name": "運転状態", "point_specification": "Status",
-                "max_pres_value": "", "min_pres_value": "", "labels": "停止&&運転"}
+            return {"point_type": "HVAC Control", "point_name": "Start/Stop Command", "point_specification": "Command",
+                    "max_pres_value": "", "min_pres_value": "", "labels": "Off&&On"}
+        return {"point_type": "Status", "point_name": "Operation Status", "point_specification": "Status",
+                "max_pres_value": "", "min_pres_value": "", "labels": "Off&&On"}
+
+    # OPC-UA integer (UA-I-*): integer setpoints / mode commands
+    if protocol == "opcua" and point_id.startswith("UA-I-"):
+        return {"point_type": "Setpoint", "point_name": "Setpoint",
+                "point_specification": "Setpoint", "max_pres_value": "", "min_pres_value": "", "labels": ""}
 
     # analogInput and OPC-UA UA-F-*: derive from unit
     if unit in _UNIT_META:
         return dict(_UNIT_META[unit], labels="")
 
     # Fallback
-    return {"point_type": unit or "不明", "point_name": unit or "不明",
+    return {"point_type": unit or "Unknown", "point_name": unit or "Unknown",
             "point_specification": "Measurement", "max_pres_value": "", "min_pres_value": "", "labels": ""}
 
 

@@ -50,13 +50,13 @@
   {
     "local_id": "ns=2;s=UA-F-0009",
     "device_ref": "opcua-server",
-    "unit": "m3/h",
+    "unit": "m/s",
     "writable": true
   },
   {
     "local_id": "ns=2;s=UA-F-0010",
     "device_ref": "opcua-server",
-    "unit": "Pa",
+    "unit": "bar",
     "writable": true
   },
   {
@@ -110,13 +110,13 @@
   {
     "local_id": "ns=2;s=UA-F-0019",
     "device_ref": "opcua-server",
-    "unit": "m3/h",
+    "unit": "m/s",
     "writable": true
   },
   {
     "local_id": "ns=2;s=UA-F-0020",
     "device_ref": "opcua-server",
-    "unit": "Pa",
+    "unit": "bar",
     "writable": true
   },
   {
@@ -170,13 +170,13 @@
   {
     "local_id": "ns=2;s=UA-F-0029",
     "device_ref": "opcua-server",
-    "unit": "m3/h",
+    "unit": "m/s",
     "writable": true
   },
   {
     "local_id": "ns=2;s=UA-F-0030",
     "device_ref": "opcua-server",
-    "unit": "Pa",
+    "unit": "bar",
     "writable": true
   },
   {
@@ -230,13 +230,13 @@
   {
     "local_id": "ns=2;s=UA-F-0039",
     "device_ref": "opcua-server",
-    "unit": "m3/h",
+    "unit": "m/s",
     "writable": true
   },
   {
     "local_id": "ns=2;s=UA-F-0040",
     "device_ref": "opcua-server",
-    "unit": "Pa",
+    "unit": "bar",
     "writable": true
   },
   {
@@ -290,13 +290,13 @@
   {
     "local_id": "ns=2;s=UA-F-0049",
     "device_ref": "opcua-server",
-    "unit": "m3/h",
+    "unit": "m/s",
     "writable": true
   },
   {
     "local_id": "ns=2;s=UA-F-0050",
     "device_ref": "opcua-server",
-    "unit": "Pa",
+    "unit": "bar",
     "writable": true
   },
   {
@@ -350,13 +350,13 @@
   {
     "local_id": "ns=2;s=UA-F-0059",
     "device_ref": "opcua-server",
-    "unit": "m3/h",
+    "unit": "m/s",
     "writable": true
   },
   {
     "local_id": "ns=2;s=UA-F-0060",
     "device_ref": "opcua-server",
-    "unit": "Pa",
+    "unit": "bar",
     "writable": true
   },
   {
@@ -410,13 +410,13 @@
   {
     "local_id": "ns=2;s=UA-F-0069",
     "device_ref": "opcua-server",
-    "unit": "m3/h",
+    "unit": "m/s",
     "writable": true
   },
   {
     "local_id": "ns=2;s=UA-F-0070",
     "device_ref": "opcua-server",
-    "unit": "Pa",
+    "unit": "bar",
     "writable": true
   },
   {
@@ -470,13 +470,13 @@
   {
     "local_id": "ns=2;s=UA-F-0079",
     "device_ref": "opcua-server",
-    "unit": "m3/h",
+    "unit": "m/s",
     "writable": true
   },
   {
     "local_id": "ns=2;s=UA-F-0080",
     "device_ref": "opcua-server",
-    "unit": "Pa",
+    "unit": "bar",
     "writable": true
   },
   {
@@ -530,13 +530,13 @@
   {
     "local_id": "ns=2;s=UA-F-0089",
     "device_ref": "opcua-server",
-    "unit": "m3/h",
+    "unit": "m/s",
     "writable": true
   },
   {
     "local_id": "ns=2;s=UA-F-0090",
     "device_ref": "opcua-server",
-    "unit": "Pa",
+    "unit": "bar",
     "writable": true
   },
   {
@@ -590,13 +590,13 @@
   {
     "local_id": "ns=2;s=UA-F-0099",
     "device_ref": "opcua-server",
-    "unit": "m3/h",
+    "unit": "m/s",
     "writable": true
   },
   {
     "local_id": "ns=2;s=UA-F-0100",
     "device_ref": "opcua-server",
-    "unit": "Pa",
+    "unit": "bar",
     "writable": true
   },
   {
@@ -650,13 +650,13 @@
   {
     "local_id": "ns=2;s=UA-F-0109",
     "device_ref": "opcua-server",
-    "unit": "m3/h",
+    "unit": "m/s",
     "writable": false
   },
   {
     "local_id": "ns=2;s=UA-F-0110",
     "device_ref": "opcua-server",
-    "unit": "Pa",
+    "unit": "bar",
     "writable": false
   },
   {
@@ -710,13 +710,13 @@
   {
     "local_id": "ns=2;s=UA-F-0119",
     "device_ref": "opcua-server",
-    "unit": "m3/h",
+    "unit": "m/s",
     "writable": false
   },
   {
     "local_id": "ns=2;s=UA-F-0120",
     "device_ref": "opcua-server",
-    "unit": "Pa",
+    "unit": "bar",
     "writable": false
   },
   {
@@ -770,13 +770,13 @@
   {
     "local_id": "ns=2;s=UA-F-0129",
     "device_ref": "opcua-server",
-    "unit": "m3/h",
+    "unit": "m/s",
     "writable": false
   },
   {
     "local_id": "ns=2;s=UA-F-0130",
     "device_ref": "opcua-server",
-    "unit": "Pa",
+    "unit": "bar",
     "writable": false
   },
   {
@@ -830,13 +830,13 @@
   {
     "local_id": "ns=2;s=UA-F-0139",
     "device_ref": "opcua-server",
-    "unit": "m3/h",
+    "unit": "m/s",
     "writable": false
   },
   {
     "local_id": "ns=2;s=UA-F-0140",
     "device_ref": "opcua-server",
-    "unit": "Pa",
+    "unit": "bar",
     "writable": false
   },
   {
@@ -890,13 +890,13 @@
   {
     "local_id": "ns=2;s=UA-F-0149",
     "device_ref": "opcua-server",
-    "unit": "m3/h",
+    "unit": "m/s",
     "writable": false
   },
   {
     "local_id": "ns=2;s=UA-F-0150",
     "device_ref": "opcua-server",
-    "unit": "Pa",
+    "unit": "bar",
     "writable": false
   },
   {
@@ -950,13 +950,13 @@
   {
     "local_id": "ns=2;s=UA-F-0159",
     "device_ref": "opcua-server",
-    "unit": "m3/h",
+    "unit": "m/s",
     "writable": false
   },
   {
     "local_id": "ns=2;s=UA-F-0160",
     "device_ref": "opcua-server",
-    "unit": "Pa",
+    "unit": "bar",
     "writable": false
   },
   {
@@ -1010,13 +1010,13 @@
   {
     "local_id": "ns=2;s=UA-F-0169",
     "device_ref": "opcua-server",
-    "unit": "m3/h",
+    "unit": "m/s",
     "writable": false
   },
   {
     "local_id": "ns=2;s=UA-F-0170",
     "device_ref": "opcua-server",
-    "unit": "Pa",
+    "unit": "bar",
     "writable": false
   },
   {
@@ -1070,13 +1070,13 @@
   {
     "local_id": "ns=2;s=UA-F-0179",
     "device_ref": "opcua-server",
-    "unit": "m3/h",
+    "unit": "m/s",
     "writable": false
   },
   {
     "local_id": "ns=2;s=UA-F-0180",
     "device_ref": "opcua-server",
-    "unit": "Pa",
+    "unit": "bar",
     "writable": false
   },
   {
@@ -1130,13 +1130,13 @@
   {
     "local_id": "ns=2;s=UA-F-0189",
     "device_ref": "opcua-server",
-    "unit": "m3/h",
+    "unit": "m/s",
     "writable": false
   },
   {
     "local_id": "ns=2;s=UA-F-0190",
     "device_ref": "opcua-server",
-    "unit": "Pa",
+    "unit": "bar",
     "writable": false
   },
   {
@@ -1190,13 +1190,13 @@
   {
     "local_id": "ns=2;s=UA-F-0199",
     "device_ref": "opcua-server",
-    "unit": "m3/h",
+    "unit": "m/s",
     "writable": false
   },
   {
     "local_id": "ns=2;s=UA-F-0200",
     "device_ref": "opcua-server",
-    "unit": "Pa",
+    "unit": "bar",
     "writable": false
   },
   {
@@ -1250,13 +1250,13 @@
   {
     "local_id": "ns=2;s=UA-F-0209",
     "device_ref": "opcua-server",
-    "unit": "m3/h",
+    "unit": "m/s",
     "writable": false
   },
   {
     "local_id": "ns=2;s=UA-F-0210",
     "device_ref": "opcua-server",
-    "unit": "Pa",
+    "unit": "bar",
     "writable": false
   },
   {
@@ -1310,13 +1310,13 @@
   {
     "local_id": "ns=2;s=UA-F-0219",
     "device_ref": "opcua-server",
-    "unit": "m3/h",
+    "unit": "m/s",
     "writable": false
   },
   {
     "local_id": "ns=2;s=UA-F-0220",
     "device_ref": "opcua-server",
-    "unit": "Pa",
+    "unit": "bar",
     "writable": false
   },
   {
@@ -1370,13 +1370,13 @@
   {
     "local_id": "ns=2;s=UA-F-0229",
     "device_ref": "opcua-server",
-    "unit": "m3/h",
+    "unit": "m/s",
     "writable": false
   },
   {
     "local_id": "ns=2;s=UA-F-0230",
     "device_ref": "opcua-server",
-    "unit": "Pa",
+    "unit": "bar",
     "writable": false
   },
   {
@@ -1430,13 +1430,13 @@
   {
     "local_id": "ns=2;s=UA-F-0239",
     "device_ref": "opcua-server",
-    "unit": "m3/h",
+    "unit": "m/s",
     "writable": false
   },
   {
     "local_id": "ns=2;s=UA-F-0240",
     "device_ref": "opcua-server",
-    "unit": "Pa",
+    "unit": "bar",
     "writable": false
   },
   {
@@ -1490,13 +1490,13 @@
   {
     "local_id": "ns=2;s=UA-F-0249",
     "device_ref": "opcua-server",
-    "unit": "m3/h",
+    "unit": "m/s",
     "writable": false
   },
   {
     "local_id": "ns=2;s=UA-F-0250",
     "device_ref": "opcua-server",
-    "unit": "Pa",
+    "unit": "bar",
     "writable": false
   },
   {
@@ -1550,13 +1550,13 @@
   {
     "local_id": "ns=2;s=UA-F-0259",
     "device_ref": "opcua-server",
-    "unit": "m3/h",
+    "unit": "m/s",
     "writable": false
   },
   {
     "local_id": "ns=2;s=UA-F-0260",
     "device_ref": "opcua-server",
-    "unit": "Pa",
+    "unit": "bar",
     "writable": false
   },
   {
@@ -1610,13 +1610,13 @@
   {
     "local_id": "ns=2;s=UA-F-0269",
     "device_ref": "opcua-server",
-    "unit": "m3/h",
+    "unit": "m/s",
     "writable": false
   },
   {
     "local_id": "ns=2;s=UA-F-0270",
     "device_ref": "opcua-server",
-    "unit": "Pa",
+    "unit": "bar",
     "writable": false
   },
   {
@@ -1670,13 +1670,13 @@
   {
     "local_id": "ns=2;s=UA-F-0279",
     "device_ref": "opcua-server",
-    "unit": "m3/h",
+    "unit": "m/s",
     "writable": false
   },
   {
     "local_id": "ns=2;s=UA-F-0280",
     "device_ref": "opcua-server",
-    "unit": "Pa",
+    "unit": "bar",
     "writable": false
   },
   {
@@ -1730,13 +1730,13 @@
   {
     "local_id": "ns=2;s=UA-F-0289",
     "device_ref": "opcua-server",
-    "unit": "m3/h",
+    "unit": "m/s",
     "writable": false
   },
   {
     "local_id": "ns=2;s=UA-F-0290",
     "device_ref": "opcua-server",
-    "unit": "Pa",
+    "unit": "bar",
     "writable": false
   },
   {
@@ -1790,13 +1790,13 @@
   {
     "local_id": "ns=2;s=UA-F-0299",
     "device_ref": "opcua-server",
-    "unit": "m3/h",
+    "unit": "m/s",
     "writable": false
   },
   {
     "local_id": "ns=2;s=UA-F-0300",
     "device_ref": "opcua-server",
-    "unit": "Pa",
+    "unit": "bar",
     "writable": false
   },
   {
@@ -1850,13 +1850,13 @@
   {
     "local_id": "ns=2;s=UA-F-0309",
     "device_ref": "opcua-server",
-    "unit": "m3/h",
+    "unit": "m/s",
     "writable": false
   },
   {
     "local_id": "ns=2;s=UA-F-0310",
     "device_ref": "opcua-server",
-    "unit": "Pa",
+    "unit": "bar",
     "writable": false
   },
   {
@@ -1910,13 +1910,13 @@
   {
     "local_id": "ns=2;s=UA-F-0319",
     "device_ref": "opcua-server",
-    "unit": "m3/h",
+    "unit": "m/s",
     "writable": false
   },
   {
     "local_id": "ns=2;s=UA-F-0320",
     "device_ref": "opcua-server",
-    "unit": "Pa",
+    "unit": "bar",
     "writable": false
   },
   {
@@ -1970,13 +1970,13 @@
   {
     "local_id": "ns=2;s=UA-F-0329",
     "device_ref": "opcua-server",
-    "unit": "m3/h",
+    "unit": "m/s",
     "writable": false
   },
   {
     "local_id": "ns=2;s=UA-F-0330",
     "device_ref": "opcua-server",
-    "unit": "Pa",
+    "unit": "bar",
     "writable": false
   },
   {
@@ -2030,13 +2030,13 @@
   {
     "local_id": "ns=2;s=UA-F-0339",
     "device_ref": "opcua-server",
-    "unit": "m3/h",
+    "unit": "m/s",
     "writable": false
   },
   {
     "local_id": "ns=2;s=UA-F-0340",
     "device_ref": "opcua-server",
-    "unit": "Pa",
+    "unit": "bar",
     "writable": false
   },
   {
@@ -2090,13 +2090,13 @@
   {
     "local_id": "ns=2;s=UA-F-0349",
     "device_ref": "opcua-server",
-    "unit": "m3/h",
+    "unit": "m/s",
     "writable": false
   },
   {
     "local_id": "ns=2;s=UA-F-0350",
     "device_ref": "opcua-server",
-    "unit": "Pa",
+    "unit": "bar",
     "writable": false
   },
   {
@@ -2150,13 +2150,13 @@
   {
     "local_id": "ns=2;s=UA-F-0359",
     "device_ref": "opcua-server",
-    "unit": "m3/h",
+    "unit": "m/s",
     "writable": false
   },
   {
     "local_id": "ns=2;s=UA-F-0360",
     "device_ref": "opcua-server",
-    "unit": "Pa",
+    "unit": "bar",
     "writable": false
   },
   {
@@ -2210,13 +2210,13 @@
   {
     "local_id": "ns=2;s=UA-F-0369",
     "device_ref": "opcua-server",
-    "unit": "m3/h",
+    "unit": "m/s",
     "writable": false
   },
   {
     "local_id": "ns=2;s=UA-F-0370",
     "device_ref": "opcua-server",
-    "unit": "Pa",
+    "unit": "bar",
     "writable": false
   },
   {
@@ -2270,13 +2270,13 @@
   {
     "local_id": "ns=2;s=UA-F-0379",
     "device_ref": "opcua-server",
-    "unit": "m3/h",
+    "unit": "m/s",
     "writable": false
   },
   {
     "local_id": "ns=2;s=UA-F-0380",
     "device_ref": "opcua-server",
-    "unit": "Pa",
+    "unit": "bar",
     "writable": false
   },
   {
@@ -2330,13 +2330,13 @@
   {
     "local_id": "ns=2;s=UA-F-0389",
     "device_ref": "opcua-server",
-    "unit": "m3/h",
+    "unit": "m/s",
     "writable": false
   },
   {
     "local_id": "ns=2;s=UA-F-0390",
     "device_ref": "opcua-server",
-    "unit": "Pa",
+    "unit": "bar",
     "writable": false
   },
   {
@@ -2390,13 +2390,13 @@
   {
     "local_id": "ns=2;s=UA-F-0399",
     "device_ref": "opcua-server",
-    "unit": "m3/h",
+    "unit": "m/s",
     "writable": false
   },
   {
     "local_id": "ns=2;s=UA-F-0400",
     "device_ref": "opcua-server",
-    "unit": "Pa",
+    "unit": "bar",
     "writable": false
   },
   {
@@ -2450,13 +2450,13 @@
   {
     "local_id": "ns=2;s=UA-F-0409",
     "device_ref": "opcua-server",
-    "unit": "m3/h",
+    "unit": "m/s",
     "writable": false
   },
   {
     "local_id": "ns=2;s=UA-F-0410",
     "device_ref": "opcua-server",
-    "unit": "Pa",
+    "unit": "bar",
     "writable": false
   },
   {
@@ -2510,13 +2510,13 @@
   {
     "local_id": "ns=2;s=UA-F-0419",
     "device_ref": "opcua-server",
-    "unit": "m3/h",
+    "unit": "m/s",
     "writable": false
   },
   {
     "local_id": "ns=2;s=UA-F-0420",
     "device_ref": "opcua-server",
-    "unit": "Pa",
+    "unit": "bar",
     "writable": false
   },
   {
@@ -2570,13 +2570,13 @@
   {
     "local_id": "ns=2;s=UA-F-0429",
     "device_ref": "opcua-server",
-    "unit": "m3/h",
+    "unit": "m/s",
     "writable": false
   },
   {
     "local_id": "ns=2;s=UA-F-0430",
     "device_ref": "opcua-server",
-    "unit": "Pa",
+    "unit": "bar",
     "writable": false
   },
   {
@@ -2630,13 +2630,13 @@
   {
     "local_id": "ns=2;s=UA-F-0439",
     "device_ref": "opcua-server",
-    "unit": "m3/h",
+    "unit": "m/s",
     "writable": false
   },
   {
     "local_id": "ns=2;s=UA-F-0440",
     "device_ref": "opcua-server",
-    "unit": "Pa",
+    "unit": "bar",
     "writable": false
   },
   {
@@ -2690,13 +2690,13 @@
   {
     "local_id": "ns=2;s=UA-F-0449",
     "device_ref": "opcua-server",
-    "unit": "m3/h",
+    "unit": "m/s",
     "writable": false
   },
   {
     "local_id": "ns=2;s=UA-F-0450",
     "device_ref": "opcua-server",
-    "unit": "Pa",
+    "unit": "bar",
     "writable": false
   },
   {
@@ -2750,13 +2750,13 @@
   {
     "local_id": "ns=2;s=UA-F-0459",
     "device_ref": "opcua-server",
-    "unit": "m3/h",
+    "unit": "m/s",
     "writable": false
   },
   {
     "local_id": "ns=2;s=UA-F-0460",
     "device_ref": "opcua-server",
-    "unit": "Pa",
+    "unit": "bar",
     "writable": false
   },
   {
@@ -2810,13 +2810,13 @@
   {
     "local_id": "ns=2;s=UA-F-0469",
     "device_ref": "opcua-server",
-    "unit": "m3/h",
+    "unit": "m/s",
     "writable": false
   },
   {
     "local_id": "ns=2;s=UA-F-0470",
     "device_ref": "opcua-server",
-    "unit": "Pa",
+    "unit": "bar",
     "writable": false
   },
   {
@@ -2870,13 +2870,13 @@
   {
     "local_id": "ns=2;s=UA-F-0479",
     "device_ref": "opcua-server",
-    "unit": "m3/h",
+    "unit": "m/s",
     "writable": false
   },
   {
     "local_id": "ns=2;s=UA-F-0480",
     "device_ref": "opcua-server",
-    "unit": "Pa",
+    "unit": "bar",
     "writable": false
   },
   {
@@ -2930,13 +2930,13 @@
   {
     "local_id": "ns=2;s=UA-F-0489",
     "device_ref": "opcua-server",
-    "unit": "m3/h",
+    "unit": "m/s",
     "writable": false
   },
   {
     "local_id": "ns=2;s=UA-F-0490",
     "device_ref": "opcua-server",
-    "unit": "Pa",
+    "unit": "bar",
     "writable": false
   },
   {
@@ -2990,13 +2990,13 @@
   {
     "local_id": "ns=2;s=UA-F-0499",
     "device_ref": "opcua-server",
-    "unit": "m3/h",
+    "unit": "m/s",
     "writable": false
   },
   {
     "local_id": "ns=2;s=UA-F-0500",
     "device_ref": "opcua-server",
-    "unit": "Pa",
+    "unit": "bar",
     "writable": false
   },
   {
