@@ -1,3 +1,6 @@
+// Copyright 2026 nexus-gateway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 // Package metrics holds process-wide counters exposed at the Admin API /metrics
 // endpoint. Counters are global (Prometheus-style): producers increment them,
 // the exposition handler reads them; neither imports the other.

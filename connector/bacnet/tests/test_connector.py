@@ -1,3 +1,6 @@
+# Copyright 2026 nexus-gateway contributors
+# SPDX-License-Identifier: Apache-2.0
+
 """Tests for the BACnet connector using injected mocks (no real BACnet or NATS)."""
 from __future__ import annotations
 

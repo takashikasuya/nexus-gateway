@@ -1,3 +1,6 @@
+// Copyright 2026 nexus-gateway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 package common
 
 // Event is the protocol-tagged message a Connector publishes to NATS JetStream.

@@ -1,3 +1,6 @@
+# Copyright 2026 nexus-gateway contributors
+# SPDX-License-Identifier: Apache-2.0
+
 """ControlCommand / WriteReply wire types for the BACnet Command Channel (ADR-0004)."""
 from __future__ import annotations
 

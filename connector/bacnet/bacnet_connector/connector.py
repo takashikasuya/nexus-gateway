@@ -1,3 +1,6 @@
+# Copyright 2026 nexus-gateway contributors
+# SPDX-License-Identifier: Apache-2.0
+
 """BACnet connector: polls / subscribes to BACnet devices and publishes Common Events."""
 from __future__ import annotations
 

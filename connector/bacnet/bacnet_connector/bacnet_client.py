@@ -1,3 +1,6 @@
+# Copyright 2026 nexus-gateway contributors
+# SPDX-License-Identifier: Apache-2.0
+
 """bacpypes3-backed BACnetClient implementation."""
 from __future__ import annotations
 

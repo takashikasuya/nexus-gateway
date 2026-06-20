@@ -1,3 +1,6 @@
+// Copyright 2026 nexus-gateway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 // Package transport builds gRPC client transport credentials for the gateway's
 // links to Building OS (telemetry Ingress uplink and control Egress agent).
 //

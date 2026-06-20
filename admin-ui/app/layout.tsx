@@ -1,3 +1,6 @@
+// Copyright 2026 nexus-gateway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import type { Metadata } from "next";
 import { Providers } from "@/components/providers";
 import { Nav } from "@/components/nav";

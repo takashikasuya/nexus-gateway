@@ -1,3 +1,6 @@
+// Copyright 2026 nexus-gateway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 package pointlist
 
 // Entry maps one native address to one canonical PointID (ADR-0003).

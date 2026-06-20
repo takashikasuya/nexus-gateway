@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# Copyright 2026 nexus-gateway contributors
+# SPDX-License-Identifier: Apache-2.0
+
 """Scale fixture generator for BOS resource management verification.
 
 Verification scenario

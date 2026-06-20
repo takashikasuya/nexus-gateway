@@ -1,3 +1,6 @@
+// Copyright 2026 nexus-gateway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 "use client";
 
 import { useCallback, useMemo, useState } from "react";

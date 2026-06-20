@@ -1,3 +1,6 @@
+# Copyright 2026 nexus-gateway contributors
+# SPDX-License-Identifier: Apache-2.0
+
 """Configuration loaded from environment variables."""
 from __future__ import annotations
 

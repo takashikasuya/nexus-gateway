@@ -1,3 +1,6 @@
+// Copyright 2026 nexus-gateway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 // Package sdk provides shared wire types and utilities for Connector↔Gateway
 // internal protocol (ADR-0005). Connectors carry only protocol-specific code;
 // the publish-with-ack-window and command-dedup mechanics live here.
