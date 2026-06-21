@@ -3,7 +3,7 @@ module nexus-gateway
 go 1.25.0
 
 require (
-	github.com/docker/docker v28.3.0+incompatible
+	github.com/docker/docker v28.5.2+incompatible
 	github.com/eclipse/paho.golang v0.23.0
 	github.com/lestrrat-go/jwx/v2 v2.1.6
 	github.com/mochi-mqtt/server/v2 v2.7.9
@@ -33,7 +33,6 @@ require (
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/goccy/go-json v0.10.3 // indirect
-	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/google/go-tpm v0.9.8 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/websocket v1.5.3 // indirect
