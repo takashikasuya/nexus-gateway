@@ -31,7 +31,7 @@ protocol because its E2E runs over plain TCP with no host-networking dependency.
 | Admin UI (Next.js) | nice-to-have, **not** MVP-blocking |
 | **OPC-UA E2E** (`integration/TestE2E_OpcUATelemetry`) | ✅ baseline scenario |
 | Connector Catalog — dev/file-backed | ✅ sufficient for MVP |
-| Store-and-Forward metrics on `/metrics` | ✅ required (gap — see below) |
+| Store-and-Forward metrics on `/metrics` | ✅ required (implemented) |
 
 ### Excluded (→ MVP+1)
 
@@ -63,7 +63,7 @@ The MVP is "done" when these five are reproducible (CI or documented steps):
    and reaches the owning connector, returning exactly one typed `ControlResult`.
 5. **Observable state** — `/health`, `/metrics`, `/telemetry`, `/connectors`,
    `/devices` all report correct status; **store-and-forward metrics are present
-   on `/metrics`** (see gap).
+   on `/metrics`** (implemented).
 
 Plus the negative path that distinguishes misconfiguration from a bug:
 
@@ -106,25 +106,26 @@ E2E_NATS_URL=nats://localhost:14222 \
 ## Required Metrics
 
 `/telemetry` (JSON) already exposes `buffer_depth` and per-`point_id` `drifts`.
-For MVP, the Prometheus `/metrics` endpoint must also expose the store-and-forward
-series the evaluation plan assumes. **Current gap:** `/metrics` emits only
-`gateway_*` and `normalizer_*` — no `storefwd_*`.
+The Prometheus `/metrics` endpoint also exposes the store-and-forward series the
+evaluation plan assumes. **Implemented:** `adminapi.handleMetrics`
+(`internal/adminapi/server.go`) emits the full `storefwd_*` set alongside
+`gateway_*` and `normalizer_*`.
 
 | Metric | Source | Status |
 |--------|--------|--------|
-| `storefwd_buffer_depth` (gauge) | `Buffer.Depth()` (exists) | ⬜ expose on `/metrics` |
-| `storefwd_written_total` (counter) | `Buffer.Write` | ⬜ add counter |
-| `storefwd_sent_total` (counter) | `Forwarder` send | ⬜ add counter |
-| `storefwd_dropped_total` (counter) | `Buffer` overflow drop-oldest | ⬜ add counter |
-| `storefwd_checkpoint_total` (counter) | `Forwarder.checkpoint` | ⬜ add counter |
-| `storefwd_send_error_total` (counter) | `Forwarder` / `grpcSink` error | ⬜ add counter |
+| `storefwd_buffer_depth` (gauge) | `Buffer.Depth()` | ✅ present |
+| `storefwd_written_total` (counter) | `Buffer.Write` | ✅ present |
+| `storefwd_sent_total` (counter) | `Forwarder` send | ✅ present |
+| `storefwd_dropped_total` (counter) | `Buffer` overflow drop-oldest | ✅ present |
+| `storefwd_checkpoint_total` (counter) | `Forwarder.checkpoint` | ✅ present |
+| `storefwd_send_error_total` (counter) | `Forwarder` / `grpcSink` error | ✅ present |
 | `normalizer_invalid_total` (counter) | Normalizer poison | ✅ present |
 | `normalizer_unresolved_total` (counter) | Normalizer point-list miss | ✅ present |
 
-The depth gauge is read-only off the buffer; the counters require small
-instrumentation in `internal/storeforward` (`written`, `dropped`) and
-`internal/uplink` (`sent`, `checkpoint`, `send_error`), surfaced through the
-existing `internal/metrics` registry into `adminapi.handleMetrics`.
+The depth gauge is read off the buffer; the counters are sourced from atomic
+counters on `Buffer` (`written`, `dropped`) and the `Forwarder` (`sent`,
+`checkpoint`, `send_error`), surfaced through `adminapi.handleMetrics`. Covered by
+`internal/adminapi/adminapi_test.go`.
 
 ---
 
@@ -147,8 +148,10 @@ existing `internal/metrics` registry into `adminapi.handleMetrics`.
 
 **P0 (blocking)**
 
-1. Expose store-and-forward metrics on `/metrics` (see Required Metrics) — **#73**.
-2. Fix the OPC-UA E2E smoke as the single MVP baseline test — **#74**.
+1. Expose store-and-forward metrics on `/metrics` (see Required Metrics) —
+   ✅ done (**#73**; `internal/adminapi/server.go`).
+2. Fix the OPC-UA E2E smoke as the single MVP baseline test —
+   ✅ done (**#74**; `integration/TestE2E_OpcUATelemetry`).
 3. State MVP scope (in/out) in the README — ✅ done (this doc + README pointers).
 4. Unify the `docker compose` port docs (README.ja used container-internal
    `3000/8080/8090`; published ports are `13000/18080/18090`) — ✅ done.

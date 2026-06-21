@@ -41,7 +41,7 @@ list. The common variables are:
 | Variable | Default | Purpose |
 |----------|---------|---------|
 | `E2E_NATS_URL` | — (required) | NATS URL for JetStream |
-| `E2E_ADMIN_URL` | `http://localhost:8080` | nexus-gateway Admin API |
+| `E2E_ADMIN_URL` | `http://localhost:18080` | nexus-gateway Admin API |
 | `E2E_BOS_API_URL` | — | Building OS REST API (SoS tests) |
 
 ### Running a single evaluation
@@ -52,15 +52,15 @@ docker compose -f docker-compose.yml -f docker-compose.integration.yml \
   --profile opcua up -d
 
 # Run one evaluation (e.g. E1 throughput with 1000 points, 1 s interval):
-E2E_NATS_URL=nats://localhost:4222 \
+E2E_NATS_URL=nats://localhost:14222 \
 E2E_E1_POINTS=1000 \
 E2E_E1_INTERVALS=1 \
 E2E_E1_WINDOW=30 \
-/home/takashi/go-sdk/go/bin/go test -v -tags e2e -run TestE1 ./test/e2e/
+go test -v -tags e2e -run TestE1 ./test/e2e/
 
 # All mandatory evaluations (long; ~3 hours for full matrix):
-E2E_NATS_URL=nats://localhost:4222 \
-/home/takashi/go-sdk/go/bin/go test -v -tags e2e -timeout 4h ./test/e2e/
+E2E_NATS_URL=nats://localhost:14222 \
+go test -v -tags e2e -timeout 4h ./test/e2e/
 ```
 
 ---

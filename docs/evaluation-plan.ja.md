@@ -40,7 +40,7 @@
 | 変数 | 既定値 | 用途 |
 |------|--------|------|
 | `E2E_NATS_URL` | —（必須） | NATS JetStream URL |
-| `E2E_ADMIN_URL` | `http://localhost:8080` | nexus-gateway Admin API |
+| `E2E_ADMIN_URL` | `http://localhost:18080` | nexus-gateway Admin API |
 | `E2E_BOS_API_URL` | — | Building OS REST API（SoS テスト用） |
 
 ### 単一評価の実行
@@ -51,15 +51,15 @@ docker compose -f docker-compose.yml -f docker-compose.integration.yml \
   --profile opcua up -d
 
 # E1 スループット（1000 ポイント、1 秒間隔）を単体実行:
-E2E_NATS_URL=nats://localhost:4222 \
+E2E_NATS_URL=nats://localhost:14222 \
 E2E_E1_POINTS=1000 \
 E2E_E1_INTERVALS=1 \
 E2E_E1_WINDOW=30 \
-/home/takashi/go-sdk/go/bin/go test -v -tags e2e -run TestE1 ./test/e2e/
+go test -v -tags e2e -run TestE1 ./test/e2e/
 
 # 必須評価全件（フルマトリックスは約 3 時間）:
-E2E_NATS_URL=nats://localhost:4222 \
-/home/takashi/go-sdk/go/bin/go test -v -tags e2e -timeout 4h ./test/e2e/
+E2E_NATS_URL=nats://localhost:14222 \
+go test -v -tags e2e -timeout 4h ./test/e2e/
 ```
 
 ---

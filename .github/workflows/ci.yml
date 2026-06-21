@@ -4,6 +4,7 @@ on:
   push:
     branches: [master]
   pull_request:
+  workflow_dispatch: # manual trigger for MVP+1 jobs (e.g. e2e-bacnet)
 
 permissions:
   contents: read
@@ -91,6 +92,9 @@ jobs:
 
   e2e-bacnet:
     name: E2E — BACnet telemetry (#40)
+    # BACnet is MVP+1 (needs host networking for Who-Is/I-Am broadcast and is
+    # flaky on hosted runners), so it is NOT an MVP gate. Run on demand only.
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout nexus-gateway

@@ -16,6 +16,11 @@
 > **ステータス: MVP 直前。** MVP のスコープ(対象/対象外)・合格条件・残ギャップは
 > **[MVP_READINESS.md](MVP_READINESS.md)** に固定しています。基準プロトコルは OPC-UA、
 > BACnet・エッジ mTLS(Traefik)・cosign 本番運用は MVP+1 です。
+>
+> 段階的ロードマップ: **MVP** = OPC-UA テレメトリ/制御/Store-and-Forward →
+> **MVP+1** = BACnet テレメトリ/制御 → **MVP+2** = BACnet COV サブスクリプション →
+> **MVP+3** = COV + 制御フィードバック相関 + Building OS への通知。
+> **BACnet COV / 制御フィードバック通知は将来課題(MVP 対象外)** です。
 
 ---
 
