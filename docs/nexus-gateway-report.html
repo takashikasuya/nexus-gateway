@@ -1165,43 +1165,49 @@ Connectors (full config — fixtures/scale/connectors/*.json)
     ↕  NATS
 Gateway  ←→  BOS  ← import fixtures/scale/&lt;N&gt;/point_list.csv</pre>
 
-  <h3>スケール試験結果（実機シミュレータ, 2026-06）</h3>
+  <h3>スケール試験結果（実機シミュレータ + 実ビル OS, 2026-06）</h3>
   <div class="fact">
-    実シミュレータ（BACnet device 1001 / OPC-UA <code>opc.tcp://…:4840</code>）に対し、
-    コネクタ → NATS JetStream（<code>evt.&lt;proto&gt;.&lt;connector&gt;</code>）の取り込み経路を
-    <code>fixtures/scale</code> の各ティアで検証。測定は JetStream プル購読で
-    起動／ポーリング時の distinct ポイント数と品質を集計（poll-only モード）。
-    BOS インポート経路は mock-bos がスタブのため対象外。
-    <span class="src">connector/bacnet, connector/opcua</span>
+    実シミュレータ（BACnet device 1001 / OPC-UA <code>opc.tcp://192.168.0.26:4840</code>）から
+    <strong>実ビル OS（192.168.0.18、ingress 5051 / egress 5052、平文）まで end-to-end</strong> で検証：
+    sim → コネクタ → NATS JetStream（<code>evt.&lt;proto&gt;.&lt;connector&gt;</code>）→ gateway 正規化 → BOS。
+    完全性は BOS 側で受信した distinct <code>point_id</code> 数、スループットは gateway の
+    store-and-forward メトリクス（<code>/metrics</code>）で測定。
+    <span class="src">connector/bacnet, connector/opcua, internal/storefwd</span>
   </div>
 
   <table>
     <thead><tr><th>ティア（BACnet / OPC-UA 設定）</th><th>BACnet 取り込み</th><th>OPC-UA 取り込み</th><th>segmentation エラー</th><th>read タイムアウト</th></tr></thead>
     <tbody>
       <tr><td>100 / 100</td><td>100（Good）</td><td>100（Good）</td><td>0</td><td>0</td></tr>
-      <tr><td>250 / 250</td><td>再試験予定</td><td>250（Good）</td><td>0</td><td>0</td></tr>
-      <tr><td>500 / 500</td><td>再試験予定</td><td>500（Good）</td><td>0</td><td>0</td></tr>
-      <tr><td>1000 / 1000</td><td>再試験予定</td><td>1000（Good）</td><td>0</td><td>0</td></tr>
+      <tr><td>250 / 250</td><td>250（Good）</td><td>250（Good）</td><td>0</td><td>0</td></tr>
+      <tr><td>500 / 500</td><td>500（Good）</td><td>500（Good）</td><td>0</td><td>0</td></tr>
+      <tr><td>1000 / 1000</td><td>1000（Good）</td><td>1000（Good）</td><td>0</td><td>0</td></tr>
     </tbody>
   </table>
 
   <div class="fact">
-    <strong>OPC-UA は 1000/1000 まで線形にスケール</strong>（全 Good）。
-    BACnet は当初 250 設定以上で 200 点しか取り込めなかったが、<strong>原因はスケール
-    フィクスチャの欠陥</strong>だった：マスターが BACnet を 5 コネクタで同一 200 アドレスを
-    再利用しており（distinct local_id が 200）、単一物理デバイス（device 1001）に対して
-    衝突していた。フィクスチャを<strong>単一デバイス・distinct 1000 点</strong>へ修正済み
-    （<code>fixtures/scale/gen_master.py</code>）。コネクタは 1000 点設定 = 50 チャンク/poll を
-    segmentation・タイムアウト 0 で実行できており、上限はコネクタでもシミュレータでもない。
-    BACnet の最終スケール値は、修正フィクスチャをシミュレータに反映後に再試験して確定する。
+    <strong>2000 点（BACnet 1000 + OPC-UA 1000）が実ビル OS まで到達することを両側で確認。</strong>
+    BOS 側で <strong>約 2000 distinct point_id を受信</strong>、テレメトリ（ingress 5051）・
+    制御下り（egress 5052、<code>GatewayEgress</code> 接続成立、<code>Unimplemented</code>=0）とも有効。
+    <code>normalizer_unresolved_total</code>=0（全点プロビジョニング済み）。
   </div>
 
   <div class="fact">
-    本試験で顕在化した 2 つのスケール課題を修正（<code>connector/bacnet</code>）:
-    ① <code>ReadPropertyMultiple</code> の APDU 超過 → <code>BACNET_RPM_CHUNK_SIZE</code>（既定 20）でチャンク分割。
+    <strong>50 分連続（BACnet 1000 @30s poll + OPC-UA 1000）で持続性を確認。</strong>
+    書込 ~26 frames/s に対し送信 ~31 frames/s（送信が書込を常に上回り backlog 発散なし）、
+    store-and-forward WAL は 1.7–4.7 MB で循環（有界）、gateway メモリ 14–26 MiB（リークなし）。
+    既知の限界：高書込レート（5s poll ≈ 200 writes/s）では store-and-forward SQLite が
+    <code>SQLITE_BUSY（database is locked）</code> でドレイン律速 → busy_timeout / WAL チューニングが必要
+    （<a href="https://github.com/takashikasuya/nexus-gateway/issues/109">#109</a>）。30s poll では 3–4 回/5 分で自己回復し持続可能。
+  </div>
+
+  <div class="fact">
+    本試験で顕在化・修正したスケール課題:
+    ① BACnet <code>ReadPropertyMultiple</code> の APDU 超過 → <code>BACNET_RPM_CHUNK_SIZE</code>（既定 20）でチャンク分割。
     ② bacpypes3 の read 無タイムアウトによる poll ループのハング → <code>BACNET_READ_TIMEOUT</code>（既定 5s）。
     ③ 大規模時の COV 購読ストーム回避用に <code>BACNET_COV_ENABLED</code>（既定 true、poll-only 切替）。
-    <span class="src">docs/connector-spec.md §BACnet env</span>
+    ④ スケールフィクスチャを<strong>単一デバイス・distinct</strong>へ再生成（5 コネクタが同一 200 アドレスを再利用していた欠陥を解消）。
+    <span class="src">connector/bacnet, fixtures/scale/gen_master.py, docs/connector-spec.md §BACnet env</span>
   </div>
 
   <h3>指数バックオフ（BOS 再接続）</h3>
