@@ -21,7 +21,7 @@ services:
     environment:
       - CONNECTOR_ID=bacnet-01
       - NATS_URL=nats://localhost:14222 # host networking: NATS exposed on host port 14222
-      - BACNET_ADDRESS=192.168.0.26
+      - BACNET_ADDRESS=192.0.2.10
       - BACNET_DEVICE_ID=1001 # bbc-sim device_id (config/simulator.yaml)
       - BACNET_LOCAL_ADDRESS=0.0.0.0:47809
       - BACNET_POLL_INTERVAL=5

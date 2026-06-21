@@ -507,7 +507,7 @@
   <span class="str">"protocol"</span>:     <span class="str">"opcua"</span>,
   <span class="str">"connector_id"</span>: <span class="str">"opcua-01"</span>,
   <span class="str">"local_id"</span>:     <span class="str">"ns=2;s=AHU01.SupplyAirTemp"</span>,
-  <span class="str">"device_ref"</span>:   <span class="str">"opc.tcp://10.0.0.5:4840"</span>,
+  <span class="str">"device_ref"</span>:   <span class="str">"opc.tcp://192.0.2.10:4840"</span>,
   <span class="str">"value"</span>:        <span class="num">23.4</span>,
   <span class="str">"unit"</span>:         <span class="str">"Cel"</span>,
   <span class="str">"quality"</span>:      <span class="str">"Good"</span>,
@@ -1167,8 +1167,8 @@ Gateway  ←→  BOS  ← import fixtures/scale/&lt;N&gt;/point_list.csv</pre>
 
   <h3>スケール試験結果（実機シミュレータ + 実ビル OS, 2026-06）</h3>
   <div class="fact">
-    実シミュレータ（BACnet device 1001 / OPC-UA <code>opc.tcp://192.168.0.26:4840</code>）から
-    <strong>実ビル OS（192.168.0.18、ingress 5051 / egress 5052、平文）まで end-to-end</strong> で検証：
+    実シミュレータ（BACnet device 1001 / OPC-UA <code>opc.tcp://192.0.2.10:4840</code>）から
+    <strong>実ビル OS（192.0.2.20、ingress 5051 / egress 5052、平文）まで end-to-end</strong> で検証：
     sim → コネクタ → NATS JetStream（<code>evt.&lt;proto&gt;.&lt;connector&gt;</code>）→ gateway 正規化 → BOS。
     完全性は BOS 側で受信した distinct <code>point_id</code> 数、スループットは gateway の
     store-and-forward メトリクス（<code>/metrics</code>）で測定。

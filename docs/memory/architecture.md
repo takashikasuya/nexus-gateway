@@ -86,7 +86,7 @@ Native addressing only — no canonical `point_id`/`device_id` (ADR-0001). Publi
   "protocol": "opcua",
   "connector_id": "opcua-01",
   "local_id": "ns=2;s=AHU01.SupplyAirTemp",
-  "device_ref": "opc.tcp://10.0.0.5:4840",
+  "device_ref": "opc.tcp://192.0.2.10:4840",
   "value": 23.4,
   "unit": "Cel",
   "quality": "Good",

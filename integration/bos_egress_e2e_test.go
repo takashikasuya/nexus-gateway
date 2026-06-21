@@ -77,7 +77,7 @@ func loadEgressEnv() egressEnvConfig {
 //
 // Run with (SoS BOS defaults):
 //
-//	E2E_BOS_API_URL=http://192.168.0.18:5000 \
+//	E2E_BOS_API_URL=http://192.0.2.20:5000 \
 //	  go test ./integration/... -run TestE2E_BosControlGate -v -timeout 30s
 //
 // For a different BOS deployment, also set E2E_WRITABLE_POINT_ID and E2E_READONLY_POINT_ID.
@@ -118,7 +118,7 @@ func TestE2E_BosControlGate(t *testing.T) {
 //
 // Run with:
 //
-//	E2E_BOS_EGRESS_ADDR=192.168.0.18:5052 E2E_BOS_API_URL=http://192.168.0.18:5000 \
+//	E2E_BOS_EGRESS_ADDR=192.0.2.20:5052 E2E_BOS_API_URL=http://192.0.2.20:5000 \
 //	E2E_GATEWAY_ID=gw-001 E2E_WRITABLE_POINT_ID=PT006 E2E_READONLY_POINT_ID=PT001 \
 //	E2E_WRITABLE_LOCAL_ID=analogValue,1002 E2E_WRITABLE_CONNECTOR=bacnet-01 E2E_WRITABLE_DEVICE_REF=ahu-01 \
 //	  go test ./integration/... -run TestE2E_BosEgressDispatch -v -timeout 60s

@@ -3,6 +3,8 @@
 *.out
 /tmp/
 nats-data/
+# Store-and-Forward SQLite DB + runtime point-list (created by the gateway/container)
+/data/
 connector/bacnet/.venv/
 connector/bacnet/**/__pycache__/
 connector/bacnet/**/*.pyc
