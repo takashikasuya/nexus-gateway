@@ -109,10 +109,11 @@ Normalizer uses (ADR-0001). In the compose stack this is loaded from
 curl -s http://localhost:18080/telemetry -H "Authorization: Bearer $TOKEN" | jq
 ```
 
-`buffer_depth` is the number of frames currently held in the Store-and-Forward
-ring buffer; `drifts` is the per-`point_id` count of frames Building OS did not
-accept (Point List ⇄ twin drift, ADR-0002). Against `mock-bos` both should stay
-near zero.
+`buffer_depth` is the number of **un-forwarded** frames in the Store-and-Forward
+buffer — the send backlog (frames whose seq is beyond the ack cursor), not the
+total row count; `drifts` is the per-`point_id` count of frames Building OS did
+not accept (Point List ⇄ twin drift, ADR-0002). Against `mock-bos` both should
+stay near zero.
 
 ### List and control connectors
 

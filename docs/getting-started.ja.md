@@ -108,7 +108,8 @@ curl -s http://localhost:18080/devices -H "Authorization: Bearer $TOKEN" | jq
 curl -s http://localhost:18080/telemetry -H "Authorization: Bearer $TOKEN" | jq
 ```
 
-`buffer_depth` は Store-and-Forward リングバッファに現在保持されているフレーム数、
+`buffer_depth` は Store-and-Forward バッファ内の**未転送**フレーム数 ＝ 送信バックログ
+(ack カーソルより先の seq を持つフレーム数)であり、総行数ではありません。
 `drifts` は Building OS が受理しなかったフレームの `point_id` 別カウント(Point List ⇄
 twin ドリフト、ADR-0002)です。`mock-bos` 相手では両方ほぼ 0 のままになります。
 

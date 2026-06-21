@@ -178,7 +178,7 @@ running only catalog-listed images is sound supply-chain security.
 
 ### 5.6 mTLS and gateway identity
 
-The gateway↔Building OS gRPC is mTLS-terminated at Building OS's Envoy edge, with
+The gateway↔Building OS gRPC is mTLS-terminated at Building OS's Traefik edge, with
 `gateway_id` bound to the client certificate's CN/SAN; the gRPC services
 themselves speak h2c and delegate cert verification to the edge proxy
 ([ADR-0007](adr/0007-transport-security-mtls-at-edge.md)). Keycloak/OIDC is scoped
@@ -225,7 +225,7 @@ avoid this:
 |----------|------|-----|
 | **High** | Finalize the Point List provisioning API | [ADR-0003](adr/0003-point-list-source-of-truth.md) requires a new API; without it Building OS cannot be the source of truth (Building OS #224) |
 | **High** | Specify the connector contract | Whether third parties can write connectors is the core of lock-in avoidance |
-| **High** | Confirm the mTLS edge topology | [ADR-0007](adr/0007-transport-security-mtls-at-edge.md) names Building OS Envoy / cert-manager / CN-SAN binding as an external dependency (Building OS #161) |
+| **High** | Confirm the mTLS edge topology | [ADR-0007](adr/0007-transport-security-mtls-at-edge.md) names Building OS Traefik / cert-manager / CN-SAN binding as an external dependency (Building OS #161) |
 | Med | Conformance test / simulator E2E | Verify connector compatibility with the sibling simulators + Building OS mock ([fixtures/integration](../fixtures/integration/README.md), `test/e2e`) |
 | Med | Admin UI authz & audit log | The Admin UI drives connector lifecycle, so it needs action auditing, RBAC, and rollback history |
 | Med | Catalog governance | Publish the manifest schema and signing policy so the Connector Catalog does not become a new centralization/lock-in point |

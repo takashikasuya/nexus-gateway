@@ -48,15 +48,28 @@ docker compose up -d   # or with --profile bacnet / --profile opcua
 | `TestE2E_BacnetControl` | `E2E_NATS_URL` | BACnet write command dispatched via NATS → connector ACKs → idempotent re-send |
 | `TestE2E_OpcUAControl` | `E2E_NATS_URL` | OPC-UA write command dispatched via NATS → connector ACKs → idempotent re-send |
 
+**CI status:** `TestE2E_OpcUATelemetry` is the automated **MVP gate** — the
+`e2e-opcua` job runs on every push/PR and asserts not just EVENTS-stream arrival
+but also that the gateway's `/metrics` shows `storefwd_written_total`/
+`storefwd_sent_total > 0` (the frame reached mock Building OS). It scrapes the
+admin API at `E2E_ADMIN_URL`, defaulting to `http://localhost:18080` when unset.
+The `e2e-bacnet` job is **manual-only** (`workflow_dispatch`) because BACnet
+needs host networking for Who-Is/I-Am broadcast and is flaky on hosted runners
+(MVP+1, not a gate). See `.github/workflows/ci.yml`.
+
 Run:
 
 ```bash
 E2E_NATS_URL=nats://localhost:14222 \
   go test ./integration/... -run TestE2E_Bacnet -v -timeout 120s
 
-E2E_NATS_URL=nats://localhost:14222 \
-  go test ./integration/... -run TestE2E_OpcUA -v -timeout 120s
+E2E_NATS_URL=nats://localhost:14222 E2E_ADMIN_URL=http://localhost:18080 \
+  go test ./integration/... -run TestE2E_OpcUA -v -timeout 240s
 ```
+
+> The OPC-UA telemetry test's `storefwd_*` metrics assertion always runs;
+> `E2E_ADMIN_URL` only overrides the admin API it scrapes (default
+> `http://localhost:18080`). CI uses `-timeout 240s` for the OPC-UA job.
 
 ---
 

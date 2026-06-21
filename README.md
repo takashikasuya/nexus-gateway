@@ -308,7 +308,7 @@ E2E tests in `integration/` require a live stack and skip automatically
 without the relevant `E2E_*` env vars (ADR-0004). See
 **[`docs/e2e-test-overview.md`](docs/e2e-test-overview.md)** for the full
 test landscape — in-process CI tests, live connector stack tests, and
-Building OS integration tests (#43–#46).
+Building OS integration tests.
 
 ---
 

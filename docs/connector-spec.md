@@ -95,7 +95,7 @@ Examples:
 cmd.<protocol>.<connector_id>
 ```
 
-The gateway sends a NATS core `Request` to this subject. Connectors **subscribe** to it and must **reply** synchronously (within the request timeout, default 10 s). This is not JetStream; it is NATS core request-reply.
+The gateway sends a NATS core `Request` to this subject. Connectors **subscribe** to it and must **reply** synchronously (within the request timeout, default 5 s). This is not JetStream; it is NATS core request-reply.
 
 ---
 
@@ -235,7 +235,7 @@ Custom tokens are allowed but the above set must be used where semantically appr
 
 ### 4.4 Timeout
 
-Reply **before** the request context deadline. The gateway's default request timeout is 10 seconds. If the device write takes longer, reply `"timeout"` rather than missing the deadline entirely — a missed NATS reply leaves the gateway blocking until it times out on its side.
+Reply **before** the request context deadline. The gateway's default request timeout is 5 seconds. If the device write takes longer, reply `"timeout"` rather than missing the deadline entirely — a missed NATS reply leaves the gateway blocking until it times out on its side.
 
 ---
 
@@ -274,6 +274,8 @@ The gateway passes these through from the connector registration. Protocol-speci
 | `OPCUA_ENDPOINT` | — | OPC-UA endpoint URL, e.g. `opc.tcp://host:4840`. |
 | `OPCUA_POINTS` | `[]` | JSON array of point configs (see §6.2). |
 | `OPCUA_POLL_INTERVAL` | `30` | Seconds between subscription renewals / poll fallback. |
+| `OPCUA_DEVICE_REF` | `opcua-server` | Device reference echoed in emitted events. |
+| `OPCUA_WRITE_TIMEOUT` | `10` | Device write timeout in seconds. |
 
 ### 5.3 CONNECTOR_MAP
 

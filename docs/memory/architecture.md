@@ -7,7 +7,9 @@ metadata:
 
 # Architecture
 
-> Status: initial skeleton — fill in as design firms up.
+> Status: target architecture / design intent. Some elements below are
+> forward-looking (e.g. Modbus connector, OpenTelemetry Collector); for what
+> currently ships see [README](../../README.md) and [CONTEXT.md](../../CONTEXT.md).
 
 ## System Diagram
 
