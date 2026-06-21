@@ -193,6 +193,47 @@ go run ./cmd/gateway
   [SECURITY.md](SECURITY.md) と
   [ADR-0007](docs/adr/0007-transport-security-mtls-at-edge.md) を参照。
 
+#### Keycloak: ローカル dev 専用 — 本番は Building OS IdP を使用
+
+`docker-compose.yml` の Keycloak は **ローカル dev / E2E / デモ専用**です
+(`admin`/`admin` 認証情報、`start-dev` モード)。認証の関心事は 2 つに分かれます。
+
+| 関心事 | 仕組み |
+|--------|--------|
+| 人間オペレータ (Admin UI / Admin API) | Keycloak / OIDC — Bearer JWT、`realm_access.roles` |
+| Gateway ↔ Building OS 機械間認証 | **mTLS** — Keycloak は関与しない |
+
+本番では、Gateway と Admin UI の両方を **Building OS 側の Keycloak**
+(または組織共通 IdP) に向け、同梱の `keycloak` コンテナは起動しません。
+Building OS の Keycloak realm に `gateway-operator` と `gateway-viewer`
+の 2 つの realm role を用意するだけで済みます。本番用の環境変数例:
+
+```env
+# Gateway
+KEYCLOAK_JWKS_URL=https://auth.example.com/realms/building-os/protocol/openid-connect/certs
+KEYCLOAK_ISSUER=https://auth.example.com/realms/building-os
+KEYCLOAK_AUDIENCE=nexus-gateway-admin-api   # "account" より専用 audience を推奨
+
+# Admin UI
+KEYCLOAK_ID=nexus-gateway-admin-ui
+KEYCLOAK_SECRET=<本番シークレット>
+KEYCLOAK_ISSUER=https://auth.example.com/realms/building-os
+NEXTAUTH_URL=https://gateway-admin.example.com
+NEXTAUTH_SECRET=<ランダムシークレット>
+ADMIN_API_URL=https://gateway-admin-api.example.com
+```
+
+統合・本番環境向けの compose override として
+[`docker-compose.external-keycloak.yml`](docker-compose.external-keycloak.yml)
+を用意しています。
+
+| 環境 | Keycloak |
+|------|----------|
+| ローカル dev / CI / E2E | 同梱 (本リポジトリ) |
+| Building OS 統合環境 | Building OS 側 Keycloak |
+| 本番 | Building OS 側 Keycloak または組織共通 IdP |
+| Gateway ↔ Building OS | mTLS — Keycloak 不使用 |
+
 ### シミュレータ統合(設備なし)
 
 隣接リポ `../bacnet-sim-gateway` と `../opcua-sim-gateway` が標準準拠の BACnet/IP・

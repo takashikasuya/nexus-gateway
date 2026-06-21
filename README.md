@@ -258,6 +258,46 @@ go run ./cmd/gateway
 For the full E2E test suite against Building OS, see
 **[`docs/e2e-test-overview.md`](docs/e2e-test-overview.md)**.
 
+#### Keycloak: local dev only — use Building OS IdP in production
+
+The Keycloak service in `docker-compose.yml` is **local dev / E2E / demo only**
+(`admin`/`admin` credentials, `start-dev` mode). Two distinct auth concerns exist:
+
+| Concern | Mechanism |
+|---------|-----------|
+| Human operators (Admin UI / Admin API) | Keycloak / OIDC — Bearer JWT, `realm_access.roles` |
+| Gateway ↔ Building OS machine auth | **mTLS** — Keycloak is not involved |
+
+In production, point both the gateway and Admin UI at the **Building OS Keycloak**
+(or your organisation's shared IdP) and omit the bundled `keycloak` container.
+The Building OS Keycloak realm needs at least two realm roles: `gateway-operator`
+and `gateway-viewer`. Example production env vars:
+
+```env
+# Gateway
+KEYCLOAK_JWKS_URL=https://auth.example.com/realms/building-os/protocol/openid-connect/certs
+KEYCLOAK_ISSUER=https://auth.example.com/realms/building-os
+KEYCLOAK_AUDIENCE=nexus-gateway-admin-api   # prefer a dedicated audience over "account"
+
+# Admin UI
+KEYCLOAK_ID=nexus-gateway-admin-ui
+KEYCLOAK_SECRET=<production-secret>
+KEYCLOAK_ISSUER=https://auth.example.com/realms/building-os
+NEXTAUTH_URL=https://gateway-admin.example.com
+NEXTAUTH_SECRET=<random-secret>
+ADMIN_API_URL=https://gateway-admin-api.example.com
+```
+
+Use [`docker-compose.external-keycloak.yml`](docker-compose.external-keycloak.yml)
+as a ready-made compose override for integration / production environments.
+
+| Environment | Keycloak |
+|-------------|----------|
+| Local dev / CI / E2E | Bundled (this repo) |
+| Building OS integration | Building OS Keycloak |
+| Production | Building OS Keycloak or org-wide IdP |
+| Gateway ↔ Building OS | mTLS — no Keycloak |
+
 ---
 
 ## Extending: add a protocol connector
