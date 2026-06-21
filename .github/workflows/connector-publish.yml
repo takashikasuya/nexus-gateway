@@ -54,7 +54,7 @@ jobs:
 
       # Build locally first so Trivy can scan before anything is pushed.
       - name: Build image (local)
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: ${{ inputs.context }}
           file: ${{ inputs.dockerfile }}
@@ -94,7 +94,7 @@ jobs:
       # ── Push (only after scan passes) ───────────────────────────────────────
       - name: Push image to GHCR
         id: push
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: ${{ inputs.context }}
           file: ${{ inputs.dockerfile }}
