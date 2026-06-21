@@ -1165,6 +1165,45 @@ Connectors (full config — fixtures/scale/connectors/*.json)
     ↕  NATS
 Gateway  ←→  BOS  ← import fixtures/scale/&lt;N&gt;/point_list.csv</pre>
 
+  <h3>スケール試験結果（実機シミュレータ, 2026-06）</h3>
+  <div class="fact">
+    実シミュレータ（BACnet device 1001 / OPC-UA <code>opc.tcp://…:4840</code>）に対し、
+    コネクタ → NATS JetStream（<code>evt.&lt;proto&gt;.&lt;connector&gt;</code>）の取り込み経路を
+    <code>fixtures/scale</code> の各ティアで検証。測定は JetStream プル購読で
+    起動／ポーリング時の distinct ポイント数と品質を集計（poll-only モード）。
+    BOS インポート経路は mock-bos がスタブのため対象外。
+    <span class="src">connector/bacnet, connector/opcua</span>
+  </div>
+
+  <table>
+    <thead><tr><th>ティア（BACnet / OPC-UA 設定）</th><th>BACnet 取り込み</th><th>OPC-UA 取り込み</th><th>segmentation エラー</th><th>read タイムアウト</th></tr></thead>
+    <tbody>
+      <tr><td>100 / 100</td><td>100（Good）</td><td>100（Good）</td><td>0</td><td>0</td></tr>
+      <tr><td>250 / 250</td><td>再試験予定</td><td>250（Good）</td><td>0</td><td>0</td></tr>
+      <tr><td>500 / 500</td><td>再試験予定</td><td>500（Good）</td><td>0</td><td>0</td></tr>
+      <tr><td>1000 / 1000</td><td>再試験予定</td><td>1000（Good）</td><td>0</td><td>0</td></tr>
+    </tbody>
+  </table>
+
+  <div class="fact">
+    <strong>OPC-UA は 1000/1000 まで線形にスケール</strong>（全 Good）。
+    BACnet は当初 250 設定以上で 200 点しか取り込めなかったが、<strong>原因はスケール
+    フィクスチャの欠陥</strong>だった：マスターが BACnet を 5 コネクタで同一 200 アドレスを
+    再利用しており（distinct local_id が 200）、単一物理デバイス（device 1001）に対して
+    衝突していた。フィクスチャを<strong>単一デバイス・distinct 1000 点</strong>へ修正済み
+    （<code>fixtures/scale/gen_master.py</code>）。コネクタは 1000 点設定 = 50 チャンク/poll を
+    segmentation・タイムアウト 0 で実行できており、上限はコネクタでもシミュレータでもない。
+    BACnet の最終スケール値は、修正フィクスチャをシミュレータに反映後に再試験して確定する。
+  </div>
+
+  <div class="fact">
+    本試験で顕在化した 2 つのスケール課題を修正（<code>connector/bacnet</code>）:
+    ① <code>ReadPropertyMultiple</code> の APDU 超過 → <code>BACNET_RPM_CHUNK_SIZE</code>（既定 20）でチャンク分割。
+    ② bacpypes3 の read 無タイムアウトによる poll ループのハング → <code>BACNET_READ_TIMEOUT</code>（既定 5s）。
+    ③ 大規模時の COV 購読ストーム回避用に <code>BACNET_COV_ENABLED</code>（既定 true、poll-only 切替）。
+    <span class="src">docs/connector-spec.md §BACnet env</span>
+  </div>
+
   <h3>指数バックオフ（BOS 再接続）</h3>
   <div class="fact">
     <code>internal/retry/backoff.go</code> に実装。Min=1s, Max=60s, Factor=2.0, ±20% jitter。

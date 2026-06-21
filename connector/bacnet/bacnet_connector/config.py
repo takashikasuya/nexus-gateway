@@ -28,10 +28,27 @@ class Config:
     local_address: str = "0.0.0.0"      # local BACnet interface address
     default_write_priority: int = 8     # BACnet write priority (1=highest, 16=lowest)
     write_timeout: float = 10.0         # seconds before a write is declared timed-out
+    # Max points per ReadPropertyMultiple request. A single RPM for many points can
+    # overflow the device's APDU; devices without segmentation then reject the whole
+    # request with "segmentation-not-supported". Polling in chunks keeps each response
+    # small enough to fit. Tune to the device's max APDU (smaller = safer, more round-trips).
+    rpm_chunk_size: int = 20
+    # Per-read deadline. bacpypes3 reads have no built-in timeout: a slow or
+    # unresponsive device would otherwise hang the poll loop forever. On timeout the
+    # chunk yields no values and polling continues on the next cycle.
+    read_timeout: float = 5.0
+    # Whether to open a per-point COV (change-of-value) subscription in addition to
+    # polling. Each subscription is a long-lived session; thousands of them can
+    # overwhelm a device. Disable (poll-only) for large point counts.
+    cov_enabled: bool = True
 
     def __post_init__(self) -> None:
         if self.poll_interval <= 0:
             raise ValueError(f"poll_interval must be positive, got {self.poll_interval}")
+        if self.rpm_chunk_size < 1:
+            raise ValueError(f"rpm_chunk_size must be >= 1, got {self.rpm_chunk_size}")
+        if self.read_timeout <= 0:
+            raise ValueError(f"read_timeout must be positive, got {self.read_timeout}")
         if not 1 <= self.default_write_priority <= 16:
             raise ValueError(f"default_write_priority must be 1–16, got {self.default_write_priority}")
         if self.write_timeout <= 0:
@@ -57,6 +74,10 @@ class Config:
             points=points,
             poll_interval=float(os.environ.get("BACNET_POLL_INTERVAL", "30")),
             local_address=os.environ.get("BACNET_LOCAL_ADDRESS", "0.0.0.0"),
+            rpm_chunk_size=int(os.environ.get("BACNET_RPM_CHUNK_SIZE", "20")),
+            read_timeout=float(os.environ.get("BACNET_READ_TIMEOUT", "5")),
+            cov_enabled=os.environ.get("BACNET_COV_ENABLED", "true").strip().lower()
+            not in ("0", "false", "no"),
             default_write_priority=int(os.environ.get("BACNET_DEFAULT_WRITE_PRIORITY", "8")),
             write_timeout=float(os.environ.get("BACNET_WRITE_TIMEOUT", "10")),
         )
