@@ -7,8 +7,8 @@ BUF   ?= $(GOBIN)/buf
 ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 COMPOSE_BASE := -f $(ROOT)/docker-compose.yml -f $(ROOT)/docker-compose.integration.yml
 
-OPCUA_ENDPOINT  ?= opc.tcp://192.168.0.26:4840
-BACNET_ADDRESS  ?= 192.168.0.26
+OPCUA_ENDPOINT  ?= opc.tcp://localhost:4840
+BACNET_ADDRESS  ?= localhost
 
 .PHONY: generate build test lint clean \
         e2e-up-opcua e2e-up-bacnet e2e-up-both e2e-down \
@@ -29,8 +29,9 @@ buf-breaking:
 clean:
 	rm -f gen/*.go
 
-# ── E2E integration targets (remote devices at 192.168.0.26) ─────────────────
-# Override OPCUA_ENDPOINT / BACNET_ADDRESS if devices are at a different address.
+# ── E2E integration targets ───────────────────────────────────────────────────
+# Override OPCUA_ENDPOINT / BACNET_ADDRESS to point at your simulator or device:
+#   make e2e-up-opcua OPCUA_ENDPOINT=opc.tcp://192.168.1.10:4840
 
 e2e-up-opcua:
 	OPCUA_ENDPOINT=$(OPCUA_ENDPOINT) \

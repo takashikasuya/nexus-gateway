@@ -1,3 +1,6 @@
+# Copyright 2026 nexus-gateway contributors
+# SPDX-License-Identifier: Apache-2.0
+
 """BACnet write handler: subscribe to cmd.<protocol>.<connector_id>, execute WriteProperty."""
 from __future__ import annotations
 

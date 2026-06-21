@@ -1,3 +1,6 @@
+# Copyright 2026 nexus-gateway contributors
+# SPDX-License-Identifier: Apache-2.0
+
 """Tests for the BACnet write handler (Command Channel, ADR-0004)."""
 from __future__ import annotations
 

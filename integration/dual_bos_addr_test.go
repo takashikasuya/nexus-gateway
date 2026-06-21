@@ -1,3 +1,6 @@
+// Copyright 2026 nexus-gateway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 package integration_test
 
 // TestE2E_DualBOSAddr verifies that the gateway can simultaneously connect

@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# Copyright 2026 nexus-gateway contributors
+# SPDX-License-Identifier: Apache-2.0
+
 """Scale fixture generator for BOS resource management verification.
 
 Verification scenario
@@ -71,8 +74,141 @@ MASTER = Path(__file__).parent / "2000/point_list.json"
 OUT_ROOT = Path(__file__).parent
 DEFAULT_SIZES = [200, 500, 1000, 2000]
 
-CSV_FIELDS = ["point_id", "connector_id", "protocol", "local_id",
-              "device_ref", "unit", "writable"]
+CSV_FIELDS = [
+    "gateway_id", "connector_id", "protocol",
+    "point_id", "point_name", "point_type", "point_specification",
+    "writable", "interval", "unit",
+    "max_pres_value", "min_pres_value", "labels", "scale",
+    "device_id", "device_name", "device_type",
+    "site", "building", "floor", "installation_area",
+    "target_area", "panel", "tags", "supplier", "owner", "description",
+    "local_id", "device_id_bacnet", "instance_no_bacnet", "object_type_bacnet",
+]
+
+# unit → point metadata  (point_type must match _POINT_SEED in bacnet-sim-gateway/semantic/brick.py)
+_UNIT_META: dict[str, dict] = {
+    "degC": {"point_type": "Temperature",          "point_name": "Temperature",          "point_specification": "Measurement", "max_pres_value": "50",     "min_pres_value": "-10"},
+    "%RH":  {"point_type": "Humidity",             "point_name": "Humidity",             "point_specification": "Measurement", "max_pres_value": "100",    "min_pres_value": "0"},
+    "ppm":  {"point_type": "CO2 Concentration",    "point_name": "CO2 Concentration",    "point_specification": "Measurement", "max_pres_value": "5000",   "min_pres_value": "0"},
+    "Pa":   {"point_type": "Differential Pressure","point_name": "Differential Pressure","point_specification": "Measurement", "max_pres_value": "1000",   "min_pres_value": "-1000"},
+    "m3/h": {"point_type": "Flow Rate",            "point_name": "Flow Rate",            "point_specification": "Measurement", "max_pres_value": "10000",  "min_pres_value": "0"},
+    "kW":   {"point_type": "Power",                "point_name": "Power",                "point_specification": "Measurement", "max_pres_value": "1000",   "min_pres_value": "0"},
+    "kWh":  {"point_type": "Energy",               "point_name": "Energy",               "point_specification": "Metering",    "max_pres_value": "999999", "min_pres_value": "0"},
+    "lux":  {"point_type": "Illuminance",          "point_name": "Illuminance",          "point_specification": "Measurement", "max_pres_value": "10000",  "min_pres_value": "0"},
+    "m/s":  {"point_type": "Wind Speed",           "point_name": "Wind Speed",           "point_specification": "Measurement", "max_pres_value": "50",     "min_pres_value": "0"},
+    "bar":  {"point_type": "Pressure",             "point_name": "Pressure",             "point_specification": "Measurement", "max_pres_value": "10",     "min_pres_value": "0"},
+}
+
+# device_ref → device metadata
+_DEVICE_META: dict[str, dict] = {
+    "ahu-01":       {"device_id": "ahu-01",       "device_name": "AHU-01",       "device_type": "AHU",     "device_id_bacnet": "1001"},
+    "ahu-02":       {"device_id": "ahu-02",       "device_name": "AHU-02",       "device_type": "AHU",     "device_id_bacnet": "1002"},
+    "fcu-01":       {"device_id": "fcu-01",       "device_name": "FCU-01",       "device_type": "AHU",     "device_id_bacnet": "1003"},
+    "chiller-01":   {"device_id": "chiller-01",   "device_name": "Chiller-01",   "device_type": "Chiller", "device_id_bacnet": "1004"},
+    "env-01":       {"device_id": "env-01",       "device_name": "ENV-01",       "device_type": "Sensor",  "device_id_bacnet": "1005"},
+    "opcua-server": {"device_id": "opcua-server", "device_name": "OPCUA Server", "device_type": "Sensor",  "device_id_bacnet": ""},
+}
+
+
+def _derive_point_meta(p: dict) -> dict:
+    """Return point_type/name/specification/max/min/labels for a point."""
+    unit = p.get("unit", "")
+    protocol = p.get("protocol", "")
+    local_id = p.get("local_id", "")
+    point_id = p.get("point_id", "")
+    writable = p.get("writable", False)
+
+    # BACnet binary points: specification from object type regardless of unit
+    if protocol == "bacnet" and "," in local_id:
+        obj_type = local_id.split(",")[0]
+        if obj_type == "binaryInput":
+            return {"point_type": "Status", "point_name": "Operation Status", "point_specification": "Status",
+                    "max_pres_value": "", "min_pres_value": "", "labels": "Off&&On"}
+        if obj_type == "binaryOutput":
+            return {"point_type": "HVAC Control", "point_name": "Start/Stop Command", "point_specification": "Command",
+                    "max_pres_value": "", "min_pres_value": "", "labels": "Off&&On"}
+        # analogOutput: keep unit-based type/range but set Setpoint
+        if obj_type == "analogOutput":
+            base = _UNIT_META.get(unit, {
+                "point_type": "Setpoint", "point_name": "Setpoint",
+                "max_pres_value": "100", "min_pres_value": "0",
+            })
+            return {**base, "point_specification": "Setpoint", "labels": ""}
+
+    # OPC-UA binary (UA-B-*): boolean on/off points
+    if protocol == "opcua" and point_id.startswith("UA-B-"):
+        if writable:
+            return {"point_type": "HVAC Control", "point_name": "Start/Stop Command", "point_specification": "Command",
+                    "max_pres_value": "", "min_pres_value": "", "labels": "Off&&On"}
+        return {"point_type": "Status", "point_name": "Operation Status", "point_specification": "Status",
+                "max_pres_value": "", "min_pres_value": "", "labels": "Off&&On"}
+
+    # OPC-UA integer (UA-I-*): integer setpoints / mode commands
+    if protocol == "opcua" and point_id.startswith("UA-I-"):
+        return {"point_type": "Setpoint", "point_name": "Setpoint",
+                "point_specification": "Setpoint", "max_pres_value": "", "min_pres_value": "", "labels": ""}
+
+    # analogInput and OPC-UA UA-F-*: derive from unit
+    if unit in _UNIT_META:
+        return dict(_UNIT_META[unit], labels="")
+
+    # Fallback
+    return {"point_type": unit or "Unknown", "point_name": unit or "Unknown",
+            "point_specification": "Measurement", "max_pres_value": "", "min_pres_value": "", "labels": ""}
+
+
+def enrich_point(p: dict) -> dict:
+    """Return a CSV-ready row with all spec fields derived from master fields."""
+    unit = p.get("unit", "")
+    device_ref = p.get("device_ref", "")
+    local_id = p.get("local_id", "")
+    protocol = p.get("protocol", "")
+
+    pt_meta = _derive_point_meta(p)
+    dev_meta = _DEVICE_META.get(device_ref, {
+        "device_id": device_ref, "device_name": device_ref,
+        "device_type": "", "device_id_bacnet": "",
+    })
+
+    # BACnet: local_id = "objectType,instanceNo"
+    if protocol == "bacnet" and "," in local_id:
+        obj_type, inst_no = local_id.split(",", 1)
+    else:
+        obj_type, inst_no = "", ""
+
+    return {
+        "gateway_id":          "gw-001",
+        "connector_id":        p.get("connector_id", ""),
+        "protocol":            protocol,
+        "point_id":            p.get("point_id", ""),
+        "point_name":          pt_meta["point_name"],
+        "point_type":          pt_meta["point_type"],
+        "point_specification": pt_meta["point_specification"],
+        "writable":            str(p.get("writable", False)).lower(),
+        "interval":            "5",
+        "unit":                unit,
+        "max_pres_value":      pt_meta["max_pres_value"],
+        "min_pres_value":      pt_meta["min_pres_value"],
+        "labels":              pt_meta["labels"],
+        "scale":               "1.0",
+        "device_id":           dev_meta["device_id"],
+        "device_name":         dev_meta["device_name"],
+        "device_type":         dev_meta["device_type"],
+        "site":                "Site01",
+        "building":            "Building01",
+        "floor":               "1F",
+        "installation_area":   "Area01",
+        "target_area":         "",
+        "panel":               "",
+        "tags":                "",
+        "supplier":            "",
+        "owner":               "",
+        "description":         "",
+        "local_id":            local_id,
+        "device_id_bacnet":    dev_meta["device_id_bacnet"],
+        "instance_no_bacnet":  inst_no,
+        "object_type_bacnet":  obj_type,
+    }
 
 
 def load_master(path: Path) -> list[dict]:
@@ -93,7 +229,7 @@ def write_csv(path: Path, points: list[dict]) -> None:
         writer = csv.DictWriter(f, fieldnames=CSV_FIELDS)
         writer.writeheader()
         for p in points:
-            writer.writerow({k: p.get(k, "") for k in CSV_FIELDS})
+            writer.writerow(enrich_point(p))
 
 
 def derive_connector_points(points: list[dict]) -> dict[str, list[dict]]:
@@ -130,6 +266,10 @@ def generate_bos_import(size: int, master: list[dict],
     if not csv_only:
         write_json(out / "point_list.json", points)
     write_csv(out / "point_list.csv", points)
+    for proto in ("bacnet", "opcua"):
+        proto_points = [p for p in points if p["protocol"] == proto]
+        if proto_points:
+            write_csv(out / f"point_list_{proto}.csv", proto_points)
 
 
 def generate_connector_configs(master: list[dict], dry_run: bool) -> None:

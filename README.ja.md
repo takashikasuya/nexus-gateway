@@ -1,8 +1,13 @@
 # nexus-gateway
 
+[![CI](https://github.com/takashikasuya/nexus-gateway/actions/workflows/ci.yml/badge.svg)](https://github.com/takashikasuya/nexus-gateway/actions/workflows/ci.yml)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+
 **ビル設備(BMS・IoT・フィールドプロトコル)を [Building OS](https://github.com/takashikasuya/gutp-building-os-oss) に接続するエッジ統合ゲートウェイ。**
 
 *[English](README.md) / 日本語*
+
+> **用語:** **SBCO** (Smart Building Common Objects) は本ゲートウェイが消費するポイントリストのスキーマ定義標準です。**Building OS** はプロビジョニングとテレメトリの System of Record となるクラウドサイドプラットフォームです。両者は **GUTP** (Green Utilization Technology Platform) 研究プロジェクトの一部です。
 
 設備データを収集し、制御を中継し、プロトコル差異を吸収して、すべてを Building OS
 の共通データモデルへ正規化します。Building OS が **System of Record(記録の正本)**
@@ -256,6 +261,10 @@ E2E テストは `test/e2e/`(`//go:build e2e`)にあり、
 
 ---
 
+## 学術的位置づけ
+
+本リポジトリはスマートビルディング向けエッジゲートウェイアーキテクチャの学術評価における実装アーティファクトとしても使用しています。実験設計（`docs/evaluation-plan.ja.md`）とパフォーマンステスト（`test/e2e/eval_*.go`）を再現可能性のために公開リポジトリに含めています。
+
 ## ライセンス
 
-Apache-2.0(SBCO / Building OS 隣接プロジェクトと統一)。[`LICENSE`](LICENSE) を参照。
+Apache-2.0。[`LICENSE`](LICENSE) および依存ライブラリの帰属については [`NOTICE`](NOTICE) を参照してください。

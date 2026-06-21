@@ -25,6 +25,13 @@ services:
       - BACNET_DEVICE_ID=1001 # bbc-sim device_id (config/simulator.yaml)
       - BACNET_LOCAL_ADDRESS=0.0.0.0:47809
       - BACNET_POLL_INTERVAL=5
+      # Read points in chunks so large point lists don't overflow the device APDU
+      # (devices without segmentation reject big reads with "segmentation-not-supported").
+      - BACNET_RPM_CHUNK_SIZE=20
+      # Per-read deadline; prevents a slow/unresponsive device from hanging the poll loop.
+      - BACNET_READ_TIMEOUT=5
+      # COV subscriptions on top of polling. Set false (poll-only) for large point counts.
+      - BACNET_COV_ENABLED=true
       # Object type,instance pairs match bbc-sim's objects and fixtures/integration/point_list.json.
       - |
         BACNET_POINTS=[

@@ -1,3 +1,6 @@
+// Copyright 2026 nexus-gateway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 //go:build e2e
 
 // Package e2e holds end-to-end tests that exercise the gateway against running

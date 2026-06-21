@@ -1,23 +1,23 @@
 ---
 name: Feature
-about: Implement a spec item
+about: Propose a new capability or improvement
 labels: feature
 ---
 
-## Spec reference
+## Problem / motivation
 
-<!-- Link to docs/specs/... -->
+<!-- What problem does this solve? What use case does it enable? -->
 
-## What to implement
+## Proposed solution
 
-<!-- One sentence -->
+<!-- One-paragraph description of what to implement -->
 
 ## Acceptance criteria
 
-<!-- Copy from spec, trimmed to this issue's scope -->
 - [ ]
 - [ ]
 
-## Notes for AI agent
+## Context for implementers
 
-<!-- Any context not in the spec: constraints, adjacent code, gotchas -->
+<!-- Relevant ADRs, adjacent code, constraints, or trade-offs to be aware of -->
+<!-- Related: docs/adr/, CONTRIBUTING.md -->

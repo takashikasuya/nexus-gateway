@@ -1,3 +1,6 @@
+// Copyright 2026 nexus-gateway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 /** Thin wrapper for Admin API calls forwarded from Next.js server routes. */
 
 const BASE = process.env.ADMIN_API_URL ?? "http://localhost:8080";

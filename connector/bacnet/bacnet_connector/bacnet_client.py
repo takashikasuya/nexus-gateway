@@ -1,3 +1,6 @@
+# Copyright 2026 nexus-gateway contributors
+# SPDX-License-Identifier: Apache-2.0
+
 """bacpypes3-backed BACnetClient implementation."""
 from __future__ import annotations
 
@@ -33,13 +36,14 @@ def _to_float(raw: object) -> float | None:
 class Bacpypes3Client(BACnetClient):
     """BACnetClient backed by a bacpypes3 Application."""
 
-    def __init__(self, app: Application):
+    def __init__(self, app: Application, read_timeout: float = 5.0):
         self._app = app
+        self._read_timeout = read_timeout
         # Map of (address, obj_id) -> (asyncio.Task, cancel_event) for active COV subs.
         self._cov_tasks: dict[tuple[str, str], asyncio.Task] = {}
 
     @classmethod
-    async def create(cls, local_address: str) -> "Bacpypes3Client":
+    async def create(cls, local_address: str, read_timeout: float = 5.0) -> "Bacpypes3Client":
         dev = DeviceObject(
             objectIdentifier=("device", 599),
             objectName="nexus-bacnet-client",
@@ -53,7 +57,7 @@ class Bacpypes3Client(BACnetClient):
             objectName="NP-1",
         )
         app = Application.from_object_list([dev, net])
-        return cls(app)
+        return cls(app, read_timeout=read_timeout)
 
     async def read_property_multiple(
         self,
@@ -68,7 +72,16 @@ class Bacpypes3Client(BACnetClient):
             parameter_list.append([prop_id])
         # ErrorRejectAbortNack is a BaseException (not Exception) so catch it explicitly.
         try:
-            raw = await self._app.read_property_multiple(Address(address), parameter_list)
+            raw = await asyncio.wait_for(
+                self._app.read_property_multiple(Address(address), parameter_list),
+                timeout=self._read_timeout,
+            )
+        except asyncio.TimeoutError:
+            logger.warning(
+                "bacnet: read from %s timed out after %.0fs (%d points)",
+                address, self._read_timeout, len(requests),
+            )
+            return [(obj_id, None, None) for obj_id, _ in requests]
         except ErrorRejectAbortNack as exc:
             logger.warning("bacnet: device error from %s: %s", address, exc)
             return [(obj_id, None, None) for obj_id, _ in requests]

@@ -1,3 +1,6 @@
+# Copyright 2026 nexus-gateway contributors
+# SPDX-License-Identifier: Apache-2.0
+
 """BACnet connector: polls / subscribes to BACnet devices and publishes Common Events."""
 from __future__ import annotations
 
@@ -80,12 +83,15 @@ class Connector:
         await self._poll_all()
 
         # Subscribe to COV for every point — tasks are cancelled on shutdown.
-        for pt in self._cfg.points:
-            task = asyncio.create_task(
-                self._subscribe_cov(pt),
-                name=f"cov-{pt.local_id}",
-            )
-            self._cov_tasks.append(task)
+        # Skipped in poll-only mode: thousands of long-lived COV sessions can
+        # overwhelm a device, so large deployments rely on periodic polling alone.
+        if self._cfg.cov_enabled:
+            for pt in self._cfg.points:
+                task = asyncio.create_task(
+                    self._subscribe_cov(pt),
+                    name=f"cov-{pt.local_id}",
+                )
+                self._cov_tasks.append(task)
 
         # Periodic poll loop — keeps values fresh even when COV subscriptions lapse.
         # Uses stop_event.wait() with a timeout so shutdown is immediate.
@@ -112,26 +118,39 @@ class Connector:
             logger.info("bacnet: connector %s stopped", self._cfg.connector_id)
 
     async def _poll_all(self) -> None:
-        """Issue a ReadPropertyMultiple for all points and publish events."""
+        """Poll all points and publish events.
+
+        Points are read in chunks of ``rpm_chunk_size`` rather than a single
+        ReadPropertyMultiple: a response for many points can overflow the device's
+        APDU, and devices without segmentation reject the whole request with
+        "segmentation-not-supported". A failed chunk is logged and skipped so the
+        remaining chunks still publish.
+        """
         if not self._cfg.points:
             return
 
         requests = [(pt.local_id, "presentValue") for pt in self._cfg.points]
-        try:
-            results = await self._bacnet.read_property_multiple(
-                self._cfg.bacnet_address,
-                self._cfg.bacnet_device_id,
-                requests,
-            )
-        except Exception as exc:
-            logger.warning("bacnet: poll failed: %s", exc)
-            return
-
-        for obj_id, value, status in results:
-            pt = self._point_map.get(obj_id)
-            if pt is None or value is None:
+        chunk_size = self._cfg.rpm_chunk_size
+        for start in range(0, len(requests), chunk_size):
+            chunk = requests[start:start + chunk_size]
+            try:
+                results = await self._bacnet.read_property_multiple(
+                    self._cfg.bacnet_address,
+                    self._cfg.bacnet_device_id,
+                    chunk,
+                )
+            except Exception as exc:
+                logger.warning(
+                    "bacnet: poll chunk [%d:%d] failed: %s",
+                    start, start + len(chunk), exc,
+                )
                 continue
-            await self._publish(pt, value, bacnet_quality(status))
+
+            for obj_id, value, status in results:
+                pt = self._point_map.get(obj_id)
+                if pt is None or value is None:
+                    continue
+                await self._publish(pt, value, bacnet_quality(status))
 
     async def _subscribe_cov(self, pt: PointConfig) -> None:
         """Subscribe to COV for a single point and publish events on each change."""

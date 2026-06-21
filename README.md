@@ -1,8 +1,13 @@
 # nexus-gateway
 
+[![CI](https://github.com/takashikasuya/nexus-gateway/actions/workflows/ci.yml/badge.svg)](https://github.com/takashikasuya/nexus-gateway/actions/workflows/ci.yml)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+
 **An edge integration gateway that connects building equipment (BMS, IoT, field protocols) to [Building OS](https://github.com/takashikasuya/gutp-building-os-oss).**
 
 *English / [日本語](README.ja.md)*
+
+> **Glossary:** **SBCO** (Smart Building Common Objects) is the data model standard that defines the point-list schema this gateway consumes. **Building OS** is the cloud-side platform that acts as System of Record for provisioning and telemetry. Both are part of the **GUTP** (Green Utilization Technology Platform) research project.
 
 It collects equipment data, relays control, absorbs protocol differences, and
 normalizes everything into Building OS's common data model. Building OS is the
@@ -313,7 +318,10 @@ Building OS integration tests (#43–#46).
 
 ---
 
+## Academic context
+
+This repository is also used as the implementation artifact for an academic evaluation of edge-gateway architecture for smart buildings. The evaluation plan (`docs/evaluation-plan.ja.md`) and performance test suite (`test/e2e/eval_*.go`) are included in the public repository to enable reproducibility.
+
 ## License
 
-Apache-2.0, consistent with the SBCO / Building OS sibling projects. See
-[`LICENSE`](LICENSE).
+Apache-2.0. See [`LICENSE`](LICENSE) and [`NOTICE`](NOTICE) for dependency attributions.

@@ -1,3 +1,6 @@
+# Copyright 2026 nexus-gateway contributors
+# SPDX-License-Identifier: Apache-2.0
+
 """Entry point: wire Config, BACnet client, NATS, and run the Connector."""
 from __future__ import annotations
 
@@ -43,7 +46,7 @@ async def _run(cfg: Config) -> None:
     subject = f"evt.bacnet.{cfg.connector_id}"
     await _await_stream(js, subject)
 
-    bacnet = await Bacpypes3Client.create(cfg.local_address)
+    bacnet = await Bacpypes3Client.create(cfg.local_address, read_timeout=cfg.read_timeout)
 
     stop_event = asyncio.Event()
 
