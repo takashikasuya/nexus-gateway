@@ -261,6 +261,11 @@ docker compose -f docker-compose.yml -f docker-compose.integration.yml --profile
 ください。署名済み OCI イメージとしてパッケージし、Connector Catalog に登録すると、
 Core Agent が digest 固定で実行します(ADR-0006)。
 
+NATS トピック体系・Common Event JSON スキーマ・write command の request/reply・
+コンテナ env vars・Point List フォーマット・Connector Catalog マニフェスト・
+冪等性ルールの完全な仕様は
+**[`docs/connector-spec.md`](docs/connector-spec.md)** を参照してください。
+
 ---
 
 ## 開発
