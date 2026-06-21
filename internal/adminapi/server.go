@@ -380,7 +380,7 @@ func (s *Server) handleMetrics(w http.ResponseWriter, r *http.Request) {
 
 	if s.telemetry != nil {
 		t := s.telemetry
-		fmt.Fprintf(w, "# HELP storefwd_buffer_depth Frames currently held in the Store-and-Forward ring buffer.\n")
+		fmt.Fprintf(w, "# HELP storefwd_buffer_depth Un-forwarded frames in the Store-and-Forward buffer (backlog beyond the cursor).\n")
 		fmt.Fprintf(w, "# TYPE storefwd_buffer_depth gauge\n")
 		fmt.Fprintf(w, "storefwd_buffer_depth %d\n", t.Depth())
 		fmt.Fprintf(w, "# HELP storefwd_written_total Frames written to the Store-and-Forward buffer.\n")

@@ -4,6 +4,9 @@
 package storeforward_test
 
 import (
+	"fmt"
+	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -149,6 +152,96 @@ func TestBuffer_Depth(t *testing.T) {
 		require.NoError(t, buf.Write(&pb.TelemetryFrame{PointId: "p1", Value: 1.0, Timestamp: "t"}))
 	}
 	assert.Equal(t, int64(3), buf.Depth())
+}
+
+// Depth must report the un-forwarded backlog (frames with seq > cursor), not the
+// total rows physically retained by the ring buffer. Rows are kept after ack
+// (only dropped on capacity overflow), so COUNT(*) over-reports and tracks
+// written_total instead of the real backlog (#109).
+func TestBuffer_DepthReflectsUnsentBacklog(t *testing.T) {
+	buf, err := storeforward.Open(t.TempDir()+"/sf.db", 100)
+	require.NoError(t, err)
+	defer buf.Close()
+
+	for range 5 {
+		require.NoError(t, buf.Write(&pb.TelemetryFrame{PointId: "p", Value: 1.0, Timestamp: "t"}))
+	}
+	assert.Equal(t, int64(5), buf.Depth(), "nothing acked yet: full backlog")
+
+	batch, err := buf.ReadBatch(0, 10)
+	require.NoError(t, err)
+	require.Len(t, batch, 5)
+
+	// Ack the first three (cursor advances). Depth must drop to the remaining
+	// un-forwarded backlog, even though all 5 rows are still physically present.
+	require.NoError(t, buf.Advance(batch[2].Seq))
+	assert.Equal(t, int64(2), buf.Depth(), "depth = unsent backlog (seq > cursor), not row count")
+}
+
+// Concurrent writers (pump) racing a drain/cursor loop (uplink Forwarder) must
+// not surface SQLITE_BUSY 'database is locked'. Regression for #109, where
+// writer–cursor contention under high write rates stalled forwarding.
+func TestBuffer_ConcurrentWritersNoLock(t *testing.T) {
+	buf, err := storeforward.Open(t.TempDir()+"/sf.db", 100_000)
+	require.NoError(t, err)
+	defer buf.Close()
+
+	const writers, perWriter = 8, 400 // 3200 writes total
+
+	var mu sync.Mutex
+	var errs []error
+	record := func(err error) {
+		if err != nil {
+			mu.Lock()
+			errs = append(errs, err)
+			mu.Unlock()
+		}
+	}
+
+	// Drain/cursor goroutine mimicking the single uplink Forwarder.
+	stop := make(chan struct{})
+	var drained atomic.Int64
+	var drainWG sync.WaitGroup
+	drainWG.Add(1)
+	go func() {
+		defer drainWG.Done()
+		var cursor int64
+		for {
+			select {
+			case <-stop:
+				return
+			default:
+			}
+			frames, err := buf.ReadBatch(cursor, 64)
+			record(err)
+			if len(frames) > 0 {
+				cursor = frames[len(frames)-1].Seq
+				record(buf.Advance(cursor))
+				drained.Add(int64(len(frames)))
+			}
+			_ = buf.Depth() // exercise the read path under contention
+		}
+	}()
+
+	var wg sync.WaitGroup
+	for w := range writers {
+		wg.Add(1)
+		go func(w int) {
+			defer wg.Done()
+			for i := range perWriter {
+				record(buf.Write(&pb.TelemetryFrame{
+					GatewayId: "gw", PointId: fmt.Sprintf("p%d-%d", w, i), Value: float64(i), Timestamp: "t",
+				}))
+			}
+		}(w)
+	}
+	wg.Wait()
+	close(stop)
+	drainWG.Wait()
+
+	require.Empty(t, errs, "no SQLITE_BUSY under concurrent write + drain")
+	assert.Equal(t, int64(writers*perWriter), buf.Written())
+	assert.Positive(t, drained.Load(), "drain/cursor loop made progress (not a silent no-op)")
 }
 
 func TestBuffer_PersistsCursor(t *testing.T) {

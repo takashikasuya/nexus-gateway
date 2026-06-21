@@ -46,15 +46,37 @@ type Buffer struct {
 }
 
 // Open opens (or creates) a Buffer at the given file path with the given capacity.
+//
+// The pump (Write) and the uplink Forwarder (Advance) both write, so they
+// contend for SQLite's single writer. To avoid SQLITE_BUSY 'database is locked'
+// under high write rates (#109) we cap the pool at a single connection so all
+// access is serialized at the Go layer instead of racing across connections,
+// and set WAL + synchronous=NORMAL + busy_timeout on that connection (the
+// timeout is a hedge in case the cap is ever raised). Pragmas are applied via
+// Exec rather than a `file:` DSN so the raw path is honored verbatim (paths
+// containing URI metacharacters like '#', '?', '%', or ':memory:' would be
+// misparsed as a URI).
 func Open(path string, capacity int) (*Buffer, error) {
 	db, err := sql.Open("sqlite", path)
 	if err != nil {
 		return nil, fmt.Errorf("open sqlite %s: %w", path, err)
 	}
-	if _, err := db.Exec(`PRAGMA journal_mode=WAL`); err != nil {
-		return nil, err
+	// One connection: the pump and Forwarder queue on it rather than colliding
+	// on the SQLite writer lock. Set before any Exec so the pragmas below land
+	// on the single connection the pool will reuse.
+	db.SetMaxOpenConns(1)
+	for _, pragma := range []string{
+		`PRAGMA journal_mode=WAL`,
+		`PRAGMA synchronous=NORMAL`,
+		`PRAGMA busy_timeout=5000`,
+	} {
+		if _, err := db.Exec(pragma); err != nil {
+			db.Close() //nolint:errcheck
+			return nil, fmt.Errorf("sqlite %s: %w", pragma, err)
+		}
 	}
 	if err := migrate(db); err != nil {
+		db.Close() //nolint:errcheck
 		return nil, err
 	}
 	return &Buffer{db: db, capacity: capacity, drifts: make(map[string]int64), notify: make(chan struct{}, 1)}, nil
@@ -177,10 +199,14 @@ func (b *Buffer) Cursor() int64 {
 	return seq
 }
 
-// Depth returns the number of frames currently stored in the buffer.
+// Depth returns the un-forwarded backlog: frames with seq beyond the cursor.
+// Rows are retained after ack (only dropped on capacity overflow), so a plain
+// COUNT(*) would track written_total rather than the real send backlog (#109).
 func (b *Buffer) Depth() int64 {
 	var n int64
-	if err := b.db.QueryRow(`SELECT COUNT(*) FROM frames`).Scan(&n); err != nil {
+	if err := b.db.QueryRow(
+		`SELECT COUNT(*) FROM frames WHERE seq > COALESCE((SELECT seq FROM cursor WHERE id = 1), 0)`,
+	).Scan(&n); err != nil {
 		slog.Warn("storeforward: depth query error", "err", err)
 	}
 	return n
