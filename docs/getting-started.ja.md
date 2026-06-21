@@ -142,6 +142,9 @@ Go コードを速く回したいときは、Common Event を合成する in-pro
 go run ./cmd/gateway --dev-sim
 ```
 
+sim の発行間隔は既定 60 秒(1 分フレッシュネスフロア)です。ローカルで素早く確認したい
+場合は下げてください: `go run ./cmd/gateway --dev-sim --dev-sim-interval 5s`。
+
 `--admin-jwks-url` が無い場合、Admin API は **認証無効**(dev 専用 — 警告ログが出ます)。
 このとき `/devices`・`/telemetry`・`/connectors` はトークン不要です:
 

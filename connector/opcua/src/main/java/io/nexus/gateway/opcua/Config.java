@@ -30,7 +30,7 @@ public record Config(
         String natsUrl = env("NATS_URL", "nats://localhost:4222");
         String endpoint = required("OPCUA_ENDPOINT");
         String deviceRef = env("OPCUA_DEVICE_REF", "opcua-server");
-        double pollInterval = Double.parseDouble(env("OPCUA_POLL_INTERVAL", "30"));
+        double pollInterval = Double.parseDouble(env("OPCUA_POLL_INTERVAL", "60"));
         if (pollInterval <= 0) {
             throw new IllegalArgumentException("OPCUA_POLL_INTERVAL must be positive");
         }

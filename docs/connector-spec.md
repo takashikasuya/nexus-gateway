@@ -180,6 +180,27 @@ BACnet device (covIncrement threshold crossed)
 
 Total gateway-side latency is dominated by the Normalizer `maxWait` (up to 500 ms in the worst case of an otherwise-idle stream).
 
+### 3.6 Acquisition cadence — 1-minute freshness floor
+
+Every point must be obtainable on at least a **1-minute cycle** (the default). Change-driven
+paths (BACnet COV, OPC-UA MonitoredItem subscriptions) deliver faster immediate updates *on
+top of* this floor; the periodic poll is the guarantee that still holds when values are static.
+
+- **BACnet** — periodic poll every `BACNET_POLL_INTERVAL` (default **60 s**) plus per-point COV (§3.5).
+- **OPC-UA** — initial poll + a change-driven subscription (1 s publishing / 250 ms sampling)
+  **and** a periodic re-poll every `OPCUA_POLL_INTERVAL` (default **60 s**) as the freshness
+  floor (#110). With static server values the subscription is silent, so the re-poll is what
+  keeps telemetry flowing. For an actively-changing point both paths may emit within an
+  interval (a subscription event plus the next re-poll); like BACnet COV (§3.5) the frame
+  carries no poll-vs-subscription flag and the Normalizer treats them identically.
+- **sim** — fixed ticker. Standalone `cmd/sim-connector`: `--interval` / `SIM_POLL_INTERVAL`
+  (default **60 s**). In-process `--dev-sim`: `--dev-sim-interval` flag (default **60 s**;
+  lower it for fast local feedback). A non-positive interval is clamped to the 60 s default.
+- **MQTT** — push-based: it emits when a broker message arrives and has no poll. The chosen
+  freshness-floor policy is a connector-side re-publish of each point's last-known value once
+  per interval; this is **planned, not yet implemented** (the MQTT connector has no runnable
+  entrypoint yet).
+
 ---
 
 ## 4. Control channel — Write command
@@ -259,7 +280,7 @@ The gateway passes these through from the connector registration. Protocol-speci
 | `BACNET_ADDRESS` | — | BACnet device IP address or CIDR (`host/24`). |
 | `BACNET_DEVICE_ID` | — | BACnet device instance number. |
 | `BACNET_POINTS` | `[]` | JSON array of point configs (see §6.1). |
-| `BACNET_POLL_INTERVAL` | `30` | Seconds between full polls. |
+| `BACNET_POLL_INTERVAL` | `60` | Seconds between full polls (1-min freshness floor; §3.6). |
 | `BACNET_RPM_CHUNK_SIZE` | `20` | Max points per ReadPropertyMultiple. Polling in chunks keeps each response within the device's APDU; devices without segmentation otherwise reject large reads with `segmentation-not-supported`. Lower it for devices with a small max APDU. |
 | `BACNET_READ_TIMEOUT` | `5` | Per-read deadline in seconds. A slow/unresponsive device otherwise hangs the poll loop indefinitely; on timeout the chunk yields no values and polling continues. |
 | `BACNET_COV_ENABLED` | `true` | Open a per-point COV subscription in addition to polling. Set `false` (poll-only) for large point counts, where thousands of COV sessions can overwhelm a device. |
@@ -273,7 +294,7 @@ The gateway passes these through from the connector registration. Protocol-speci
 |----------|---------|-------------|
 | `OPCUA_ENDPOINT` | — | OPC-UA endpoint URL, e.g. `opc.tcp://host:4840`. |
 | `OPCUA_POINTS` | `[]` | JSON array of point configs (see §6.2). |
-| `OPCUA_POLL_INTERVAL` | `30` | Seconds between subscription renewals / poll fallback. |
+| `OPCUA_POLL_INTERVAL` | `60` | Seconds between periodic re-polls, run alongside the change-driven subscription as the freshness floor (§3.6, #110). |
 | `OPCUA_DEVICE_REF` | `opcua-server` | Device reference echoed in emitted events. |
 | `OPCUA_WRITE_TIMEOUT` | `10` | Device write timeout in seconds. |
 

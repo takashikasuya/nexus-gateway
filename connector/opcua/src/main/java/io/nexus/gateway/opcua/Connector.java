@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /** Connects to an OPC-UA server and publishes Common Events via the injected publisher. */
@@ -41,7 +42,13 @@ public class Connector {
         this.subject = "evt.opcua." + cfg.connectorId();
     }
 
-    /** Connect, poll once, subscribe, then block until stop() is called. */
+    /**
+     * Connect, poll once, subscribe, then re-poll every {@code pollInterval}
+     * seconds until stop() is called. The periodic re-poll is a freshness floor
+     * alongside the change-driven subscription (#110): with static server values
+     * the subscription fires nothing, so polling guarantees every point is
+     * refreshed at least once per interval.
+     */
     public void run() throws Exception {
         log.info("opcua: connector {} starting, endpoint={}", cfg.connectorId(), cfg.opcuaEndpoint());
         client.connect();
@@ -64,8 +71,16 @@ public class Connector {
                 client.subscribe(nodeIds, this::onValue);
             }
 
-            log.info("opcua: connector {} subscribed to {} points", cfg.connectorId(), nodeIds.size());
-            stopLatch.await();
+            log.info("opcua: connector {} subscribed to {} points, re-poll every {}s",
+                cfg.connectorId(), nodeIds.size(), cfg.pollInterval());
+
+            // Periodic re-poll backstop alongside the subscription (#110).
+            // await() returns true once stop() fires; false on timeout (interval
+            // elapsed) → re-poll. At least 1 ms to avoid a busy loop.
+            long intervalMs = Math.max(1L, (long) (cfg.pollInterval() * 1000));
+            while (!stopLatch.await(intervalMs, TimeUnit.MILLISECONDS)) {
+                pollAll();
+            }
         } finally {
             client.close();
             log.info("opcua: connector {} stopped", cfg.connectorId());

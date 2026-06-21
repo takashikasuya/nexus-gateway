@@ -144,6 +144,9 @@ connector** that synthesizes Common Events — no NATS connectors, no equipment:
 go run ./cmd/gateway --dev-sim
 ```
 
+The sim publishes every 60 s by default (the 1-minute freshness floor). For fast
+local feedback, lower it: `go run ./cmd/gateway --dev-sim --dev-sim-interval 5s`.
+
 With no `--admin-jwks-url`, the Admin API runs **auth-disabled** (dev only — the
 gateway logs a warning). Now `/devices`, `/telemetry`, and `/connectors` need no
 token:

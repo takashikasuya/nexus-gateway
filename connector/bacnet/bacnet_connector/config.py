@@ -24,7 +24,7 @@ class Config:
     bacnet_address: str  # target BACnet device IP address or "host/24"
     bacnet_device_id: int
     points: list[PointConfig] = field(default_factory=list)
-    poll_interval: float = 30.0          # seconds between full polls
+    poll_interval: float = 60.0          # seconds between full polls (1-min freshness floor)
     local_address: str = "0.0.0.0"      # local BACnet interface address
     default_write_priority: int = 8     # BACnet write priority (1=highest, 16=lowest)
     write_timeout: float = 10.0         # seconds before a write is declared timed-out
@@ -72,7 +72,7 @@ class Config:
             bacnet_address=os.environ["BACNET_ADDRESS"],
             bacnet_device_id=int(os.environ["BACNET_DEVICE_ID"]),
             points=points,
-            poll_interval=float(os.environ.get("BACNET_POLL_INTERVAL", "30")),
+            poll_interval=float(os.environ.get("BACNET_POLL_INTERVAL", "60")),
             local_address=os.environ.get("BACNET_LOCAL_ADDRESS", "0.0.0.0"),
             rpm_chunk_size=int(os.environ.get("BACNET_RPM_CHUNK_SIZE", "20")),
             read_timeout=float(os.environ.get("BACNET_READ_TIMEOUT", "5")),

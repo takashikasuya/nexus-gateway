@@ -21,7 +21,9 @@ import (
 func main() {
 	natsURL := flag.String("nats", envOrDefault("NATS_URL", nats.DefaultURL), "NATS URL")
 	connID := flag.String("connector-id", envOrDefault("CONNECTOR_ID", "sim-01"), "Connector ID")
-	interval := flag.Duration("interval", 5*time.Second, "Publish interval")
+	// 1-minute freshness floor by default, consistent with the BACnet/OPC-UA
+	// connectors; override with --interval or SIM_POLL_INTERVAL (e.g. "5s").
+	interval := flag.Duration("interval", envDurationOrDefault("SIM_POLL_INTERVAL", 60*time.Second), "Publish interval")
 	flag.Parse()
 
 	nc, err := nats.Connect(*natsURL,
@@ -61,6 +63,18 @@ func main() {
 func envOrDefault(key, def string) string {
 	if v := os.Getenv(key); v != "" {
 		return v
+	}
+	return def
+}
+
+// envDurationOrDefault parses a Go duration (e.g. "60s", "500ms") from the env
+// var, falling back to def when unset or unparseable.
+func envDurationOrDefault(key string, def time.Duration) time.Duration {
+	if v := os.Getenv(key); v != "" {
+		if d, err := time.ParseDuration(v); err == nil {
+			return d
+		}
+		slog.Warn("invalid duration in env, using default", "key", key, "value", v, "default", def)
 	}
 	return def
 }

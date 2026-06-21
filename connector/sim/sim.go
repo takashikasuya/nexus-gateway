@@ -35,7 +35,15 @@ type Point struct {
 	Amplitude float64
 }
 
+// defaultInterval is the 1-minute freshness floor used when no positive interval
+// is supplied (a non-positive value would panic time.NewTicker).
+const defaultInterval = 60 * time.Second
+
 func New(connectorID string, js jetstream.JetStream, interval time.Duration, points []Point) *Connector {
+	if interval <= 0 {
+		slog.Warn("sim: non-positive interval, using default", "interval", interval, "default", defaultInterval)
+		interval = defaultInterval
+	}
 	return &Connector{connectorID: connectorID, js: js, interval: interval, points: points}
 }
 

@@ -193,6 +193,7 @@ go run ./cmd/gateway --dev-sim   # in-process sim connector for a no-equipment s
 | `--bos-key` | `BOS_KEY_FILE` | – | Client private key for mTLS to Building OS |
 | `--bos-servername` | `BOS_SERVER_NAME` | – | Override server name in Building OS cert verification |
 | `--dev-sim` | `DEV_SIM` | `false` | Run the in-process sim connector (non-production, ADR-0001) |
+| `--dev-sim-interval` | – | `60s` | Publish interval for `--dev-sim`; lower it (e.g. `5s`) for fast local feedback |
 | `--catalog-file` | `CATALOG_FILE` | – | File-backed Connector Catalog (JSON `[]Manifest`); enables `POST /connectors/{name}/install` |
 | `--catalog-url` | `CATALOG_URL` | – | Remote Connector Catalog base URL (overrides `--catalog-file`) |
 | `--allow-adhoc-upgrade` | `ALLOW_ADHOC_UPGRADE` | `false` | Enable dev-only `POST /connectors/{id}/upgrade?image=`; MVP update path is catalog-driven (ADR-0006) |

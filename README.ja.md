@@ -170,6 +170,7 @@ go run ./cmd/gateway --dev-sim   # 設備不要の smoke 実行用に in-process
 | `--point-sync-interval` | – | `10m` | 初回同期後の Point List ポーリング間隔 |
 | `--admin-jwks-url` | `KEYCLOAK_JWKS_URL` | – | Keycloak JWKS(空 = Admin API 認証無効) |
 | `--dev-sim` | `DEV_SIM` | `false` | in-process sim コネクタを起動(非本番) |
+| `--dev-sim-interval` | – | `60s` | `--dev-sim` の発行間隔。ローカルで素早く確認したい場合は `5s` 等に下げる |
 
 ### 本番: Building OS への TLS/mTLS(ADR-0007)
 

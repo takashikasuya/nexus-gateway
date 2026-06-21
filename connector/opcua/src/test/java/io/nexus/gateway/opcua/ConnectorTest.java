@@ -72,6 +72,16 @@ class ConnectorTest {
         );
     }
 
+    /** Same as onePointConfig but with a short re-poll interval for timing tests. */
+    static Config onePointConfig(double pollIntervalSec) {
+        return new Config(
+            "opcua-01", "nats://localhost:4222", "opc.tcp://localhost:4840",
+            "sim-server",
+            List.of(new PointConfig("ns=2;i=1001", "sim-server", "degC")),
+            pollIntervalSec, 10.0
+        );
+    }
+
     /** Run connector in a daemon thread; returns the task future. */
     static Future<?> startAsync(Connector connector) {
         ExecutorService exec = Executors.newSingleThreadExecutor(r -> {
@@ -247,6 +257,35 @@ class ConnectorTest {
             catch (Exception e) { return false; }
         });
         assertFalse(hasUnknown);
+    }
+
+    // #110: the connector must keep a freshness floor via a periodic re-poll
+    // alongside the subscription. With static server values the subscription
+    // fires nothing, so without re-poll only the single initial-poll event would
+    // be published; the loop must produce additional events on each interval.
+    @Test
+    void periodicRepollPublishesEvenWhenValuesAreStatic() throws Exception {
+        MockClient client = new MockClient();
+        client.readResults.put("ns=2;i=1001", OpcValue.good(20.0)); // never changes
+
+        RecordingPublisher pub = new RecordingPublisher();
+        // 50 ms re-poll so the test runs fast; subscription is never fired.
+        Connector connector = new Connector(onePointConfig(0.05), client, pub.asPublisher());
+        Future<?> task = startAsync(connector);
+
+        awaitSubscribed(client);
+
+        // Wait for at least 3 events (initial poll + ≥2 re-polls) or 2 s.
+        long deadline = System.currentTimeMillis() + 2_000;
+        while (pub.published.size() < 3 && System.currentTimeMillis() < deadline) {
+            Thread.sleep(10);
+        }
+
+        connector.stop();
+        task.get(2, TimeUnit.SECONDS);
+
+        assertTrue(pub.published.size() >= 3,
+            "periodic re-poll must publish repeatedly for static values; got " + pub.published.size());
     }
 
     @Test
