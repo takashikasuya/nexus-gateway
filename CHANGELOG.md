@@ -10,6 +10,11 @@ surface may change between minor versions until a `1.0.0` release.
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-06-21
+
+First public preview (pre-MVP). MVP baseline is OPC-UA telemetry/control +
+Store-and-Forward; see `MVP_READINESS.md`.
+
 ### Added
 - Connectors: **1-minute polling baseline**. Every point is obtainable on at
   least a 1-minute cycle, with change-driven paths (BACnet COV, OPC-UA
@@ -48,4 +53,5 @@ surface may change between minor versions until a `1.0.0` release.
 - Scrubbed real lab/building-OS IP addresses from tracked files, replacing them
   with RFC 5737 documentation addresses (`192.0.2.0/24`).
 
-[Unreleased]: https://github.com/takashikasuya/nexus-gateway/commits/master
+[Unreleased]: https://github.com/takashikasuya/nexus-gateway/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/takashikasuya/nexus-gateway/releases/tag/v0.1.0

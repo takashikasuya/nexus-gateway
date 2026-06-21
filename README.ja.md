@@ -13,14 +13,10 @@
 の共通データモデルへ正規化します。Building OS が **System of Record(記録の正本)**
 であり、本ゲートウェイの責務は **接続と変換** のみです。
 
-> **ステータス: MVP 直前。** MVP のスコープ(対象/対象外)・合格条件・残ギャップは
-> **[MVP_READINESS.md](MVP_READINESS.md)** に固定しています。基準プロトコルは OPC-UA、
-> BACnet・エッジ mTLS(Traefik)・cosign 本番運用は MVP+1 です。
->
-> 段階的ロードマップ: **MVP** = OPC-UA テレメトリ/制御/Store-and-Forward →
-> **MVP+1** = BACnet テレメトリ/制御 → **MVP+2** = BACnet COV サブスクリプション →
-> **MVP+3** = COV + 制御フィードバック相関 + Building OS への通知。
-> **BACnet COV / 制御フィードバック通知は将来課題(MVP 対象外)** です。
+> **ステータス: v0.1.0 public preview。** MVP のスコープ(対象/対象外)・合格条件・
+> 残ギャップは **[MVP_READINESS.md](MVP_READINESS.md)** に固定しています。MVP baseline
+> は OPC-UA テレメトリ/制御 + Store-and-Forward です。BACnet、edge mTLS(Traefik)本番構成、
+> cosign 本番検証、BACnet COV 制御フィードバック通知は後続マイルストーンです。
 
 ---
 

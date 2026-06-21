@@ -14,15 +14,11 @@ normalizes everything into Building OS's common data model. Building OS is the
 **System of Record**; this gateway is responsible only for **connection and
 translation**.
 
-> **Status: pre-MVP.** The MVP scope (in/out), pass conditions, and remaining
-> gaps are fixed in **[MVP_READINESS.md](MVP_READINESS.md)** — OPC-UA is the
-> baseline end-to-end protocol; BACnet, edge mTLS (Traefik), and cosign production are
-> MVP+1.
->
-> Staged roadmap: **MVP** = OPC-UA telemetry/control/store-and-forward →
-> **MVP+1** = BACnet telemetry/control → **MVP+2** = BACnet COV subscription →
-> **MVP+3** = COV + control-feedback correlation + Building OS notification.
-> **BACnet COV / control-feedback notification is future work (out of MVP scope).**
+> **Status: v0.1.0 public preview.** The MVP scope (in/out), pass conditions, and
+> remaining gaps are fixed in **[MVP_READINESS.md](MVP_READINESS.md)** — OPC-UA
+> telemetry/control + Store-and-Forward is the MVP baseline. BACnet, edge mTLS
+> (Traefik) production deployment, cosign production verification, and BACnet COV
+> control-feedback notification are planned follow-up milestones.
 
 ---
 

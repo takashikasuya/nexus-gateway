@@ -49,17 +49,19 @@ Reports are most useful when framed against the intended model:
   explicit `--bos-insecure`/dev flag. There is no bearer token on these links
   (Building OS does not validate one). The gateway never sends `X-Gateway-Id`
   itself — the edge supplies it, and any externally-supplied value is stripped.
-- **Connector distribution — signed OCI, digest-pinned (ADR-0006).** The Core
-  Agent **never** runs an unsigned image, **never** runs a digest mismatch, and
-  **never** pulls from a registry outside the allowlist (`--catalog-allowlist`).
-  Verification (cosign) is mandatory; connectors run `image@sha256:…`, never by
-  tag.
+- **Connector distribution — digest-pinned, allowlisted registry (ADR-0006).**
+  The intended model is signed, digest-pinned OCI images pulled only from an
+  allowlisted registry (`--catalog-allowlist`) and run by `image@sha256:…`
+  rather than by tag. **MVP uses a file-backed development catalog; production
+  cosign signature verification is the intended model and is tracked as MVP+1**
+  — it is not yet enforced by default. The registry allowlist and digest-pinned
+  references apply on the catalog path today.
 - **Human operator access — Keycloak/OIDC.** The Admin API & UI are protected by
   OIDC with `operator`/`viewer` roles. JWTs are validated against the configured
   JWKS with audience + issuer enforcement.
 
-A report showing any of these guarantees can be bypassed — an unsigned or
-non-allowlisted image running, a token/role check evaded, an mTLS/identity
+A report showing any of these guarantees can be bypassed — a non-allowlisted or
+tag-mutated (non-digest-pinned) image running, a token/role check evaded, an mTLS/identity
 spoof, a control command applied without authority, or a path that leaks
 credentials or equipment access — is high-value.
 
