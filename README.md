@@ -315,6 +315,11 @@ Use the per-language reference connectors (`connector/{bacnet,opcua,mqtt}`) as
 templates. Package it as a signed OCI image and list it in the Connector Catalog
 to have the Core Agent run it digest-pinned (ADR-0006).
 
+For the full contract — NATS topics, Common Event JSON schema, write command
+request/reply, container env vars, Point List format, Connector Catalog manifest,
+and idempotency rules — see
+**[`docs/connector-spec.md`](docs/connector-spec.md)**.
+
 ---
 
 ## Development
