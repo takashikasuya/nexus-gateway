@@ -67,7 +67,7 @@ jobs:
       # ── Vulnerability gate ──────────────────────────────────────────────────
       # CRITICAL vulnerabilities abort the pipeline; no image is pushed.
       - name: Trivy vulnerability scan
-        uses: aquasecurity/trivy-action@0.30.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: ${{ inputs.image-name }}:ci-scan
           format: sarif
