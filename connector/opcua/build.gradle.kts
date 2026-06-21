@@ -16,7 +16,7 @@ repositories {
     mavenCentral()
 }
 
-val miloVersion = "0.6.14"
+val miloVersion = "0.6.16"
 val natsVersion = "2.20.5"
 val jacksonVersion = "2.18.3"
 
