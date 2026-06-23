@@ -15,3 +15,6 @@ connector/bacnet/**/*.pyc
 
 # compiled gateway binary
 /gateway
+
+# Claude Code local config (memory, worktrees, settings)
+.claude/
