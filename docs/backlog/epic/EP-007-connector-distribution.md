@@ -26,14 +26,14 @@ Connector developer → build/test/sign → Container Registry
 - [ ] Update flow: detect → pull → verify → stop old → start new → health check → on failure automatic rollback to the previous pinned digest (always retained).
 - [ ] Catalog `permissions` (network/mounts) are applied as the container-creation contract; `min_gateway_version` is enforced.
 - [ ] Unreachable Catalog degrades to "no installs/updates" — running connectors are never stopped because of it.
-- [ ] Admin UI shows per connector: name, version, image digest, signature status, update availability, current status, logs, and offers Install / Update / Rollback.
+- [x] Admin UI shows per connector: name, version, image digest, signature status, update availability, current status, logs, and offers Install / Update / Rollback. **Rollback on the Catalog screen landed (PR #129):** `admin-ui/app/catalog/page.tsx` now shows a Rollback action (with confirm dialog) whenever `prev_image` is available, alongside the existing Install/Update actions; the general Connectors screen (`components/connector-table.tsx`) already had it.
 
 ## Child Features
 
 - [ ] FEAT-028: Catalog client + verified install (digest-pinned pull, cosign verify, allowlist, permissions, min_gateway_version)
 - [ ] FEAT-029: Update & rollback engine (poll detect, stop-replace-health-rollback, previous-digest retention)
 - [ ] FEAT-030: Connector CI/CD reference pipeline (GitHub Actions: build → test → scan/SBOM → cosign sign → push GHCR → catalog manifest update)
-- [ ] FEAT-031: Admin UI Connector Catalog screens (catalog browse, install with config, signature/update status, rollback)
+- [x] FEAT-031: Admin UI Connector Catalog screens (catalog browse, install with config, signature/update status, rollback). **Rollback landed (PR #129)** — browse/install/signature/update-status were already implemented in `admin-ui/app/catalog/page.tsx`; Rollback was the missing action, now added.
 
 ## Dependencies
 
