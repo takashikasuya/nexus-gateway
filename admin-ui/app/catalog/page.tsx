@@ -99,8 +99,7 @@ export default function CatalogPage() {
         { method: "POST" }
       );
       if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text || `${res.status}`);
+        throw new Error(await extractErrorMessage(res));
       }
       await fetchData();
     } catch (e) {
@@ -223,6 +222,22 @@ export default function CatalogPage() {
 function digestFromRef(ref: string): string | null {
   const idx = ref.indexOf("@");
   return idx >= 0 ? ref.slice(idx + 1) : null;
+}
+
+/**
+ * Extracts a readable error message from a failed proxy response. The
+ * `[id]/[action]` route replies with `{ error: string }` JSON on failure;
+ * fall back to the raw text, then statusText, for non-JSON error bodies.
+ */
+async function extractErrorMessage(res: Response): Promise<string> {
+  const text = await res.text();
+  try {
+    const data = JSON.parse(text);
+    if (data && typeof data.error === "string") return data.error;
+  } catch {
+    // not JSON — fall through to the raw text below
+  }
+  return text || res.statusText || `${res.status}`;
 }
 
 /** Returns a safe short display string for an OCI digest (e.g. "abc123ef…"). */
