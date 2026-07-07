@@ -41,3 +41,15 @@ Connector developer → build/test/sign → Container Registry
 - **External:** the Connector Catalog management server. MVP develops against a reference/file-backed catalog implementation in this repo, interface-compatible with the real service.
 - EP-004 (#13) Admin UI shell — FEAT-031 extends it.
 - Registry: GHCR for MVP; Harbor/ECR/ACR for production per site.
+
+## Known gap: dev catalog fixture has no installable digest (#133)
+
+`fixtures/catalog.json`'s four connector entries all reference
+`ghcr.io/takashikasuya/nexus-gateway/*` with a placeholder all-zero digest, so
+"Install" always fails with "manifest unknown" from a clean `docker compose up`.
+The reusable `connector-publish.yml` pipeline (build → scan → SBOM → push →
+cosign sign → auto-update the catalog digest) exists (triggered by
+`publish-sim-connector.yml` and sibling per-connector workflows) but has
+apparently never successfully run on this fork. Closing this requires actually
+publishing a real signed image to GHCR — a deliberate, reviewed action — not a
+drive-by fixture edit. Tracked as #133; left open pending that decision.

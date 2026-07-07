@@ -19,9 +19,22 @@
       "secret": "admin-ui-secret",
       "standardFlowEnabled": true,
       "directAccessGrantsEnabled": false,
-      "redirectUris": ["http://localhost:3000/*"],
-      "webOrigins": ["http://localhost:3000"],
-      "defaultClientScopes": ["openid", "profile", "email", "roles"]
+      "redirectUris": ["http://localhost:3000/*", "http://localhost:13000/*"],
+      "webOrigins": ["http://localhost:3000", "http://localhost:13000"],
+      "defaultClientScopes": ["openid", "profile", "email", "roles"],
+      "protocolMappers": [
+        {
+          "name": "audience-account",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.custom.audience": "account",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
+        }
+      ]
     }
   ],
   "users": [

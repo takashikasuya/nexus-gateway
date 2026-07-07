@@ -39,3 +39,28 @@ This epic does **not** introduce new pipeline stages; it hardens existing ones. 
   - ADR-0007 written — mTLS at the Building OS Envoy edge, h2c in-cluster, `gateway_id`↔cert CN/SAN, no OIDC token on the gRPC link. FEAT-032 is AFK on the gateway side (config + TLS dialer); production cutover waits on Building OS edge (#161, external).
   - Point-list-miss policy: **no ADR** — relaxed loss/timing requirements collapse the trade-off to drop-and-meter under ADR-0002; FEAT-033 is AFK. Sync cadence relaxed to initial + ~10 min.
 - **No remaining HITL gates.**
+
+## Known local dev-stack gaps (found 2026-07-07, FEAT-036 residual)
+
+Found while smoke-testing #128/#129 end-to-end via a clean `docker compose up` —
+both violated the "no manual post-steps" acceptance criterion above:
+
+- [x] **#131** — `fixtures/keycloak/realm.json`'s `admin-ui` client only registered
+  `redirectUris`/`webOrigins` for `localhost:3000`, not the compose stack's
+  published `localhost:13000`; Keycloak rejected the Admin UI login with
+  "Invalid parameter: redirect_uri". **Fixed** — both ports are now registered.
+- [x] **#132** — the same realm defined no audience mapper, so tokens never
+  carried `"account"` in `aud`, and the gateway's `KEYCLOAK_AUDIENCE=account`
+  JWT validation 401'd every Admin API call from the Admin UI (surfaced as a
+  generic 502 by the Admin UI's proxy routes). **Fixed** — an
+  `oidc-audience-mapper` protocol mapper was added to the `admin-ui` client.
+  Verified together: a clean `docker compose up --build` → sign in as
+  `operator` → Catalog/Devices/Connectors all load without a 401/502.
+- [ ] **#133** — `fixtures/catalog.json`'s four connector entries reference
+  `ghcr.io/takashikasuya/nexus-gateway/*` with placeholder all-zero digests
+  that don't exist on GHCR, so "Install" in the Admin UI Catalog screen always
+  500s ("manifest unknown"). The reusable `connector-publish.yml` pipeline
+  (build → scan → SBOM → push → cosign sign → auto-update the catalog digest)
+  exists but has apparently never successfully run on this fork. Fixing this
+  means publishing a real image under the repo owner's GHCR namespace — a
+  deliberate, reviewed action, not a drive-by doc/config fix. Left open.
