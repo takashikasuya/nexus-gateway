@@ -5,7 +5,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"flag"
 	"fmt"
 	"log/slog"
@@ -31,7 +30,6 @@ import (
 	"nexus-gateway/internal/egress"
 	"nexus-gateway/internal/lifecycle"
 	"nexus-gateway/internal/normalizer"
-	"nexus-gateway/internal/pointlist"
 	"nexus-gateway/internal/pointsync"
 	"nexus-gateway/internal/provisioning"
 	"nexus-gateway/internal/storeforward"
@@ -141,10 +139,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Build the live point list resolver. Source precedence (ADR-0003): an
-	// authoritative provisioning source (HTTP API, or a file-backed stand-in)
-	// always overrides the local fixture bootstrap once synced.
-	resolver := pointlist.NewSynced(nil)
+	// Point List convergence (ADR-0003, FEAT-031) is owned end-to-end by
+	// pointsync.Service: fixture bootstrap → provisioning sync override →
+	// blocking first-load → forward + reverse resolution. An authoritative
+	// provisioning source (HTTP API, or a file-backed stand-in) always
+	// overrides the local fixture bootstrap once configured.
 	var provClient provisioning.Client
 	switch {
 	case *provURL != "":
@@ -162,43 +161,18 @@ func main() {
 		}
 		provClient = provisioning.NewFileClient(*provFile, *provConnID)
 	}
-	// Ensure the persist directory exists before the sync loop tries to write.
-	if *plPersist != "" {
-		if err := os.MkdirAll(filepath.Dir(*plPersist), 0o755); err != nil {
-			slog.Error("point list persist dir create failed", "err", err)
-			os.Exit(1)
-		}
-	}
 
 	// revalidatePL is signalled by the egress agent on EgressDown.point_list_update (#224/push).
 	revalidatePL := make(chan struct{}, 1)
-	if provClient != nil {
-		// Real sync loop against the provisioning source (ADR-0003)
-		syncLoop := pointsync.New(
-			provClient,
-			resolver,
-			pointsync.Config{Interval: *syncInterval, PersistPath: *plPersist},
-		).WithRevalidate(revalidatePL)
-		go syncLoop.Run(ctx)
-		// Wait for the first sync to complete (Ready() closes on success or failure).
-		select {
-		case <-syncLoop.Ready():
-		case <-time.After(30 * time.Second):
-		}
-		if len(resolver.Snapshot()) == 0 {
-			// Proceeding with an empty resolver means every Common Event resolves to a
-			// point-list miss and is dropped (ADR-0002). Make that loud rather than silent.
-			slog.Error("point list: initial sync did not complete within 30s — starting with an empty Point List; telemetry will be dropped as point-list misses until sync succeeds")
-		}
-	} else {
-		// Bootstrap from fixture file (dev / no provisioning API)
-		entries, err := loadFixtureEntries(*plFile)
-		if err != nil {
-			slog.Error("load point list failed", "err", err)
-			os.Exit(1)
-		}
-		resolver.Update(entries)
+	plService := pointsync.NewService(provClient, *plFile, pointsync.Config{
+		Interval:    *syncInterval,
+		PersistPath: *plPersist,
+	}, revalidatePL)
+	if _, err := plService.Start(ctx); err != nil {
+		slog.Error("point list convergence failed", "err", err)
+		os.Exit(1)
 	}
+	resolver := plService.Resolver()
 
 	// Start Normalizer
 	norm, err := normalizer.New(ctx, js, resolver, *gatewayID)
@@ -360,15 +334,6 @@ func startDevSim(ctx context.Context, js jetstream.JetStream, reg *lifecycle.Reg
 		<-ctx.Done()
 		reg.SetRunning("sim-01", "", false)
 	}()
-}
-
-func loadFixtureEntries(path string) ([]pointlist.Entry, error) {
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
-	var entries []pointlist.Entry
-	return entries, json.Unmarshal(data, &entries)
 }
 
 func envOrDefault(key, def string) string {

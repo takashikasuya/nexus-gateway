@@ -16,7 +16,14 @@ import (
 type Config struct {
 	Interval    time.Duration
 	PersistPath string // path to persist the snapshot; empty = no persistence
+	// FirstLoadTimeout bounds how long Service.Start waits for the first sync
+	// attempt to complete before proceeding with whatever the resolver holds
+	// (possibly empty). Zero means DefaultFirstLoadTimeout.
+	FirstLoadTimeout time.Duration
 }
+
+// DefaultFirstLoadTimeout is used when Config.FirstLoadTimeout is zero.
+const DefaultFirstLoadTimeout = 30 * time.Second
 
 // Loop polls the provisioning API and keeps a SyncedResolver up to date (ADR-0003).
 // It uses the ETag-based Fetch interface (#224): 304 means no-op, a diff result is
