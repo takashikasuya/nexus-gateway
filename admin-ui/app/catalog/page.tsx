@@ -90,6 +90,26 @@ export default function CatalogPage() {
     }
   };
 
+  const doRollback = async (name: string) => {
+    setBusy(`rollback:${name}`);
+    setActionError(null);
+    try {
+      const res = await fetch(
+        `/api/gateway/connectors/${encodeURIComponent(name)}/rollback`,
+        { method: "POST" }
+      );
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || `${res.status}`);
+      }
+      await fetchData();
+    } catch (e) {
+      setActionError(String(e));
+    } finally {
+      setBusy(null);
+    }
+  };
+
   if (loading) return <p>Loading…</p>;
 
   return (
@@ -124,7 +144,8 @@ export default function CatalogPage() {
             const installedDigest = conn ? digestFromRef(conn.image) : null;
             const catalogDigest = entry.digest;
             const updateAvailable = !!conn && !!installedDigest && installedDigest !== catalogDigest;
-            const isBusy = busy === entry.name || busy === `update:${entry.name}`;
+            const canRollback = !!conn && !!conn.prev_image;
+            const isBusy = busy === entry.name || busy === `update:${entry.name}` || busy === `rollback:${entry.name}`;
 
             return (
               <tr key={entry.name} style={{ borderBottom: "1px solid #f3f4f6" }}>
@@ -169,10 +190,22 @@ export default function CatalogPage() {
                       )}
                       {conn && updateAvailable && (
                         <ActionBtn
-                          label={isBusy ? "Updating…" : "Update"}
+                          label={busy === `update:${entry.name}` ? "Updating…" : "Update"}
                           disabled={isBusy}
                           onClick={() => doUpdate(entry.name)}
                           variant="primary"
+                        />
+                      )}
+                      {canRollback && (
+                        <ActionBtn
+                          label={busy === `rollback:${entry.name}` ? "Rolling back…" : "Rollback"}
+                          disabled={isBusy}
+                          onClick={() => {
+                            if (window.confirm(`Roll back ${entry.name} to:\n${conn!.prev_image}\n\nProceed?`)) {
+                              doRollback(entry.name);
+                            }
+                          }}
+                          variant="danger"
                         />
                       )}
                     </span>
@@ -202,7 +235,7 @@ function shortDigest(d: string): string {
 function ActionBtn({
   label, disabled, onClick, variant,
 }: {
-  label: string; disabled: boolean; onClick: () => void; variant?: "primary" | "default";
+  label: string; disabled: boolean; onClick: () => void; variant?: "primary" | "danger" | "default";
 }) {
   return (
     <button
@@ -213,10 +246,10 @@ function ActionBtn({
         fontSize: "0.8rem",
         cursor: disabled ? "not-allowed" : "pointer",
         opacity: disabled ? 0.5 : 1,
-        border: variant === "primary" ? "1px solid #2563eb" : "1px solid #d1d5db",
+        border: variant === "primary" ? "1px solid #2563eb" : variant === "danger" ? "1px solid #dc2626" : "1px solid #d1d5db",
         borderRadius: "0.25rem",
         background: variant === "primary" ? "#2563eb" : "#fff",
-        color: variant === "primary" ? "#fff" : "#111",
+        color: variant === "primary" ? "#fff" : variant === "danger" ? "#dc2626" : "#111",
       }}
     >
       {label}
