@@ -697,7 +697,7 @@
       <tr>
         <td><strong>Point List Sync</strong></td>
         <td>Go</td>
-        <td>Building OS（または file/CSV）から diff 同期。起動時ブロッキング取得後、低頻度ポーリング（既定 10 分）</td>
+        <td>Building OS（または file/CSV）から diff 同期。fixture bootstrap → provisioning 上書き → 起動時ブロッキング取得 → 順引き/逆引き解決の収束ライフサイクルを <code>pointsync.Service</code> が一元所有（FEAT-031, #70）。既定ポーリング間隔 10 分</td>
         <td><span class="src">internal/pointlist/, internal/pointsync/</span></td>
       </tr>
       <tr>
@@ -1272,6 +1272,11 @@ Gateway  ←→  BOS  ← import fixtures/scale/&lt;N&gt;/point_list.csv</pre>
         <td><code>pointlist.Resolver</code></td>
         <td>順引き + 逆引き</td>
         <td>Normalizer（順）と制御 Dispatch（逆）の共通ルックアップ</td>
+      </tr>
+      <tr>
+        <td><code>pointsync.Service</code></td>
+        <td><code>Start / Resolver</code></td>
+        <td>fixture bootstrap → provisioning 上書き → 起動時ブロッキング取得 → 順引き/逆引き解決の収束ライフサイクルを一元所有（FEAT-031 残タスク #70、ライブ NATS/gRPC/Building OS 不要でテスト可能）</td>
       </tr>
       <tr>
         <td><code>adminapi</code></td>
