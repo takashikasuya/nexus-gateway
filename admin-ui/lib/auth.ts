@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { NextAuthOptions } from "next-auth";
+import { getServerSession } from "next-auth";
 import KeycloakProvider from "next-auth/providers/keycloak";
+import { isAuthEnabled } from "@/lib/auth-config";
 
 function decodeRealmRoles(rawToken: string): string[] {
   const parts = rawToken.split(".");
@@ -16,18 +18,24 @@ function decodeRealmRoles(rawToken: string): string[] {
 }
 
 export const authOptions: NextAuthOptions = {
-  providers: [
-    KeycloakProvider({
-      clientId: process.env.KEYCLOAK_ID!,
-      clientSecret: process.env.KEYCLOAK_SECRET!,
-      issuer: process.env.KEYCLOAK_ISSUER!,
-      // Allow server-side OIDC discovery to use the Docker-internal hostname while
-      // the browser-facing issuer URL (used for iss validation) stays as localhost.
-      wellKnown: process.env.KEYCLOAK_INTERNAL_ISSUER
-        ? `${process.env.KEYCLOAK_INTERNAL_ISSUER}/.well-known/openid-configuration`
-        : undefined,
-    }),
-  ],
+  // Empty when auth is disabled (no Keycloak env vars configured): NextAuth
+  // then has no sign-in provider, and the pass-through middleware (see
+  // middleware.ts) never redirects to a sign-in page that couldn't work
+  // anyway.
+  providers: isAuthEnabled()
+    ? [
+        KeycloakProvider({
+          clientId: process.env.KEYCLOAK_ID!,
+          clientSecret: process.env.KEYCLOAK_SECRET!,
+          issuer: process.env.KEYCLOAK_ISSUER!,
+          // Allow server-side OIDC discovery to use the Docker-internal hostname while
+          // the browser-facing issuer URL (used for iss validation) stays as localhost.
+          wellKnown: process.env.KEYCLOAK_INTERNAL_ISSUER
+            ? `${process.env.KEYCLOAK_INTERNAL_ISSUER}/.well-known/openid-configuration`
+            : undefined,
+        }),
+      ]
+    : [],
   callbacks: {
     async jwt({ token, account }) {
       // Persist the access_token so API routes can forward it to the Admin API.
@@ -56,4 +64,25 @@ declare module "next-auth" {
     accessToken?: string;
     realmRoles: string[];
   }
+}
+
+/**
+ * Resolves the bearer token an API proxy route should forward to the Admin API.
+ *
+ * When auth is disabled, the gateway's Admin API is also unauthenticated by
+ * default (KEYCLOAK_JWKS_URL unset — see cmd/gateway/main.go), so requests
+ * proceed with no token. When auth is enabled, a valid NextAuth session is
+ * required; its absence is reported via `unauthorized`.
+ */
+export async function resolveAdminApiToken(): Promise<
+  { token?: string; unauthorized?: false } | { token?: undefined; unauthorized: true }
+> {
+  if (!isAuthEnabled()) {
+    return { token: undefined };
+  }
+  const session = await getServerSession(authOptions);
+  if (!session?.accessToken) {
+    return { unauthorized: true };
+  }
+  return { token: session.accessToken };
 }

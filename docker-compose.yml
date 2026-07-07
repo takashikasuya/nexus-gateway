@@ -8,12 +8,20 @@ version: "3.9"
 # Host ports used by this stack:
 #   NATS client  : 14222   (container: 4222)
 #   NATS monitor : 18222   (container: 8222)
-#   Keycloak     : 18090   (container: 8090)
 #   Gateway API  : 18080   (container: 8080)
 #   Admin UI     : 13000   (container: 3000)
 #   mock-bos gRPC: 15051   (container: 50051)
 #   OPC-UA sim   : 4840    (no building-os conflict)
 #   BACnet sim   : host-network (UDP 47808)
+#
+# Auth is optional and OFF by default: no Keycloak service is started, and
+# neither the gateway's Admin API nor the Admin UI require a login (the
+# gateway's adminapi.NewServer / the Admin UI's pass-through middleware are
+# both used whenever no KEYCLOAK_* env vars are set). To opt in to Keycloak
+# OIDC auth (bundled dev realm, Keycloak on host port 18090), run:
+#   docker compose -f docker-compose.yml -f docker-compose.keycloak.yml up --build
+# For an external/production IdP instead of the bundled dev Keycloak, see
+# docker-compose.external-keycloak.yml.
 
 services:
   nats:
@@ -46,29 +54,6 @@ services:
       retries: 5
       start_period: 5s
 
-  keycloak:
-    image: quay.io/keycloak/keycloak:24.0
-    command: start-dev --import-realm
-    environment:
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
-      KC_HTTP_PORT: "8090"
-      KC_HOSTNAME_STRICT: "false"
-      KC_HTTP_ENABLED: "true"
-      # Browser-facing issuer — must match the iss claim in tokens.
-      KC_HOSTNAME_URL: "http://localhost:18090"
-    ports:
-      - "18090:8090"
-    volumes:
-      - ./fixtures/keycloak:/opt/keycloak/data/import:ro
-    healthcheck:
-      # Keycloak 24 image has neither curl nor wget; probe TCP port instead.
-      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/localhost/8090' 2>/dev/null"]
-      interval: 10s
-      timeout: 5s
-      retries: 12
-      start_period: 30s
-
   gateway:
     build:
       context: .
@@ -91,11 +76,12 @@ services:
       # Connector Catalog (ADR-0006): file-backed for dev; replace with CATALOG_URL in production.
       - CATALOG_FILE=/fixtures/catalog.json
       - CATALOG_ALLOWLIST=ghcr.io
-      # When KEYCLOAK_JWKS_URL is set, tokens are validated; omit for auth-free dev.
-      - KEYCLOAK_JWKS_URL=http://keycloak:8090/realms/nexus-gateway/protocol/openid-connect/certs
-      # Issuer must match the iss claim in tokens (uses external hostname seen by browser).
-      - KEYCLOAK_ISSUER=http://localhost:18090/realms/nexus-gateway
-      - KEYCLOAK_AUDIENCE=account
+      # Auth is off by default (KEYCLOAK_JWKS_URL unset -> adminapi.NewServer,
+      # no token required). Set these three (and see docker-compose.keycloak.yml)
+      # to require a validated Keycloak JWT on the Admin API instead:
+      #- KEYCLOAK_JWKS_URL=http://keycloak:8090/realms/nexus-gateway/protocol/openid-connect/certs
+      #- KEYCLOAK_ISSUER=http://localhost:18090/realms/nexus-gateway
+      #- KEYCLOAK_AUDIENCE=account
       - BOS_INSECURE=true
     ports:
       - "18080:8080"
@@ -107,8 +93,6 @@ services:
       nats:
         condition: service_healthy
       mock-bos:
-        condition: service_healthy
-      keycloak:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:8080/health | grep -q '\"status\":\"ok\"' || exit 1"]
@@ -126,16 +110,15 @@ services:
     environment:
       - NEXTAUTH_URL=http://localhost:13000
       - NEXTAUTH_SECRET=dev-secret-change-in-production
-      - KEYCLOAK_ID=admin-ui
-      - KEYCLOAK_SECRET=admin-ui-secret
-      # Browser-facing issuer (must match iss claim in tokens, which KC_HOSTNAME_URL controls).
-      - KEYCLOAK_ISSUER=http://localhost:18090/realms/nexus-gateway
-      # Internal Docker hostname for NextAuth server-side OIDC discovery (code exchange, token refresh).
-      - KEYCLOAK_INTERNAL_ISSUER=http://keycloak:8090/realms/nexus-gateway
+      # Auth is off by default (Admin UI has no Keycloak client configured ->
+      # pass-through middleware, no login step). Set these (and see
+      # docker-compose.keycloak.yml) to require Keycloak sign-in instead:
+      #- KEYCLOAK_ID=admin-ui
+      #- KEYCLOAK_SECRET=admin-ui-secret
+      #- KEYCLOAK_ISSUER=http://localhost:18090/realms/nexus-gateway
+      #- KEYCLOAK_INTERNAL_ISSUER=http://keycloak:8090/realms/nexus-gateway
       - ADMIN_API_URL=http://gateway:8080
     depends_on:
-      keycloak:
-        condition: service_healthy
       gateway:
         condition: service_started
 

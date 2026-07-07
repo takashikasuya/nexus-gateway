@@ -32,13 +32,13 @@ cd nexus-gateway
 docker compose up --build
 ```
 
-This starts five services:
+This starts four services (auth is optional and off by default — see the
+callout below):
 
 | Service | Port | What it is |
 |---------|------|------------|
-| `admin-ui` | http://localhost:13000 | Next.js operator console (OIDC-protected) |
+| `admin-ui` | http://localhost:13000 | Next.js operator console (no login by default) |
 | `gateway` | http://localhost:18080 | the Core Agent + Admin API |
-| `keycloak` | http://localhost:18090 | OIDC for human operators (realm `nexus-gateway`) |
 | `mock-bos` | `localhost:15051` | a stand-in for Building OS's gRPC ingress |
 | `nats` | `localhost:14222` | NATS + JetStream message bus |
 
@@ -47,6 +47,18 @@ Wait until every service reports healthy:
 ```bash
 docker compose ps
 ```
+
+> **Want Keycloak/OIDC login instead?** Auth is opt-in: layer the auth overlay
+> to also start a bundled dev Keycloak (realm `nexus-gateway`) and require
+> sign-in on the Admin UI / a Bearer token on the Admin API:
+> ```bash
+> docker compose -f docker-compose.yml -f docker-compose.keycloak.yml up --build
+> ```
+> This adds a fifth service, `keycloak`, at http://localhost:18090. The rest of
+> this guide (§4) assumes you're running *without* the overlay (`TOKEN` unset
+> is fine — the Admin API accepts requests with no `Authorization` header when
+> `KEYCLOAK_JWKS_URL` is unset). If you did add the overlay, run §4 to get a
+> real token first.
 
 ---
 
@@ -68,10 +80,12 @@ curl -s http://localhost:18080/metrics
 
 ---
 
-## 4. Get an operator token
+## 4. Get an operator token (only if you enabled the auth overlay)
 
-The interesting endpoints are role-protected (operator/viewer). In the compose
-stack, tokens come from Keycloak. Grab one with the dev `operator` user:
+By default (no `docker-compose.keycloak.yml` overlay) the Admin API needs no
+token at all — skip straight to §5 with `TOKEN` unset. If you *did* start the
+auth overlay, the interesting endpoints are role-protected (operator/viewer)
+and tokens come from the bundled Keycloak. Grab one with the dev `operator` user:
 
 ```bash
 TOKEN=$(curl -s http://localhost:18090/realms/nexus-gateway/protocol/openid-connect/token \
@@ -82,12 +96,14 @@ TOKEN=$(curl -s http://localhost:18090/realms/nexus-gateway/protocol/openid-conn
 echo "${TOKEN:0:20}…"   # sanity check: should print a JWT prefix
 ```
 
-Dev credentials (seeded in `fixtures/keycloak/`): `operator`/`operator` (full
-control) and `viewer`/`viewer` (read-only). **Change these before any non-lab
-deployment** — see [SECURITY.md](../SECURITY.md).
+Dev credentials (seeded in `fixtures/keycloak/`, only relevant with the auth
+overlay): `operator`/`operator` (full control) and `viewer`/`viewer`
+(read-only). **Change these before any non-lab deployment** — see
+[SECURITY.md](../SECURITY.md).
 
-> Prefer a browser? Open http://localhost:13000 and sign in as `operator`. The
-> Admin UI calls these same endpoints for you.
+> Prefer a browser? Open http://localhost:13000. Without the auth overlay you
+> land directly on the Admin UI shell; with it, sign in as `operator` first.
+> The Admin UI calls these same endpoints for you.
 
 ---
 
@@ -199,8 +215,8 @@ control path (Building OS → gateway → connector), the
 
 | Symptom | Likely cause |
 |---------|--------------|
-| `401 Unauthorized` on `/connectors`, `/devices`, … | Missing/expired token. Re-run §4; Keycloak tokens are short-lived. |
-| `403 Forbidden` on a `POST` action | Token is a `viewer`, not an `operator`. |
-| Token request fails | Keycloak not healthy yet — `docker compose ps` and retry once it's up. |
+| `401 Unauthorized` on `/connectors`, `/devices`, … | Only relevant with the auth overlay: missing/expired token. Re-run §4; Keycloak tokens are short-lived. |
+| `403 Forbidden` on a `POST` action | Only relevant with the auth overlay: token is a `viewer`, not an `operator`. |
+| Token request fails | Only relevant with the auth overlay: Keycloak not healthy yet — `docker compose ps` and retry once it's up. |
 | `/telemetry` `buffer_depth` keeps growing | The uplink to Building OS is down; frames are buffering (expected during a `mock-bos` restart). |
 | Gateway can't manage connectors | The container needs the host Docker socket mounted (`/var/run/docker.sock`); see `docker-compose.yml`. |

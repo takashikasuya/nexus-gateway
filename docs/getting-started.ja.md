@@ -32,13 +32,12 @@ cd nexus-gateway
 docker compose up --build
 ```
 
-5 つのサービスが起動します:
+4 つのサービスが起動します(認証は既定で無効—下記コールアウト参照):
 
 | サービス | ポート | 内容 |
 |----------|--------|------|
-| `admin-ui` | http://localhost:13000 | Next.js 運用コンソール(OIDC 保護) |
+| `admin-ui` | http://localhost:13000 | Next.js 運用コンソール(既定ではログイン不要) |
 | `gateway` | http://localhost:18080 | Core Agent + Admin API |
-| `keycloak` | http://localhost:18090 | 運用者向け OIDC(realm `nexus-gateway`) |
 | `mock-bos` | `localhost:15051` | Building OS gRPC ingress のスタブ |
 | `nats` | `localhost:14222` | NATS + JetStream メッセージバス |
 
@@ -47,6 +46,18 @@ docker compose up --build
 ```bash
 docker compose ps
 ```
+
+> **Keycloak/OIDC ログインを使いたい場合:** 認証はオプトインです。auth overlay を
+> 重ねると、同梱の dev 用 Keycloak(realm `nexus-gateway`)も起動し、Admin UI への
+> サインインと Admin API への Bearer トークンが必要になります:
+> ```bash
+> docker compose -f docker-compose.yml -f docker-compose.keycloak.yml up --build
+> ```
+> これにより 5 つ目のサービス `keycloak`(http://localhost:18090)が追加されます。
+> 本ガイドの以降(§4)は overlay **なし**を前提とします(`TOKEN` は未設定のままで
+> 構いません — `KEYCLOAK_JWKS_URL` 未設定時、Admin API は `Authorization`
+> ヘッダなしのリクエストを受け付けます)。overlay を追加した場合は §4 で
+> 実トークンを取得してください。
 
 ---
 
@@ -68,10 +79,12 @@ curl -s http://localhost:18080/metrics
 
 ---
 
-## 4. 運用者トークンの取得
+## 4. 運用者トークンの取得(auth overlay を有効にした場合のみ)
 
-主要エンドポイントはロール保護(operator/viewer)です。compose スタックでは
-トークンは Keycloak から取得します。dev の `operator` ユーザーで取得:
+既定(`docker-compose.keycloak.yml` overlay なし)では Admin API はトークン不要です
+— `TOKEN` を未設定のまま §5 に進んでください。auth overlay を**有効にした場合のみ**、
+主要エンドポイントはロール保護(operator/viewer)となり、トークンは同梱の Keycloak
+から取得します。dev の `operator` ユーザーで取得:
 
 ```bash
 TOKEN=$(curl -s http://localhost:18090/realms/nexus-gateway/protocol/openid-connect/token \
@@ -82,12 +95,13 @@ TOKEN=$(curl -s http://localhost:18090/realms/nexus-gateway/protocol/openid-conn
 echo "${TOKEN:0:20}…"   # 動作確認: JWT のプレフィックスが出れば OK
 ```
 
-dev 資格情報(`fixtures/keycloak/` に投入済み): `operator`/`operator`(フル操作)
-と `viewer`/`viewer`(読み取り専用)。**ラボ以外へのデプロイ前に必ず変更してください**
-— [SECURITY.md](../SECURITY.md) 参照。
+dev 資格情報(`fixtures/keycloak/` に投入済み、auth overlay 使用時のみ関係):
+`operator`/`operator`(フル操作)と `viewer`/`viewer`(読み取り専用)。
+**ラボ以外へのデプロイ前に必ず変更してください** — [SECURITY.md](../SECURITY.md) 参照。
 
-> ブラウザ派なら http://localhost:13000 を開き `operator` でサインイン。Admin UI が
-> 同じエンドポイントを代理で呼び出します。
+> ブラウザ派なら http://localhost:13000 を開いてください。auth overlay なしなら
+> そのまま Admin UI シェルが表示され、ありなら先に `operator` でサインインします。
+> Admin UI が同じエンドポイントを代理で呼び出します。
 
 ---
 
@@ -193,8 +207,8 @@ docker compose -f docker-compose.yml -f docker-compose.integration.yml --profile
 
 | 症状 | 想定原因 |
 |------|----------|
-| `/connectors`・`/devices` 等で `401 Unauthorized` | トークン未設定/期限切れ。§4 を再実行。Keycloak トークンは短命です。 |
-| `POST` アクションで `403 Forbidden` | トークンが `operator` でなく `viewer`。 |
-| トークン取得に失敗 | Keycloak がまだ healthy でない。`docker compose ps` で確認し、起動後に再試行。 |
+| `/connectors`・`/devices` 等で `401 Unauthorized` | auth overlay 使用時のみ関係:トークン未設定/期限切れ。§4 を再実行。Keycloak トークンは短命です。 |
+| `POST` アクションで `403 Forbidden` | auth overlay 使用時のみ関係:トークンが `operator` でなく `viewer`。 |
+| トークン取得に失敗 | auth overlay 使用時のみ関係:Keycloak がまだ healthy でない。`docker compose ps` で確認し、起動後に再試行。 |
 | `/telemetry` の `buffer_depth` が増え続ける | Building OS へのアップリンク断。フレームがバッファ中(`mock-bos` 再起動時など想定内)。 |
 | ゲートウェイがコネクタを管理できない | コンテナに host Docker socket(`/var/run/docker.sock`)のマウントが必要。`docker-compose.yml` 参照。 |

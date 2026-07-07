@@ -121,10 +121,10 @@ write(cmd)  → Result
 - **耐障害性** — 有界 Store-and-Forward が Building OS 障害をやり過ごす。Normalizer は
   poison / point-list-miss を drop-and-meter(`normalizer_invalid_total`、
   `normalizer_unresolved_total`)。
-- **セキュリティ** — Building OS への設定駆動 **TLS/mTLS**。Admin API & UI は
-  **Keycloak/OIDC**(operator/viewer ロール)で保護。
+- **セキュリティ** — Building OS への設定駆動 **TLS/mTLS**。Admin API & UI はオプションの
+  **Keycloak/OIDC**(既定は無効・オプトイン、operator/viewer ロール)で保護可能。
 - **Admin UI**(Next.js)— ダッシュボード + コネクタライフサイクル(start/stop/restart/
-  upgrade)、OIDC 背後。
+  upgrade)、オプションで OIDC 背後。
 - **ライフサイクル管理** — Docker Engine API 経由。**署名済み OCI** によるコネクタ配布を
   Connector Catalog 経由で実施(digest 固定・cosign 検証・stop→replace→health→rollback)。
 
@@ -137,14 +137,23 @@ write(cmd)  → Result
 > Admin API でのコネクタ操作までを、機器なし・約 10 分で案内します。
 
 ```bash
-# フルスタック: NATS + mock Building OS + gateway + Keycloak + Admin UI
+# フルスタック: NATS + mock Building OS + gateway + Admin UI(認証なし・Keycloak なし)
 docker compose up --build
 ```
 
-- Admin UI: http://localhost:13000(Keycloak realm `nexus-gateway`、ユーザ
-  `operator`/`operator`、`viewer`/`viewer`)
+- Admin UI: http://localhost:13000(既定ではログイン不要。認証については後述)
 - Gateway Admin API: http://localhost:18080(`/health`、`/metrics`、`/connectors`)
-- Keycloak: http://localhost:18090(管理者 `admin`/`admin`)
+
+**認証は既定で無効(オプトイン)です** — 上記の既定スタックには Keycloak は含まれず、
+Admin UI・Admin API ともログイン不要ですぐに使えます。Keycloak OIDC 認証(同梱の
+dev realm、ユーザ `operator`/`operator`・`viewer`/`viewer`)を有効にするには、
+認証用 overlay を追加してください:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.keycloak.yml up --build
+```
+
+これにより Keycloak(http://localhost:18090 、管理者 `admin`/`admin`)も起動します。
 
 ゲートウェイバイナリを直接実行:
 
@@ -193,18 +202,30 @@ go run ./cmd/gateway
   [SECURITY.md](SECURITY.md) と
   [ADR-0007](docs/adr/0007-transport-security-mtls-at-edge.md) を参照。
 
-#### Keycloak: ローカル dev 専用 — 本番は Building OS IdP を使用
+#### Keycloak: 既定で無効(オプトイン)— 本番は Building OS IdP を使用
 
-`docker-compose.yml` の Keycloak は **ローカル dev / E2E / デモ専用**です
-(`admin`/`admin` 認証情報、`start-dev` モード)。認証の関心事は 2 つに分かれます。
+Gateway Admin API と Admin UI の認証は**既定で無効(オプトイン)**です。
+`docker-compose.yml` は Keycloak サービスを起動せず、Gateway
+(`KEYCLOAK_JWKS_URL` 未設定時に使われる `adminapi.NewServer`)・Admin UI
+(`KEYCLOAK_*` クライアント環境変数が未設定の場合のパススルー middleware。
+`admin-ui/lib/auth-config.ts` 参照)ともログインを要求しません。認証の
+関心事は 2 つに分かれます。
 
 | 関心事 | 仕組み |
 |--------|--------|
-| 人間オペレータ (Admin UI / Admin API) | Keycloak / OIDC — Bearer JWT、`realm_access.roles` |
+| 人間オペレータ (Admin UI / Admin API) | Keycloak / OIDC — Bearer JWT、`realm_access.roles`(オプトイン) |
 | Gateway ↔ Building OS 機械間認証 | **mTLS** — Keycloak は関与しない |
 
+**同梱の dev 用 Keycloak**(ローカル dev / E2E / デモ専用、`admin`/`admin`、
+`start-dev` モード)を有効にするには、
+[`docker-compose.keycloak.yml`](docker-compose.keycloak.yml) を重ねます:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.keycloak.yml up --build
+```
+
 本番では、Gateway と Admin UI の両方を **Building OS 側の Keycloak**
-(または組織共通 IdP) に向け、同梱の `keycloak` コンテナは起動しません。
+(または組織共通 IdP) に向けます(同梱 dev Keycloak は使いません)。
 Building OS の Keycloak realm に `gateway-operator` と `gateway-viewer`
 の 2 つの realm role を用意するだけで済みます。本番用の環境変数例:
 
@@ -225,12 +246,13 @@ ADMIN_API_URL=https://gateway-admin-api.example.com
 
 統合・本番環境向けの compose override として
 [`docker-compose.external-keycloak.yml`](docker-compose.external-keycloak.yml)
-を用意しています。
+を用意しています(`docker-compose.keycloak.yml` とは併用せず、いずれか一方を使ってください)。
 
 | 環境 | Keycloak |
 |------|----------|
-| ローカル dev / CI / E2E | 同梱 (本リポジトリ) |
-| Building OS 統合環境 | Building OS 側 Keycloak |
+| ローカル dev / CI / E2E(既定、認証なし) | なし |
+| ローカル dev / デモ、認証あり | 同梱(`docker-compose.keycloak.yml`) |
+| Building OS 統合環境 | Building OS 側 Keycloak(`docker-compose.external-keycloak.yml`) |
 | 本番 | Building OS 側 Keycloak または組織共通 IdP |
 | Gateway ↔ Building OS | mTLS — Keycloak 不使用 |
 

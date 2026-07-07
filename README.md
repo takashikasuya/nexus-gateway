@@ -125,10 +125,10 @@ with the proven per-protocol OSS stacks underneath: **Eclipse Milo** (OPC-UA),
 - **Resilience**: bounded Store-and-Forward rides out Building OS outages; the
   Normalizer drops-and-meters poison / point-list-miss events
   (`normalizer_invalid_total`, `normalizer_unresolved_total`).
-- **Security**: config-driven **TLS/mTLS** to Building OS; **Keycloak/OIDC**
-  protects the Admin API & UI (operator/viewer roles).
+- **Security**: config-driven **TLS/mTLS** to Building OS; optional **Keycloak/OIDC**
+  (opt-in, off by default) protects the Admin API & UI (operator/viewer roles).
 - **Admin UI** (Next.js) — dashboard + connector lifecycle (start/stop/restart/
-  upgrade), behind OIDC.
+  upgrade), optionally behind OIDC.
 - **Lifecycle management** via the Docker Engine API; **signed-OCI** connector
   distribution through the Connector Catalog (digest-pinned, cosign-verified,
   stop→replace→health→rollback).
@@ -143,7 +143,7 @@ with the proven per-protocol OSS stacks underneath: **Eclipse Milo** (OPC-UA),
 > with no equipment.
 
 ```bash
-# 1. Full stack: NATS + mock Building OS + gateway + Keycloak + Admin UI
+# 1. Full stack: NATS + mock Building OS + gateway + Admin UI (no auth, no Keycloak)
 docker compose up --build
 
 # 2. Verify healthy (all services should reach "healthy" within ~60 s)
@@ -152,11 +152,22 @@ docker compose ps
 
 | Endpoint | URL | Notes |
 |----------|-----|-------|
-| Admin UI | http://localhost:13000 | Keycloak realm `nexus-gateway`; users `operator`/`operator`, `viewer`/`viewer` |
+| Admin UI | http://localhost:13000 | No login by default (see Auth below) |
 | Gateway Admin API | http://localhost:18080 | `/health`, `/metrics`, `/connectors` |
-| Keycloak | http://localhost:18090 | Admin: `admin`/`admin` |
 | mock Building OS (gRPC) | `localhost:15051` | `GatewayIngressService` stub for dev |
 | NATS | `localhost:14222` | NATS client port; monitoring at `:18222` |
+
+**Auth is optional and off by default** — the default stack above has no
+Keycloak service and no login step; the Admin UI and Admin API are fully
+usable immediately. To opt in to Keycloak OIDC auth (bundled dev realm,
+users `operator`/`operator` and `viewer`/`viewer`), add the auth overlay:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.keycloak.yml up --build
+```
+
+This also starts Keycloak at http://localhost:18090 (admin: `admin`/`admin`).
+See [Keycloak: optional, off by default](#keycloak-optional-off-by-default---use-building-os-idp-in-production) below.
 
 Run the gateway binary directly (no Docker):
 
@@ -258,18 +269,30 @@ go run ./cmd/gateway
 For the full E2E test suite against Building OS, see
 **[`docs/e2e-test-overview.md`](docs/e2e-test-overview.md)**.
 
-#### Keycloak: local dev only — use Building OS IdP in production
+#### Keycloak: optional, off by default — use Building OS IdP in production
 
-The Keycloak service in `docker-compose.yml` is **local dev / E2E / demo only**
-(`admin`/`admin` credentials, `start-dev` mode). Two distinct auth concerns exist:
+Auth for the gateway's Admin API and the Admin UI is **optional and off by
+default**: `docker-compose.yml` starts no Keycloak service, and neither the
+gateway (`adminapi.NewServer`, used whenever `KEYCLOAK_JWKS_URL` is unset) nor
+the Admin UI (pass-through middleware, used whenever no `KEYCLOAK_*` client
+env vars are set — see `admin-ui/lib/auth-config.ts`) require a login. Two
+distinct auth concerns exist:
 
 | Concern | Mechanism |
 |---------|-----------|
-| Human operators (Admin UI / Admin API) | Keycloak / OIDC — Bearer JWT, `realm_access.roles` |
+| Human operators (Admin UI / Admin API) | Keycloak / OIDC — Bearer JWT, `realm_access.roles` (opt-in) |
 | Gateway ↔ Building OS machine auth | **mTLS** — Keycloak is not involved |
 
+To opt in to the **bundled dev Keycloak** (local dev / E2E / demo only —
+`admin`/`admin` credentials, `start-dev` mode), layer
+[`docker-compose.keycloak.yml`](docker-compose.keycloak.yml):
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.keycloak.yml up --build
+```
+
 In production, point both the gateway and Admin UI at the **Building OS Keycloak**
-(or your organisation's shared IdP) and omit the bundled `keycloak` container.
+(or your organisation's shared IdP) instead of the bundled dev Keycloak.
 The Building OS Keycloak realm needs at least two realm roles: `gateway-operator`
 and `gateway-viewer`. Example production env vars:
 
@@ -289,12 +312,14 @@ ADMIN_API_URL=https://gateway-admin-api.example.com
 ```
 
 Use [`docker-compose.external-keycloak.yml`](docker-compose.external-keycloak.yml)
-as a ready-made compose override for integration / production environments.
+as a ready-made compose override for integration / production environments
+(do not combine it with `docker-compose.keycloak.yml` — pick one).
 
 | Environment | Keycloak |
 |-------------|----------|
-| Local dev / CI / E2E | Bundled (this repo) |
-| Building OS integration | Building OS Keycloak |
+| Local dev / CI / E2E, no auth (default) | None |
+| Local dev / demo, with auth | Bundled (`docker-compose.keycloak.yml`) |
+| Building OS integration | Building OS Keycloak (`docker-compose.external-keycloak.yml`) |
 | Production | Building OS Keycloak or org-wide IdP |
 | Gateway ↔ Building OS | mTLS — no Keycloak |
 

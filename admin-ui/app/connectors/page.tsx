@@ -33,7 +33,11 @@ export default function ConnectorsPage() {
     return () => clearInterval(id);
   }, [fetchConnectors]);
 
-  const isOperator = session?.realmRoles?.includes("gateway-operator") ?? false;
+  // When auth is disabled, middleware never gates this page, so there is no
+  // session at all — treat that as full (operator-equivalent) access rather
+  // than the restrictive viewer default. When auth is enabled, middleware
+  // guarantees a session exists here, so the real realm roles apply.
+  const isOperator = !session || (session.realmRoles?.includes("gateway-operator") ?? false);
 
   return (
     <div>

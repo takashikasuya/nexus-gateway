@@ -2,7 +2,8 @@
 #
 # Compose override for integration / production environments where
 # the Building OS Keycloak (or an org-wide IdP) is used instead of
-# the bundled dev Keycloak.
+# the bundled dev Keycloak (auth is off by default in docker-compose.yml;
+# see docker-compose.keycloak.yml for the bundled-dev-Keycloak opt-in).
 #
 # Usage:
 #   docker compose -f docker-compose.yml -f docker-compose.external-keycloak.yml up
@@ -19,17 +20,11 @@
 #   ADMIN_API_URL    — URL the Admin UI uses to reach the Gateway Admin API
 
 services:
-  # Disable the bundled dev Keycloak.
-  keycloak:
-    profiles:
-      - disabled  # never matched by default → service does not start
-
   gateway:
     environment:
       - KEYCLOAK_JWKS_URL=${KC_BASE}/realms/${KC_REALM}/protocol/openid-connect/certs
       - KEYCLOAK_ISSUER=${KC_BASE}/realms/${KC_REALM}
       - KEYCLOAK_AUDIENCE=${KC_AUDIENCE:-nexus-gateway-admin-api}
-    # Remove the dependency on the (now-disabled) keycloak service.
     depends_on:
       nats:
         condition: service_healthy

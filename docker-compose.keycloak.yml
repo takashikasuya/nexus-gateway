@@ -1,0 +1,69 @@
+# docker-compose.keycloak.yml
+#
+# Opt-in overlay: enables Keycloak OIDC auth for the Admin UI and the
+# gateway's Admin API, using the bundled dev Keycloak (fixtures/keycloak/realm.json).
+# Auth is off by default in docker-compose.yml; this overlay is how you turn
+# it on for local dev/demo purposes.
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.keycloak.yml up --build
+#
+# Then open http://localhost:13000 and sign in as operator/operator or
+# viewer/viewer (fixtures/keycloak/realm.json).
+#
+# For a real/production IdP instead of this bundled dev Keycloak, use
+# docker-compose.external-keycloak.yml instead (do not combine the two).
+
+version: "3.9"
+
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    command: start-dev --import-realm
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HTTP_PORT: "8090"
+      KC_HOSTNAME_STRICT: "false"
+      KC_HTTP_ENABLED: "true"
+      # Browser-facing issuer — must match the iss claim in tokens.
+      KC_HOSTNAME_URL: "http://localhost:18090"
+    ports:
+      - "18090:8090"
+    volumes:
+      - ./fixtures/keycloak:/opt/keycloak/data/import:ro
+    healthcheck:
+      # Keycloak 24 image has neither curl nor wget; probe TCP port instead.
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/localhost/8090' 2>/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  gateway:
+    environment:
+      - KEYCLOAK_JWKS_URL=http://keycloak:8090/realms/nexus-gateway/protocol/openid-connect/certs
+      # Issuer must match the iss claim in tokens (uses external hostname seen by browser).
+      - KEYCLOAK_ISSUER=http://localhost:18090/realms/nexus-gateway
+      - KEYCLOAK_AUDIENCE=account
+    depends_on:
+      nats:
+        condition: service_healthy
+      mock-bos:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+
+  admin-ui:
+    environment:
+      - KEYCLOAK_ID=admin-ui
+      - KEYCLOAK_SECRET=admin-ui-secret
+      # Browser-facing issuer (must match iss claim in tokens, which KC_HOSTNAME_URL controls).
+      - KEYCLOAK_ISSUER=http://localhost:18090/realms/nexus-gateway
+      # Internal Docker hostname for NextAuth server-side OIDC discovery (code exchange, token refresh).
+      - KEYCLOAK_INTERNAL_ISSUER=http://keycloak:8090/realms/nexus-gateway
+    depends_on:
+      gateway:
+        condition: service_started
+      keycloak:
+        condition: service_healthy
