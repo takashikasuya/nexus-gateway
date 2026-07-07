@@ -110,13 +110,16 @@ func (s *Service) Start(ctx context.Context) (Result, error) {
 		return Result{}, ctx.Err()
 	}
 
-	if len(s.resolver.Snapshot()) == 0 {
+	snapshot := s.resolver.Snapshot()
+	if len(snapshot) == 0 {
 		// Proceeding with an empty resolver means every Common Event resolves to a
 		// point-list miss and is dropped (ADR-0002). Make that loud rather than silent.
-		slog.Error("point list: initial sync did not complete — starting with an empty Point List; telemetry will be dropped as point-list misses until sync succeeds")
+		// This covers both cases: the first sync attempt timed out, or it completed
+		// but the provisioning source itself returned an empty Point List.
+		slog.Error("point list: resolver is empty after the initial load attempt — starting with an empty Point List; telemetry will be dropped as point-list misses until sync succeeds")
 	}
 
-	return Result{Converged: len(s.resolver.Snapshot()) > 0}, nil
+	return Result{Converged: len(snapshot) > 0}, nil
 }
 
 // loadFixtureEntries reads a JSON-encoded []pointlist.Entry bootstrap file.
