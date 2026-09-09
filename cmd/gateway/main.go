@@ -76,7 +76,9 @@ func main() {
 	cosignOIDCIssuer := flag.String("cosign-oidc-issuer", envOrDefault("COSIGN_OIDC_ISSUER", ""), "Expected OIDC issuer for keyless cosign verification (ADR-0006)")
 	telemetrySink := flag.String("telemetry-sink", envOrDefault("TELEMETRY_SINK", "bos"), "Telemetry sink: bos or dtdpf")
 	dtdpfPointConfig := flag.String("dtdpf-point-config", envOrDefault("DTDPF_POINT_CONFIG_FILE", ""), "DTDPF pointConfig.json path (required for dtdpf sink)")
-	dtdpfConnectionString := flag.String("dtdpf-eventhub-connection-string", envOrDefault("DTDPF_EVENTHUB_CONNECTION_STRING", ""), "Azure Event Hubs SAS connection string (required for dtdpf sink)")
+	// Secret, not a flag: avoids leaking the SAS connection string via process
+	// listings or shell history (Copilot review, PR #168).
+	dtdpfConnectionString := os.Getenv("DTDPF_EVENTHUB_CONNECTION_STRING")
 	dtdpfEventHub := flag.String("dtdpf-eventhub-name", envOrDefault("DTDPF_EVENTHUB_NAME", "telemetry"), "Azure Event Hub name")
 	dtdpfTransport := flag.String("dtdpf-eventhub-transport", envOrDefault("DTDPF_EVENTHUB_TRANSPORT", string(dtdpf.TransportAMQPTCP)), "Event Hubs transport: amqp-tcp or websocket")
 	flag.Parse()
@@ -84,7 +86,7 @@ func main() {
 	*bosEgressAddr = resolveBOSAddr(*bosAddr, *bosEgressAddr)
 	if err := validateTelemetrySinkConfig(telemetryConfig{
 		Sink: *telemetrySink, PointConfigFile: *dtdpfPointConfig,
-		ConnectionString: *dtdpfConnectionString, EventHub: *dtdpfEventHub, Transport: *dtdpfTransport,
+		ConnectionString: dtdpfConnectionString, EventHub: *dtdpfEventHub, Transport: *dtdpfTransport,
 	}); err != nil {
 		slog.Error("invalid telemetry sink configuration", "err", err)
 		os.Exit(1)
@@ -238,7 +240,7 @@ func main() {
 
 	// Start the selected telemetry uplink. Control remains on the Building OS egress path.
 	if *telemetrySink == "dtdpf" {
-		dtdpfUplink, err := dtdpf.NewUplink(*dtdpfConnectionString, *dtdpfEventHub, dtdpf.EventHubsTransport(*dtdpfTransport), buf, uplink.DefaultConfig)
+		dtdpfUplink, err := dtdpf.NewUplink(dtdpfConnectionString, *dtdpfEventHub, dtdpf.EventHubsTransport(*dtdpfTransport), buf, uplink.DefaultConfig)
 		if err != nil {
 			slog.Error("DTDPF uplink init failed", "err", err)
 			os.Exit(1)

@@ -40,10 +40,13 @@ func Pump(ctx context.Context, src <-chan telemetry.PendingRecord, buf *Buffer) 
 				if pending.InProgress != nil {
 					_ = pending.InProgress()
 				}
+				timer := time.NewTimer(10 * time.Second)
 				select {
 				case <-buf.SpaceNotify():
-				case <-time.After(10 * time.Second):
+					timer.Stop()
+				case <-timer.C:
 				case <-ctx.Done():
+					timer.Stop()
 					if pending.Nak != nil {
 						_ = pending.Nak()
 					}

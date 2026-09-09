@@ -123,12 +123,25 @@ func (n *Normalizer) consume(ctx context.Context, src EventSource, resolver poin
 				_ = msg.Term()
 				continue
 			}
-			select {
-			case n.records <- telemetry.PendingRecord{Record: record, Ack: msg.Ack, Nak: msg.Nak, InProgress: msg.InProgress}:
-			case <-ctx.Done():
-				_ = msg.Nak()
-				return
+			pending := telemetry.PendingRecord{Record: record, Ack: msg.Ack, Nak: msg.Nak, InProgress: msg.InProgress}
+			ticker := time.NewTicker(5 * time.Second)
+			enqueued := false
+			for !enqueued {
+				select {
+				case n.records <- pending:
+					enqueued = true
+				case <-ticker.C:
+					// The downstream pump can block for a long time under DTDPF's
+					// BlockWhenFull backpressure; keep the JetStream ack deadline
+					// alive instead of risking redelivery (Copilot review, PR #168).
+					_ = msg.InProgress()
+				case <-ctx.Done():
+					_ = msg.Nak()
+					ticker.Stop()
+					return
+				}
 			}
+			ticker.Stop()
 		}
 	}
 }

@@ -69,7 +69,9 @@ func NewEventHubsSinkWithTransport(connectionString, eventHub string, transport 
 	}
 	client, err := azeventhubs.NewProducerClientFromConnectionString(connectionString, sdkEventHub, options)
 	if err != nil {
-		return nil, fmt.Errorf("create DTDPF Event Hubs producer: invalid connection configuration")
+		// Wrap the SDK error (it does not echo the raw connection string) so
+		// operators can distinguish misconfiguration from transient failures.
+		return nil, fmt.Errorf("create DTDPF Event Hubs producer: %w", err)
 	}
 	return newEventHubsSink(&azureProducer{client: client}), nil
 }

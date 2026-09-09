@@ -197,7 +197,7 @@ go run ./cmd/gateway --dev-sim   # in-process sim connector for a no-equipment s
 | `--catalog-allowlist` | `CATALOG_ALLOWLIST` | `ghcr.io` | Comma-separated list of allowed OCI registries (ADR-0006) |
 | `--telemetry-sink` | `TELEMETRY_SINK` | `bos` | Telemetry destination: `bos` or `dtdpf` |
 | `--dtdpf-point-config` | `DTDPF_POINT_CONFIG_FILE` | – | DTDPF `pointConfig.json`; required for `dtdpf` |
-| `--dtdpf-eventhub-connection-string` | `DTDPF_EVENTHUB_CONNECTION_STRING` | – | Event Hubs SAS connection string; required for `dtdpf` |
+| – | `DTDPF_EVENTHUB_CONNECTION_STRING` | – | Event Hubs SAS connection string; required for `dtdpf`. Env-only, no CLI flag (avoids leaking secrets via process listings/shell history) |
 | `--dtdpf-eventhub-name` | `DTDPF_EVENTHUB_NAME` | `telemetry` | Event Hub entity name |
 | `--dtdpf-eventhub-transport` | `DTDPF_EVENTHUB_TRANSPORT` | `amqp-tcp` | Event Hubs binding: `amqp-tcp` (5671) or `websocket` (443) |
 

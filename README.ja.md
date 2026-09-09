@@ -169,7 +169,7 @@ go run ./cmd/gateway --dev-sim   # 設備不要の smoke 実行用に in-process
 | `--dev-sim-interval` | – | `60s` | `--dev-sim` の発行間隔。ローカルで素早く確認したい場合は `5s` 等に下げる |
 | `--telemetry-sink` | `TELEMETRY_SINK` | `bos` | テレメトリ送信先: `bos` または `dtdpf` |
 | `--dtdpf-point-config` | `DTDPF_POINT_CONFIG_FILE` | – | DTDPF `pointConfig.json`。`dtdpf` 選択時は必須 |
-| `--dtdpf-eventhub-connection-string` | `DTDPF_EVENTHUB_CONNECTION_STRING` | – | Event Hubs SAS 接続文字列。`dtdpf` 選択時は必須 |
+| – | `DTDPF_EVENTHUB_CONNECTION_STRING` | – | Event Hubs SAS 接続文字列。`dtdpf` 選択時は必須。環境変数のみ(CLIフラグなし、プロセス一覧/シェル履歴への漏洩を避けるため) |
 | `--dtdpf-eventhub-name` | `DTDPF_EVENTHUB_NAME` | `telemetry` | Event Hub 名 |
 | `--dtdpf-eventhub-transport` | `DTDPF_EVENTHUB_TRANSPORT` | `amqp-tcp` | Event Hubs接続: `amqp-tcp`（5671）または`websocket`（443） |
 
