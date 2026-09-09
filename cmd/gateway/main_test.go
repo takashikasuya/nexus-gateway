@@ -158,6 +158,26 @@ func TestResolveBOSAddr_BothEmpty(t *testing.T) {
 	}
 }
 
+func TestValidateTelemetrySinkConfig(t *testing.T) {
+	assert.NoError(t, validateTelemetrySinkConfig(telemetryConfig{Sink: "bos"}))
+	assert.NoError(t, validateTelemetrySinkConfig(telemetryConfig{
+		Sink: "dtdpf", PointConfigFile: "pointConfig.json",
+		ConnectionString: "Endpoint=sb://example/;SharedAccessKeyName=send;SharedAccessKey=secret", EventHub: "telemetry", Transport: "websocket",
+	}))
+
+	for name, config := range map[string]telemetryConfig{
+		"unknown sink":         {Sink: "other"},
+		"missing point config": {Sink: "dtdpf", ConnectionString: "secret", EventHub: "telemetry", Transport: "amqp-tcp"},
+		"missing connection":   {Sink: "dtdpf", PointConfigFile: "pointConfig.json", EventHub: "telemetry", Transport: "amqp-tcp"},
+		"missing hub":          {Sink: "dtdpf", PointConfigFile: "pointConfig.json", ConnectionString: "secret", Transport: "amqp-tcp"},
+		"invalid transport":    {Sink: "dtdpf", PointConfigFile: "pointConfig.json", ConnectionString: "secret", EventHub: "telemetry", Transport: "invalid"},
+	} {
+		t.Run(name, func(t *testing.T) {
+			assert.Error(t, validateTelemetrySinkConfig(config))
+		})
+	}
+}
+
 func newTestNATS(t *testing.T, ctx context.Context) (*nats.Conn, jetstream.JetStream) {
 	t.Helper()
 	ns, err := server.NewServer(&server.Options{JetStream: true, StoreDir: t.TempDir(), Port: -1})

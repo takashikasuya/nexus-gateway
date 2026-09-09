@@ -40,10 +40,10 @@ func TestNormalizer_ResolvesLocalIDToPointID(t *testing.T) {
 	})
 
 	select {
-	case frame := <-norm.Frames():
-		assert.Equal(t, "gw-test", frame.GatewayId)
-		assert.Equal(t, "zone_a/temp", frame.PointId)
-		assert.InDelta(t, 21.5, frame.Value, 0.001)
+	case pending := <-norm.Records():
+		assert.Equal(t, "gw-test", pending.Record.GatewayID)
+		assert.Equal(t, "zone_a/temp", pending.Record.PointID)
+		assert.InDelta(t, 21.5, pending.Record.Value, 0.001)
 	case <-ctx.Done():
 		t.Fatal("timeout waiting for frame")
 	}
@@ -66,7 +66,7 @@ func TestNormalizer_SkipsUnknownLocalID(t *testing.T) {
 
 	// Also publish a known event after so we can detect order
 	select {
-	case <-norm.Frames():
+	case <-norm.Records():
 		t.Fatal("frame must not be emitted for unknown local_id")
 	case <-time.After(500 * time.Millisecond):
 		// expected: no frame
@@ -92,8 +92,8 @@ func TestNormalizer_BoolValueNormalisedToNumeric(t *testing.T) {
 	})
 
 	select {
-	case frame := <-norm.Frames():
-		assert.Equal(t, 1.0, frame.Value, "bool true must arrive as 1.0")
+	case pending := <-norm.Records():
+		assert.Equal(t, 1.0, pending.Record.Value, "bool true must arrive as 1.0")
 	case <-ctx.Done():
 		t.Fatal("timeout")
 	}
@@ -135,7 +135,7 @@ func TestNormalizer_DropsAndMetersPoisonAndMiss(t *testing.T) {
 
 	// No frame is emitted for either.
 	select {
-	case <-norm.Frames():
+	case <-norm.Records():
 		t.Fatal("no frame expected for poison/miss")
 	case <-time.After(300 * time.Millisecond):
 	}

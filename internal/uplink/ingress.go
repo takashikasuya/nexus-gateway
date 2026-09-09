@@ -15,6 +15,7 @@ import (
 	pb "nexus-gateway/gen"
 	"nexus-gateway/internal/retry"
 	"nexus-gateway/internal/storeforward"
+	"nexus-gateway/internal/telemetry"
 )
 
 // Config holds tunable checkpoint parameters.
@@ -74,7 +75,7 @@ type grpcSink struct {
 	stream pb.GatewayIngress_StreamTelemetryClient
 }
 
-func (g *grpcSink) Send(ctx context.Context, frame *pb.TelemetryFrame) error {
+func (g *grpcSink) Send(ctx context.Context, record *telemetry.Record) error {
 	if g.stream == nil {
 		stream, err := g.client.StreamTelemetry(ctx)
 		if err != nil {
@@ -82,7 +83,7 @@ func (g *grpcSink) Send(ctx context.Context, frame *pb.TelemetryFrame) error {
 		}
 		g.stream = stream
 	}
-	return g.stream.Send(frame)
+	return g.stream.Send(record.ToProto())
 }
 
 func (g *grpcSink) Checkpoint(_ context.Context) (int64, error) {

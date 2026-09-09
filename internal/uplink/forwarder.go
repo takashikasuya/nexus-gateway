@@ -9,8 +9,8 @@ import (
 	"log/slog"
 	"time"
 
-	pb "nexus-gateway/gen"
 	"nexus-gateway/internal/storeforward"
+	"nexus-gateway/internal/telemetry"
 )
 
 // FrameSink is the transport seam for the telemetry uplink. Frames are sent one
@@ -19,7 +19,7 @@ import (
 // is ready to start a fresh batch. The gRPC client-streaming transport is one
 // adapter; tests inject an in-memory fake.
 type FrameSink interface {
-	Send(ctx context.Context, frame *pb.TelemetryFrame) error
+	Send(ctx context.Context, record *telemetry.Record) error
 	Checkpoint(ctx context.Context) (accepted int64, err error)
 }
 
@@ -109,11 +109,11 @@ func (f *Forwarder) Run(ctx context.Context) error {
 				return nil
 			}
 			for _, sf := range frames {
-				if err := f.sink.Send(ctx, sf.Frame); err != nil {
+				if err := f.sink.Send(ctx, sf.Record); err != nil {
 					f.buf.RecordSendError()
 					return fmt.Errorf("send: %w", err)
 				}
-				batch = append(batch, storeforward.SentFrame{Seq: sf.Seq, PointID: sf.Frame.PointId})
+				batch = append(batch, storeforward.SentFrame{Seq: sf.Seq, PointID: sf.Record.PointID})
 				cursor = sf.Seq
 				if len(batch) >= f.cfg.CheckpointSize {
 					if err := checkpoint(); err != nil {

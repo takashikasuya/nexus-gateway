@@ -11,12 +11,14 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/nats-io/nats.go/jetstream"
 
 	pb "nexus-gateway/gen"
 	"nexus-gateway/internal/common"
 	"nexus-gateway/internal/metrics"
 	"nexus-gateway/internal/pointlist"
+	"nexus-gateway/internal/telemetry"
 )
 
 // Outcome classifies a Common Event so the consume loop can drop-and-meter
@@ -36,6 +38,7 @@ type EventMsg interface {
 	Ack() error
 	Term() error
 	Nak() error
+	InProgress() error
 }
 
 // EventSource is the seam over the durable JetStream pull consumer: it yields the
@@ -48,17 +51,27 @@ type EventSource interface {
 	Fetch(max int, maxWait time.Duration) iter.Seq[EventMsg]
 }
 
+// MetadataResolver optionally enriches canonical point IDs for a specific sink.
+type MetadataResolver interface {
+	Resolve(pointID, protocol string) (*telemetry.DTDPFMetadata, bool)
+}
+
 // Normalizer is the single durable pull consumer on evt.> (ADR-0001, ADR-0005).
 // It resolves native LocalID → canonical PointID via the resolver, then emits
 // TelemetryFrames downstream. Unknown local_ids are skipped and metered.
 type Normalizer struct {
-	frames chan *pb.TelemetryFrame
+	records chan telemetry.PendingRecord
 }
 
 // New wires the Normalizer to the live JetStream EVENTS stream (ADR-0005),
 // creating the durable consumer and feeding the consume loop through a
 // jetstreamSource adapter.
 func New(ctx context.Context, js jetstream.JetStream, resolver pointlist.Resolver, gatewayID string) (*Normalizer, error) {
+	return NewWithMetadata(ctx, js, resolver, nil, gatewayID)
+}
+
+// NewWithMetadata wires the Normalizer with optional sink-specific metadata enrichment.
+func NewWithMetadata(ctx context.Context, js jetstream.JetStream, resolver pointlist.Resolver, metadata MetadataResolver, gatewayID string) (*Normalizer, error) {
 	cons, err := js.CreateOrUpdateConsumer(ctx, "EVENTS", jetstream.ConsumerConfig{
 		Durable:       "normalizer",
 		FilterSubject: "evt.>",
@@ -68,30 +81,35 @@ func New(ctx context.Context, js jetstream.JetStream, resolver pointlist.Resolve
 	if err != nil {
 		return nil, fmt.Errorf("create normalizer consumer: %w", err)
 	}
-	return NewWithSource(ctx, jetstreamSource{cons: cons}, resolver, gatewayID), nil
+	return NewWithSourceAndMetadata(ctx, jetstreamSource{cons: cons}, resolver, metadata, gatewayID), nil
 }
 
 // NewWithSource starts a Normalizer over an arbitrary EventSource. This is the
 // testable seam; New is the production wrapper over JetStream.
 func NewWithSource(ctx context.Context, src EventSource, resolver pointlist.Resolver, gatewayID string) *Normalizer {
-	n := &Normalizer{frames: make(chan *pb.TelemetryFrame, 256)}
-	go n.consume(ctx, src, resolver, gatewayID)
+	return NewWithSourceAndMetadata(ctx, src, resolver, nil, gatewayID)
+}
+
+// NewWithSourceAndMetadata is the testable constructor with optional enrichment.
+func NewWithSourceAndMetadata(ctx context.Context, src EventSource, resolver pointlist.Resolver, metadata MetadataResolver, gatewayID string) *Normalizer {
+	n := &Normalizer{records: make(chan telemetry.PendingRecord, 256)}
+	go n.consume(ctx, src, resolver, metadata, gatewayID)
 	return n
 }
 
-// Frames returns the channel of normalized TelemetryFrames.
-func (n *Normalizer) Frames() <-chan *pb.TelemetryFrame {
-	return n.frames
+// Records returns normalized records whose source must be acknowledged after persistence.
+func (n *Normalizer) Records() <-chan telemetry.PendingRecord {
+	return n.records
 }
 
-func (n *Normalizer) consume(ctx context.Context, src EventSource, resolver pointlist.Resolver, gatewayID string) {
-	defer close(n.frames)
+func (n *Normalizer) consume(ctx context.Context, src EventSource, resolver pointlist.Resolver, metadata MetadataResolver, gatewayID string) {
+	defer close(n.records)
 	for {
 		if ctx.Err() != nil {
 			return
 		}
 		for msg := range src.Fetch(32, 500*time.Millisecond) {
-			frame, out := Normalize(msg.Data(), resolver, gatewayID)
+			record, out := NormalizeRecord(msg.Data(), resolver, metadata, gatewayID)
 			switch out {
 			case OutcomePoison:
 				// Retrying an unparseable event is pointless; terminate, don't redeliver.
@@ -106,8 +124,7 @@ func (n *Normalizer) consume(ctx context.Context, src EventSource, resolver poin
 				continue
 			}
 			select {
-			case n.frames <- frame:
-				_ = msg.Ack()
+			case n.records <- telemetry.PendingRecord{Record: record, Ack: msg.Ack, Nak: msg.Nak, InProgress: msg.InProgress}:
 			case <-ctx.Done():
 				_ = msg.Nak()
 				return
@@ -144,6 +161,15 @@ func (s jetstreamSource) Fetch(max int, maxWait time.Duration) iter.Seq[EventMsg
 // It is a pure function: no I/O, no state. The consume loop calls it and
 // acts on the returned Outcome (ack, term, or nak).
 func Normalize(data []byte, resolver pointlist.Resolver, gatewayID string) (*pb.TelemetryFrame, Outcome) {
+	record, outcome := NormalizeRecord(data, resolver, nil, gatewayID)
+	if record == nil {
+		return nil, outcome
+	}
+	return record.ToProto(), outcome
+}
+
+// NormalizeRecord maps a raw Common Event to the sink-independent telemetry record.
+func NormalizeRecord(data []byte, resolver pointlist.Resolver, metadata MetadataResolver, gatewayID string) (*telemetry.Record, Outcome) {
 	var evt common.Event
 	if err := json.Unmarshal(data, &evt); err != nil {
 		slog.Warn("normalizer: unmarshal error", "err", err)
@@ -158,10 +184,20 @@ func Normalize(data []byte, resolver pointlist.Resolver, gatewayID string) (*pb.
 	if ts == "" {
 		ts = time.Now().UTC().Format(time.RFC3339)
 	}
-	return &pb.TelemetryFrame{
-		GatewayId: gatewayID,
-		PointId:   pointID,
+	record := &telemetry.Record{
+		EventID:   uuid.NewString(),
+		GatewayID: gatewayID,
+		PointID:   pointID,
 		Value:     evt.Value,
 		Timestamp: ts,
-	}, OutcomeOK
+	}
+	if metadata != nil {
+		dtdpfMetadata, ok := metadata.Resolve(pointID, evt.Protocol)
+		if !ok {
+			slog.Warn("normalizer: DTDPF metadata unresolved", "point_id", pointID, "protocol", evt.Protocol)
+			return nil, OutcomeMiss
+		}
+		record.DTDPF = dtdpfMetadata
+	}
+	return record, OutcomeOK
 }

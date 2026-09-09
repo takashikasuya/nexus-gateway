@@ -15,6 +15,7 @@ import (
 
 	pb "nexus-gateway/gen"
 	"nexus-gateway/internal/storeforward"
+	"nexus-gateway/internal/telemetry"
 )
 
 // A successful Write signals WriteNotify so the uplink Forwarder can react
@@ -63,6 +64,64 @@ func TestBuffer_WriteReadAdvance(t *testing.T) {
 	require.NoError(t, err)
 	require.Len(t, batch2, 1)
 	assert.Equal(t, "p3", batch2[0].Frame.PointId)
+}
+
+func TestBuffer_RecordRoundTripPreservesDTDPFMetadata(t *testing.T) {
+	buf, err := storeforward.Open(t.TempDir()+"/sf.db", 100)
+	require.NoError(t, err)
+	defer buf.Close()
+
+	pointType := 2
+	record := &telemetry.Record{
+		EventID: "43217568-443d-4b24-96d1-59887fdd1628", GatewayID: "gw-1", PointID: "R90_000001",
+		Value: 256.3, Timestamp: "2021-07-01T01:23:45.1234567Z", Attributes: map[string]string{"quality": "good"},
+		DTDPF: &telemetry.DTDPFMetadata{
+			RootID: 5, DTID: "R90_000001", Topic: "takenaka.co.jp/R90/temp", Type: &pointType, Protocol: "bacnet",
+		},
+	}
+	require.NoError(t, buf.WriteRecord(record))
+
+	batch, err := buf.ReadBatch(0, 1)
+	require.NoError(t, err)
+	require.Len(t, batch, 1)
+	assert.Equal(t, record, batch[0].Record)
+	assert.Equal(t, record.PointID, batch[0].Frame.PointId, "legacy protobuf projection remains available")
+}
+
+type metadataResolver map[string]telemetry.DTDPFMetadata
+
+func (r metadataResolver) ResolvePoint(pointID string) (*telemetry.DTDPFMetadata, bool) {
+	metadata, ok := r[pointID]
+	return &metadata, ok
+}
+
+func TestBuffer_PrepareDTDPFBackfillsLegacyRowsOnce(t *testing.T) {
+	buf, err := storeforward.OpenWithPolicy(t.TempDir()+"/sf.db", 100, storeforward.BlockWhenFull)
+	require.NoError(t, err)
+	defer buf.Close()
+	require.NoError(t, buf.Write(&pb.TelemetryFrame{PointId: "R90_000001", Value: 1, Timestamp: "2026-01-01T00:00:00Z"}))
+
+	pointType := 2
+	resolver := metadataResolver{"R90_000001": {
+		RootID: 5, DTID: "R90_000001", Topic: "takenaka.co.jp/R90/temp", Type: &pointType, Protocol: "bacnet",
+	}}
+	updated, err := buf.PrepareDTDPF(resolver)
+	require.NoError(t, err)
+	assert.Equal(t, 1, updated)
+
+	batch, err := buf.ReadBatch(0, 1)
+	require.NoError(t, err)
+	require.Len(t, batch, 1)
+	assert.NotEmpty(t, batch[0].Record.EventID)
+	assert.Equal(t, resolver["R90_000001"], *batch[0].Record.DTDPF)
+	firstID := batch[0].Record.EventID
+
+	updated, err = buf.PrepareDTDPF(resolver)
+	require.NoError(t, err)
+	assert.Zero(t, updated)
+	batch, err = buf.ReadBatch(0, 1)
+	require.NoError(t, err)
+	assert.Equal(t, firstID, batch[0].Record.EventID, "startup replay must not regenerate the event id")
 }
 
 // The Buffer is the single store-and-forward metrics source: it counts frames
@@ -116,6 +175,22 @@ func TestBuffer_DropOldestOnOverflow(t *testing.T) {
 	assert.Equal(t, "p2", batch[0].Frame.PointId)
 	assert.Equal(t, "p3", batch[1].Frame.PointId)
 	assert.Equal(t, "p4", batch[2].Frame.PointId)
+}
+
+func TestBuffer_BlockWhenFullPreservesOldest(t *testing.T) {
+	buf, err := storeforward.OpenWithPolicy(t.TempDir()+"/sf.db", 1, storeforward.BlockWhenFull)
+	require.NoError(t, err)
+	defer buf.Close()
+
+	require.NoError(t, buf.Write(&pb.TelemetryFrame{PointId: "p1", Value: 1, Timestamp: "t"}))
+	assert.ErrorIs(t, buf.Write(&pb.TelemetryFrame{PointId: "p2", Value: 2, Timestamp: "t"}), storeforward.ErrBufferFull)
+
+	batch, err := buf.ReadBatch(0, 10)
+	require.NoError(t, err)
+	require.Len(t, batch, 1)
+	assert.Equal(t, "p1", batch[0].Frame.PointId)
+	require.NoError(t, buf.Advance(batch[0].Seq))
+	require.NoError(t, buf.Write(&pb.TelemetryFrame{PointId: "p2", Value: 2, Timestamp: "t"}))
 }
 
 func TestBuffer_DriftCounter(t *testing.T) {
