@@ -613,14 +613,14 @@
 
     <!-- Arrow: S&F → BOS (gRPC Ingress) -->
     <line x1="462" y1="300" x2="598" y2="145" stroke="#3ec98d" stroke-width="1.5" marker-end="url(#arr3)"/>
-    <text x="520" y="232" fill="#3ec98d" font-size="8.5" font-family="sans-serif" transform="rotate(-30,520,232)">gRPC StreamTelemetry</text>
+    <text x="488" y="272" fill="#3ec98d" font-size="8.5" font-family="sans-serif" transform="rotate(-30,488,272)">gRPC StreamTelemetry</text>
 
-    <!-- Arrow: BOS → Connectors (Control) -->
-    <line x1="598" y1="195" x2="462" y2="195" stroke="#f0904e" stroke-width="1.5" marker-end="url(#arr2)"/>
-    <text x="520" y="188" text-anchor="middle" fill="#f0904e" font-size="8" font-family="sans-serif">ControlCommand</text>
+    <!-- Arrow: BOS GatewayEgress → Egress Agent -->
+    <line x1="598" y1="190" x2="592" y2="190" stroke="#f0904e" stroke-width="1.5" marker-end="url(#arr2)"/>
+    <text x="545" y="163" text-anchor="middle" fill="#f0904e" font-size="8" font-family="sans-serif">ControlCommand</text>
 
-    <!-- Arrow: Connectors → BOS (cmd) -->
-    <line x1="300" y1="185" x2="338" y2="185" stroke="#f0904e" stroke-width="1" stroke-dasharray="3,3"/>
+    <!-- Arrow: Egress Agent → Connectors (dispatch, dashed) -->
+    <line x1="500" y1="190" x2="302" y2="132" stroke="#f0904e" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr2)"/>
 
     <!-- Egress agent -->
     <rect x="500" y="170" width="90" height="40" rx="4" fill="#22263a" stroke="#f0904e"/>
@@ -697,7 +697,7 @@
       <tr>
         <td><strong>Point List Sync</strong></td>
         <td>Go</td>
-        <td>Building OS（または file/CSV）から diff 同期。fixture bootstrap → provisioning 上書き → 起動時ブロッキング取得 → 順引き/逆引き解決の収束ライフサイクルを <code>pointsync.Service</code> が一元所有（FEAT-031, #70）。既定ポーリング間隔 10 分</td>
+        <td>Building OS（または file/CSV）から diff 同期。起動時ブロッキング取得後、低頻度ポーリング（既定 10 分）</td>
         <td><span class="src">internal/pointlist/, internal/pointsync/</span></td>
       </tr>
       <tr>
@@ -1272,11 +1272,6 @@ Gateway  ←→  BOS  ← import fixtures/scale/&lt;N&gt;/point_list.csv</pre>
         <td><code>pointlist.Resolver</code></td>
         <td>順引き + 逆引き</td>
         <td>Normalizer（順）と制御 Dispatch（逆）の共通ルックアップ</td>
-      </tr>
-      <tr>
-        <td><code>pointsync.Service</code></td>
-        <td><code>Start / Resolver</code></td>
-        <td>fixture bootstrap → provisioning 上書き → 起動時ブロッキング取得 → 順引き/逆引き解決の収束ライフサイクルを一元所有（FEAT-031 残タスク #70、ライブ NATS/gRPC/Building OS 不要でテスト可能）</td>
       </tr>
       <tr>
         <td><code>adminapi</code></td>
