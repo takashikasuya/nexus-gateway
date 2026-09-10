@@ -9,6 +9,8 @@ import (
 	"fmt"
 	"log/slog"
 
+	"github.com/google/uuid"
+
 	"nexus-gateway/internal/dtdpf/storage"
 	"nexus-gateway/internal/metrics"
 	"nexus-gateway/internal/telemetry"
@@ -65,7 +67,16 @@ func (o *AttachmentOrchestrator) Resolve(ctx context.Context, record *telemetry.
 		return nil, nil
 	}
 
-	fileName := storage.ObjectName(record.EventID, o.extension)
+	// Canonicalize to the same lowercase UUID form EncodeEvent emits as the
+	// body's "id" field, so the uploaded object name always matches the
+	// telemetry ID a DTDPF consumer correlates it against.
+	telemetryID, err := uuid.Parse(record.EventID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid telemetry event id %q: %w", record.EventID, err)
+	}
+	canonicalID := telemetryID.String()
+
+	fileName := storage.ObjectName(canonicalID, o.extension)
 	fileHash := storage.Hash(compact)
 
 	state, existingName, existingHash, err := o.store.AttachmentState(record.EventID)

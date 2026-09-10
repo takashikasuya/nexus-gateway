@@ -128,6 +128,33 @@ func TestAttachmentOrchestrator_UploadsBeforeReturningAttachment(t *testing.T) {
 	assert.Equal(t, attachment.FileHash, fileHash)
 }
 
+func TestAttachmentOrchestrator_ObjectNameUsesCanonicalLowercaseUUID(t *testing.T) {
+	uploader := &fakeUploader{}
+	store := newFakeAttachmentStore()
+	orch, err := dtdpf.NewAttachmentOrchestrator(uploader, store)
+	require.NoError(t, err)
+
+	// Uppercase EventID: EncodeEvent canonicalizes UUIDs to lowercase for the
+	// body's "id" field, so the uploaded fileName must match that form too.
+	record := recordWithValues("43217568-443D-4B24-96D1-59887FDD1628", largeValues(dtdpf.AttachmentThreshold+1))
+	attachment, err := orch.Resolve(context.Background(), record)
+	require.NoError(t, err)
+	require.NotNil(t, attachment)
+	assert.Equal(t, "43217568-443d-4b24-96d1-59887fdd1628.json", attachment.FileName)
+}
+
+func TestAttachmentOrchestrator_RejectsInvalidEventID(t *testing.T) {
+	uploader := &fakeUploader{}
+	store := newFakeAttachmentStore()
+	orch, err := dtdpf.NewAttachmentOrchestrator(uploader, store)
+	require.NoError(t, err)
+
+	record := recordWithValues("not-a-uuid", largeValues(dtdpf.AttachmentThreshold+1))
+	_, err = orch.Resolve(context.Background(), record)
+	require.Error(t, err)
+	assert.Equal(t, 0, uploader.callCount())
+}
+
 func TestAttachmentOrchestrator_CrashReplayDoesNotReupload(t *testing.T) {
 	uploader := &fakeUploader{}
 	store := newFakeAttachmentStore()
@@ -176,7 +203,7 @@ func TestAttachmentOrchestrator_UploadFailureLeavesStateUnuploaded(t *testing.T)
 	orch, err := dtdpf.NewAttachmentOrchestrator(uploader, store)
 	require.NoError(t, err)
 
-	record := recordWithValues("id-1", largeValues(dtdpf.AttachmentThreshold+1))
+	record := recordWithValues("53217568-443d-4b24-96d1-59887fdd1628", largeValues(dtdpf.AttachmentThreshold+1))
 	_, err = orch.Resolve(context.Background(), record)
 	require.Error(t, err, "the caller must not send an Event Hubs notification when upload fails")
 
