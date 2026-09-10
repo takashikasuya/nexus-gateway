@@ -331,12 +331,24 @@ func (b *Buffer) AttachmentState(eventID string) (state, fileName, fileHash stri
 // MarkAttachmentUploaded records that eventID's oversized Values payload has
 // been durably uploaded as fileName with the given content hash, so a
 // restart or retry does not re-upload it (FEAT-050). Idempotent: calling it
-// again with the same eventID/fileName/fileHash is a harmless no-op.
+// again with the same eventID/fileName/fileHash is a harmless no-op. Returns
+// an error if eventID does not match exactly one row, so a silently-missed
+// persist (or an unexpected multi-row update) is never mistaken for success.
 func (b *Buffer) MarkAttachmentUploaded(eventID, fileName, fileHash string) error {
-	_, err := b.db.Exec(
+	res, err := b.db.Exec(
 		`UPDATE frames SET attachment_state = 'uploaded', attachment_file_name = ?, attachment_file_hash = ?
 		 WHERE event_id = ?`, fileName, fileHash, eventID)
-	return err
+	if err != nil {
+		return err
+	}
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affected != 1 {
+		return fmt.Errorf("mark DTDPF attachment uploaded: expected exactly 1 row for event_id %q, affected %d", eventID, affected)
+	}
+	return nil
 }
 
 // ReadBatch returns up to limit frames with seq > afterSeq, in ascending order.

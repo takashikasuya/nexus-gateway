@@ -189,6 +189,15 @@ func TestBuffer_MarkAttachmentUploadedIsIdempotent(t *testing.T) {
 	assert.Equal(t, "deadbeef", fileHash)
 }
 
+func TestBuffer_MarkAttachmentUploadedErrorsOnUnknownEventID(t *testing.T) {
+	buf, err := storeforward.Open(t.TempDir()+"/sf.db", 100)
+	require.NoError(t, err)
+	defer buf.Close()
+
+	err = buf.MarkAttachmentUploaded("does-not-exist", "obj.json", "deadbeef")
+	require.Error(t, err, "marking an unwritten/unknown event_id must not be mistaken for a successful persist")
+}
+
 type metadataResolver map[string]telemetry.DTDPFMetadata
 
 func (r metadataResolver) ResolvePoint(pointID string) (*telemetry.DTDPFMetadata, bool) {

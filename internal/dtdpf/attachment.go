@@ -5,6 +5,7 @@ package dtdpf
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 
@@ -40,10 +41,10 @@ type AttachmentOrchestrator struct {
 // store, both required.
 func NewAttachmentOrchestrator(uploader storage.Uploader, store AttachmentStore) (*AttachmentOrchestrator, error) {
 	if uploader == nil {
-		return nil, fmt.Errorf("DTDPF attachment orchestrator requires an Uploader")
+		return nil, errors.New("DTDPF attachment orchestrator requires a non-nil Uploader")
 	}
 	if store == nil {
-		return nil, fmt.Errorf("DTDPF attachment orchestrator requires an AttachmentStore")
+		return nil, errors.New("DTDPF attachment orchestrator requires a non-nil AttachmentStore")
 	}
 	return &AttachmentOrchestrator{uploader: uploader, store: store, extension: defaultAttachmentExtension}, nil
 }
