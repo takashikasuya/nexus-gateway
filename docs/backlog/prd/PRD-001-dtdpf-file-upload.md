@@ -21,7 +21,7 @@ guarantees "upload before notify" across a crash/restart.
 This PRD scopes the **gateway-side (Go core)** work required to close that
 gap. It intentionally does not scope connector-side (Python/Java/Go SDK)
 changes to actually *emit* large payloads from the field — see
-[Out of scope](#out-of-scope).
+[Non-Goals](#non-goals).
 
 ## Goals
 
@@ -50,6 +50,7 @@ changes to actually *emit* large payloads from the field — see
 - Entra ID credential support — the seam is interface-based so it can be
   added later without a caller-visible change; only SAS URI is implemented
   now (mirrors ADR-0008's existing SAS-based Event Hubs auth for consistency).
+  See [Non-Goals](#non-goals) below for the full list this PRD excludes.
 - Rule evaluation, IoT Hub Direct Methods — unchanged EP-012 non-goals.
 
 ## Design
@@ -90,7 +91,12 @@ changes to actually *emit* large payloads from the field — see
   - a bounded timeout per attempt (`DTDPF_UPLOAD_TIMEOUT`, default e.g. 30s),
   - retry with backoff on transient failures (reuse the existing
     `internal/retry` package if its policy shape fits),
-  - `Content-MD5`/`Content-Type` set from the caller (JSON payloads).
+  - `Content-Type` set internally to `application/json` (the only payload
+    shape this PRD uploads); the `Uploader` interface itself stays
+    `Put(ctx, objectName, body)` with no caller-supplied metadata. `fileHash`
+    (SHA-256, computed by the caller before calling `Put`) is the integrity
+    check that ships in the Event Hubs properties — a transport-level
+    `Content-MD5` is not required for that purpose and is omitted.
 - A `Hash(body []byte) string` helper returns the lowercase 64-char SHA-256
   hex digest per [C4-06].
 - Object naming helper: `ObjectName(telemetryID, extension string) string`
