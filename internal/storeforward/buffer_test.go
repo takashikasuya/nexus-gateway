@@ -123,6 +123,81 @@ func TestBuffer_RecordWithoutValuesRoundTripsNil(t *testing.T) {
 	assert.Nil(t, batch[0].Record.Values, "legacy/scalar-only rows must not synthesize a Values object")
 }
 
+func TestBuffer_AttachmentStateDefaultsToNoneForWrittenRow(t *testing.T) {
+	buf, err := storeforward.Open(t.TempDir()+"/sf.db", 100)
+	require.NoError(t, err)
+	defer buf.Close()
+
+	eventID := "43217568-443d-4b24-96d1-59887fdd1628"
+	require.NoError(t, buf.WriteRecord(&telemetry.Record{
+		EventID: eventID, GatewayID: "gw-1", PointID: "p1", Value: 1.0, Timestamp: "2026-09-10T00:00:00Z",
+	}))
+
+	state, fileName, fileHash, err := buf.AttachmentState(eventID)
+	require.NoError(t, err)
+	assert.Equal(t, "none", state)
+	assert.Empty(t, fileName)
+	assert.Empty(t, fileHash)
+}
+
+func TestBuffer_AttachmentStateForUnknownEventIDIsNoneWithoutError(t *testing.T) {
+	buf, err := storeforward.Open(t.TempDir()+"/sf.db", 100)
+	require.NoError(t, err)
+	defer buf.Close()
+
+	state, _, _, err := buf.AttachmentState("does-not-exist")
+	require.NoError(t, err)
+	assert.Equal(t, "none", state)
+}
+
+func TestBuffer_MarkAttachmentUploadedPersistsAndRoundTrips(t *testing.T) {
+	buf, err := storeforward.Open(t.TempDir()+"/sf.db", 100)
+	require.NoError(t, err)
+	defer buf.Close()
+
+	eventID := "43217568-443d-4b24-96d1-59887fdd1628"
+	require.NoError(t, buf.WriteRecord(&telemetry.Record{
+		EventID: eventID, GatewayID: "gw-1", PointID: "p1", Value: 1.0, Timestamp: "2026-09-10T00:00:00Z",
+	}))
+
+	require.NoError(t, buf.MarkAttachmentUploaded(eventID, "43217568.json", "deadbeef"))
+
+	state, fileName, fileHash, err := buf.AttachmentState(eventID)
+	require.NoError(t, err)
+	assert.Equal(t, "uploaded", state)
+	assert.Equal(t, "43217568.json", fileName)
+	assert.Equal(t, "deadbeef", fileHash)
+}
+
+func TestBuffer_MarkAttachmentUploadedIsIdempotent(t *testing.T) {
+	buf, err := storeforward.Open(t.TempDir()+"/sf.db", 100)
+	require.NoError(t, err)
+	defer buf.Close()
+
+	eventID := "43217568-443d-4b24-96d1-59887fdd1628"
+	require.NoError(t, buf.WriteRecord(&telemetry.Record{
+		EventID: eventID, GatewayID: "gw-1", PointID: "p1", Value: 1.0, Timestamp: "2026-09-10T00:00:00Z",
+	}))
+
+	require.NoError(t, buf.MarkAttachmentUploaded(eventID, "43217568.json", "deadbeef"))
+	require.NoError(t, buf.MarkAttachmentUploaded(eventID, "43217568.json", "deadbeef"))
+
+	state, fileName, fileHash, err := buf.AttachmentState(eventID)
+	require.NoError(t, err)
+	assert.Equal(t, "uploaded", state)
+	assert.Equal(t, "43217568.json", fileName)
+	assert.Equal(t, "deadbeef", fileHash)
+}
+
+func TestBuffer_MarkAttachmentUploadedErrorsOnUnknownEventID(t *testing.T) {
+	buf, err := storeforward.Open(t.TempDir()+"/sf.db", 100)
+	require.NoError(t, err)
+	defer buf.Close()
+
+	err = buf.MarkAttachmentUploaded("does-not-exist", "obj.json", "deadbeef")
+	require.Error(t, err, "marking an unwritten/unknown event_id must not be mistaken for a successful persist")
+}
+
 type metadataResolver map[string]telemetry.DTDPFMetadata
 
 func (r metadataResolver) ResolvePoint(pointID string) (*telemetry.DTDPFMetadata, bool) {

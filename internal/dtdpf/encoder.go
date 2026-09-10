@@ -23,6 +23,15 @@ type EncodedEvent struct {
 	PartitionKey  string
 }
 
+// Attachment carries the DTDPF contract ④ reference properties added to an
+// Event Hubs notification once the record's oversized Values payload has been
+// durably uploaded to GW Upload Storage (FEAT-050). Pass nil when no
+// attachment applies (absent, under threshold, or over the 10 MiB limit).
+type Attachment struct {
+	FileName string
+	FileHash string
+}
+
 type eventBody struct {
 	ID        string      `json:"id"`
 	Type      *int        `json:"type,omitempty"`
@@ -37,8 +46,11 @@ type eventValues struct {
 	Value string `json:"value"`
 }
 
-// EncodeEvent converts a durable telemetry record to the DTDPF Event Hubs contract.
-func EncodeEvent(record *telemetry.Record) (*EncodedEvent, error) {
+// EncodeEvent converts a durable telemetry record to the DTDPF Event Hubs
+// contract. attachment is nil unless the record's Values payload has already
+// been durably uploaded (FEAT-050); the body always carries the scalar
+// summary in values.value regardless.
+func EncodeEvent(record *telemetry.Record, attachment *Attachment) (*EncodedEvent, error) {
 	if record == nil {
 		return nil, fmt.Errorf("encode nil telemetry record")
 	}
@@ -67,12 +79,18 @@ func EncodeEvent(record *telemetry.Record) (*EncodedEvent, error) {
 	if err != nil {
 		return nil, fmt.Errorf("encode DTDPF event body: %w", err)
 	}
+	properties := map[string]any{
+		"rootId": rootID,
+		"dtId":   record.DTDPF.DTID,
+	}
+	if attachment != nil {
+		properties["fileUpload"] = "1"
+		properties["fileName"] = attachment.FileName
+		properties["fileHash"] = attachment.FileHash
+	}
 	return &EncodedEvent{
-		Body: body,
-		Properties: map[string]any{
-			"rootId": rootID,
-			"dtId":   record.DTDPF.DTID,
-		},
+		Body:          body,
+		Properties:    properties,
 		ContentType:   "application/json",
 		CorrelationID: telemetryID.String(),
 		PartitionKey:  rootID,

@@ -377,6 +377,9 @@ func (s *Server) handleMetrics(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "# HELP normalizer_unresolved_total Common Events whose local_id is absent from the Point List.\n")
 	fmt.Fprintf(w, "# TYPE normalizer_unresolved_total counter\n")
 	fmt.Fprintf(w, "normalizer_unresolved_total{reason=\"point_list_miss\"} %d\n", metrics.NormalizerUnresolved())
+	fmt.Fprintf(w, "# HELP dtdpf_attachment_oversized_total Telemetry values payloads exceeding the DTDPF 10 MiB attachment limit, sent as summary-only.\n")
+	fmt.Fprintf(w, "# TYPE dtdpf_attachment_oversized_total counter\n")
+	fmt.Fprintf(w, "dtdpf_attachment_oversized_total %d\n", metrics.DTDPFAttachmentOversized())
 
 	if s.telemetry != nil {
 		t := s.telemetry
