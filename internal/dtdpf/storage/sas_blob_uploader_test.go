@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -28,6 +29,7 @@ type requestRecord struct {
 
 func newFakeServer(t *testing.T, handler func(w http.ResponseWriter, r *http.Request, seen *requestRecord)) (*httptest.Server, *[]requestRecord) {
 	t.Helper()
+	var mu sync.Mutex
 	var records []requestRecord
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		body, err := io.ReadAll(r.Body)
@@ -37,7 +39,12 @@ func newFakeServer(t *testing.T, handler func(w http.ResponseWriter, r *http.Req
 			blobType: r.Header.Get("x-ms-blob-type"), ctype: r.Header.Get("Content-Type"),
 			body: body,
 		}
+		// A client-side per-attempt timeout can leave the previous request's
+		// handler goroutine still running (e.g. blocked in time.Sleep) while a
+		// retried request's handler runs concurrently; guard shared state.
+		mu.Lock()
 		records = append(records, rec)
+		mu.Unlock()
 		handler(w, r, &rec)
 	}))
 	t.Cleanup(server.Close)
