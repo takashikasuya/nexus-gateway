@@ -63,7 +63,14 @@ func NewSASBlobUploader(sasURL string, opts ...Option) (*SASBlobUploader, error)
 	}
 	parsed, err := url.Parse(sasURL)
 	if err != nil {
-		return nil, fmt.Errorf("parse DTDPF upload SAS URL: %w", err)
+		// Unwrap to the underlying reason only: a *url.Error's Error() method
+		// embeds the raw URL (including the SAS signature), which must never
+		// be logged.
+		var urlErr *url.Error
+		if errors.As(err, &urlErr) {
+			return nil, fmt.Errorf("parse DTDPF upload SAS URL: %w", urlErr.Err)
+		}
+		return nil, errors.New("parse DTDPF upload SAS URL: invalid URL")
 	}
 	u := &SASBlobUploader{
 		baseURL:     parsed,
@@ -74,6 +81,15 @@ func NewSASBlobUploader(sasURL string, opts ...Option) (*SASBlobUploader, error)
 	}
 	for _, opt := range opts {
 		opt(u)
+	}
+	if u.maxAttempts < 1 {
+		return nil, fmt.Errorf("DTDPF upload max attempts must be at least 1, got %d", u.maxAttempts)
+	}
+	if u.httpClient == nil {
+		return nil, errors.New("DTDPF upload HTTP client must not be nil")
+	}
+	if u.timeout <= 0 {
+		return nil, fmt.Errorf("DTDPF upload timeout must be positive, got %s", u.timeout)
 	}
 	return u, nil
 }
@@ -98,16 +114,14 @@ func (u *SASBlobUploader) Put(ctx context.Context, objectName string, body []byt
 			break
 		}
 		if waitErr := backoff.Wait(ctx); waitErr != nil {
-			return waitErr
+			return fmt.Errorf("upload %s: %w", objectName, waitErr)
 		}
 	}
 	return fmt.Errorf("upload %s: giving up after %d attempts: %w", objectName, u.maxAttempts, lastErr)
 }
 
 func (u *SASBlobUploader) objectURL(objectName string) string {
-	ref := *u.baseURL
-	ref.Path = strings.TrimSuffix(ref.Path, "/") + "/" + objectName
-	return ref.String()
+	return u.baseURL.JoinPath(objectName).String()
 }
 
 func (u *SASBlobUploader) putOnce(ctx context.Context, objectURL string, body []byte) error {

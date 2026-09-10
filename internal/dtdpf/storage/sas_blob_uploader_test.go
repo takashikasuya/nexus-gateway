@@ -144,3 +144,41 @@ func TestSASBlobUploader_PerAttemptTimeoutIsRetryable(t *testing.T) {
 	require.NoError(t, uploader.Put(context.Background(), "obj.json", []byte("x")))
 	assert.Equal(t, int32(2), calls.Load(), "a per-attempt timeout must be retried, not treated as final")
 }
+
+func TestSASBlobUploader_ObjectNameIsPathEscaped(t *testing.T) {
+	server, records := newFakeServer(t, func(w http.ResponseWriter, r *http.Request, seen *requestRecord) {
+		w.WriteHeader(http.StatusCreated)
+	})
+
+	uploader, err := storage.NewSASBlobUploader(server.URL + "/container?sig=x")
+	require.NoError(t, err)
+
+	require.NoError(t, uploader.Put(context.Background(), "a b#c.json", []byte("x")))
+
+	require.Len(t, *records, 1)
+	assert.Equal(t, "/container/a b#c.json", (*records)[0].path,
+		"the server-observed decoded path must match the literal object name")
+}
+
+func TestNewSASBlobUploader_RejectsNonPositiveMaxAttempts(t *testing.T) {
+	_, err := storage.NewSASBlobUploader("https://example.blob.core.windows.net/container?sig=x", storage.WithMaxAttempts(0))
+	require.Error(t, err)
+}
+
+func TestNewSASBlobUploader_RejectsNilHTTPClient(t *testing.T) {
+	_, err := storage.NewSASBlobUploader("https://example.blob.core.windows.net/container?sig=x", storage.WithHTTPClient(nil))
+	require.Error(t, err)
+}
+
+func TestNewSASBlobUploader_RejectsNonPositiveTimeout(t *testing.T) {
+	_, err := storage.NewSASBlobUploader("https://example.blob.core.windows.net/container?sig=x", storage.WithTimeout(0))
+	require.Error(t, err)
+}
+
+func TestNewSASBlobUploader_ParseErrorDoesNotLeakSASSignature(t *testing.T) {
+	// A control character makes url.Parse fail; the SAS signature must not
+	// appear in the returned error text.
+	_, err := storage.NewSASBlobUploader("https://example.blob.core.windows.net/container?sig=super-secret-value\x7f")
+	require.Error(t, err)
+	assert.NotContains(t, err.Error(), "super-secret-value")
+}
