@@ -21,19 +21,21 @@ import (
 
 // fakeMsg records which ack control the consume loop invoked.
 type fakeMsg struct {
-	data []byte
-	mu   sync.Mutex
-	ack  bool
-	term bool
-	nak  bool
+	data     []byte
+	mu       sync.Mutex
+	ack      bool
+	term     bool
+	nak      bool
+	progress bool
 }
 
-func (m *fakeMsg) Data() []byte { return m.data }
-func (m *fakeMsg) Ack() error   { m.mu.Lock(); m.ack = true; m.mu.Unlock(); return nil }
-func (m *fakeMsg) Term() error  { m.mu.Lock(); m.term = true; m.mu.Unlock(); return nil }
-func (m *fakeMsg) Nak() error   { m.mu.Lock(); m.nak = true; m.mu.Unlock(); return nil }
-func (m *fakeMsg) acked() bool  { m.mu.Lock(); defer m.mu.Unlock(); return m.ack }
-func (m *fakeMsg) termed() bool { m.mu.Lock(); defer m.mu.Unlock(); return m.term }
+func (m *fakeMsg) Data() []byte      { return m.data }
+func (m *fakeMsg) Ack() error        { m.mu.Lock(); m.ack = true; m.mu.Unlock(); return nil }
+func (m *fakeMsg) Term() error       { m.mu.Lock(); m.term = true; m.mu.Unlock(); return nil }
+func (m *fakeMsg) Nak() error        { m.mu.Lock(); m.nak = true; m.mu.Unlock(); return nil }
+func (m *fakeMsg) InProgress() error { m.mu.Lock(); m.progress = true; m.mu.Unlock(); return nil }
+func (m *fakeMsg) acked() bool       { m.mu.Lock(); defer m.mu.Unlock(); return m.ack }
+func (m *fakeMsg) termed() bool      { m.mu.Lock(); defer m.mu.Unlock(); return m.term }
 
 // fakeSource yields preloaded batches once, then blocks for maxWait like a real
 // JetStream pull consumer (so the consume loop does not busy-spin).
@@ -72,7 +74,7 @@ func startNormalizer(t *testing.T, src normalizer.EventSource, r pointlist.Resol
 	n := normalizer.NewWithSource(ctx, src, r, "gw-1")
 	t.Cleanup(func() {
 		cancel()
-		for range n.Frames() { // drains until the goroutine closes the channel = joined
+		for range n.Records() { // drains until the goroutine closes the channel = joined
 		}
 	})
 	return n
@@ -85,10 +87,12 @@ func eventJSON(t *testing.T, connectorID, localID string, value float64) []byte 
 	return b
 }
 
-func resolverWith(entries ...pointlist.Entry) pointlist.Resolver { return pointlist.NewFixture(entries) }
+func resolverWith(entries ...pointlist.Entry) pointlist.Resolver {
+	return pointlist.NewFixture(entries)
+}
 
-// A resolved Common Event becomes a TelemetryFrame on Frames() and is Acked.
-func TestNormalizer_OKEmitsFrameAndAcks(t *testing.T) {
+// A resolved Common Event is emitted with its Ack deferred to the durable writer.
+func TestNormalizer_OKEmitsPendingRecord(t *testing.T) {
 	msg := &fakeMsg{data: eventJSON(t, "c1", "l1", 1.5)}
 	src := &fakeSource{batches: [][]normalizer.EventMsg{{msg}}}
 	r := resolverWith(pointlist.Entry{ConnectorID: "c1", LocalID: "l1", PointID: "p1"})
@@ -96,14 +100,16 @@ func TestNormalizer_OKEmitsFrameAndAcks(t *testing.T) {
 	n := startNormalizer(t, src, r)
 
 	select {
-	case f := <-n.Frames():
-		assert.Equal(t, "p1", f.PointId)
-		assert.Equal(t, "gw-1", f.GatewayId)
-		assert.Equal(t, 1.5, f.Value)
+	case pending := <-n.Records():
+		assert.Equal(t, "p1", pending.Record.PointID)
+		assert.Equal(t, "gw-1", pending.Record.GatewayID)
+		assert.Equal(t, 1.5, pending.Record.Value)
+		assert.False(t, msg.acked(), "record must not be Acked before durable persistence")
+		require.NoError(t, pending.Ack())
 	case <-time.After(2 * time.Second):
-		t.Fatal("expected a TelemetryFrame")
+		t.Fatal("expected a pending telemetry record")
 	}
-	assert.Eventually(t, msg.acked, time.Second, 10*time.Millisecond, "OK event must be Acked")
+	assert.True(t, msg.acked())
 }
 
 // Unparseable payload → no frame, Term (drop-and-meter, ADR-0002).
@@ -115,7 +121,7 @@ func TestNormalizer_PoisonTermedNoFrame(t *testing.T) {
 
 	assert.Eventually(t, msg.termed, time.Second, 10*time.Millisecond, "poison event must be Termed")
 	select {
-	case f := <-n.Frames():
+	case f := <-n.Records():
 		t.Fatalf("poison event must not emit a frame, got %v", f)
 	case <-time.After(100 * time.Millisecond):
 	}
@@ -131,7 +137,7 @@ func TestNormalizer_MissTermedNoFrame(t *testing.T) {
 
 	assert.Eventually(t, msg.termed, time.Second, 10*time.Millisecond, "miss event must be Termed")
 	select {
-	case f := <-n.Frames():
+	case f := <-n.Records():
 		t.Fatalf("miss event must not emit a frame, got %v", f)
 	case <-time.After(100 * time.Millisecond):
 	}

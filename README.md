@@ -110,6 +110,7 @@ with the proven per-protocol OSS stacks underneath: **Eclipse Milo** (OPC-UA),
 | [0005](docs/adr/0005-jetstream-topology-bounded-replay.md) | JetStream sits before the Normalizer as the durable replay/back-pressure boundary. |
 | [0006](docs/adr/0006-connector-distribution-signed-oci.md) | Connectors are signed OCI images, run digest-pinned, installed via the Connector Catalog with cosign verification + rollback. |
 | [0007](docs/adr/0007-transport-security-mtls-at-edge.md) | Gateway↔Building OS gRPC is mTLS terminated at the Building OS Traefik edge (`gateway_id` ↔ client-cert CN, enforced via the `X-Gateway-Id` header); h2c in-cluster. |
+| [0008](docs/adr/0008-selectable-dtdpf-event-hubs-sink.md) | Telemetry uses one selected sink (`bos` or DTDPF Event Hubs); DTDPF uses a non-dropping durable outbox and stable event IDs. |
 
 ---
 
@@ -194,6 +195,33 @@ go run ./cmd/gateway --dev-sim   # in-process sim connector for a no-equipment s
 | `--catalog-url` | `CATALOG_URL` | – | Remote Connector Catalog base URL (overrides `--catalog-file`) |
 | `--allow-adhoc-upgrade` | `ALLOW_ADHOC_UPGRADE` | `false` | Enable dev-only `POST /connectors/{id}/upgrade?image=`; MVP update path is catalog-driven (ADR-0006) |
 | `--catalog-allowlist` | `CATALOG_ALLOWLIST` | `ghcr.io` | Comma-separated list of allowed OCI registries (ADR-0006) |
+| `--telemetry-sink` | `TELEMETRY_SINK` | `bos` | Telemetry destination: `bos` or `dtdpf` |
+| `--dtdpf-point-config` | `DTDPF_POINT_CONFIG_FILE` | – | DTDPF `pointConfig.json`; required for `dtdpf` |
+| – | `DTDPF_EVENTHUB_CONNECTION_STRING` | – | Event Hubs SAS connection string; required for `dtdpf`. Env-only, no CLI flag (avoids leaking secrets via process listings/shell history) |
+| `--dtdpf-eventhub-name` | `DTDPF_EVENTHUB_NAME` | `telemetry` | Event Hub entity name |
+| `--dtdpf-eventhub-transport` | `DTDPF_EVENTHUB_TRANSPORT` | `amqp-tcp` | Event Hubs binding: `amqp-tcp` (5671) or `websocket` (443) |
+
+### DTDPF Event Hubs telemetry
+
+DTDPF is an alternative telemetry sink, not a simultaneous mirror of the
+Building OS ingress. The existing Point List still resolves native addresses to
+canonical `point_id`; DTDPF `pointConfig.json` then resolves that ID as `dtId`
+and supplies `rootId`, `topic`, and `type`.
+
+```bash
+DTDPF_EVENTHUB_CONNECTION_STRING='Endpoint=sb://...;SharedAccessKeyName=...;SharedAccessKey=...' \
+docker compose -f docker-compose.yml -f docker-compose.dtdpf.yml up --build
+```
+
+The connection string is supplied only through the environment. Events are
+sent in `rootId`-partitioned batches with stable UUIDs and at-least-once replay;
+the DTDPF consumer must deduplicate on body `id`. The initial implementation
+does not include rule properties, file attachments, IoT Hub Direct Methods, or
+GW API configuration sync.
+
+Use `DTDPF_EVENTHUB_TRANSPORT=websocket` when outbound native AMQP/TLS on port
+5671 is blocked. This uses AMQP over WebSockets on port 443; `amqp-tcp` remains
+the default.
 
 ### Simulator integration (no equipment)
 

@@ -5,21 +5,41 @@ package storeforward
 
 import (
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
 	"sync"
 	"sync/atomic"
 
+	"github.com/google/uuid"
 	_ "modernc.org/sqlite"
 
 	pb "nexus-gateway/gen"
+	"nexus-gateway/internal/telemetry"
+)
+
+// ErrBufferFull signals backpressure without dropping an existing record.
+var ErrBufferFull = errors.New("store-forward buffer full")
+
+// OverflowPolicy controls whether a full outbox evicts or blocks.
+type OverflowPolicy int
+
+const (
+	DropOldest OverflowPolicy = iota
+	BlockWhenFull
 )
 
 // StoredFrame pairs a sequence number with a TelemetryFrame read from the buffer.
 type StoredFrame struct {
-	Seq   int64
-	Frame *pb.TelemetryFrame
+	Seq    int64
+	Frame  *pb.TelemetryFrame
+	Record *telemetry.Record
+}
+
+// DTDPFMetadataResolver resolves legacy outbox rows by canonical point ID.
+type DTDPFMetadataResolver interface {
+	ResolvePoint(pointID string) (*telemetry.DTDPFMetadata, bool)
 }
 
 // Buffer is a bounded SQLite ring buffer (ADR-0002).
@@ -27,6 +47,7 @@ type StoredFrame struct {
 type Buffer struct {
 	db       *sql.DB
 	capacity int
+	overflow OverflowPolicy
 
 	mu     sync.Mutex
 	drifts map[string]int64
@@ -43,6 +64,7 @@ type Buffer struct {
 	// notify is signaled (non-blocking, coalesced) after each successful Write so
 	// the single uplink Forwarder can drain immediately instead of polling (#71).
 	notify chan struct{}
+	space  chan struct{}
 }
 
 // Open opens (or creates) a Buffer at the given file path with the given capacity.
@@ -57,6 +79,11 @@ type Buffer struct {
 // containing URI metacharacters like '#', '?', '%', or ':memory:' would be
 // misparsed as a URI).
 func Open(path string, capacity int) (*Buffer, error) {
+	return OpenWithPolicy(path, capacity, DropOldest)
+}
+
+// OpenWithPolicy opens a Buffer with an explicit overflow policy.
+func OpenWithPolicy(path string, capacity int, overflow OverflowPolicy) (*Buffer, error) {
 	db, err := sql.Open("sqlite", path)
 	if err != nil {
 		return nil, fmt.Errorf("open sqlite %s: %w", path, err)
@@ -65,9 +92,13 @@ func Open(path string, capacity int) (*Buffer, error) {
 	// on the SQLite writer lock. Set before any Exec so the pragmas below land
 	// on the single connection the pool will reuse.
 	db.SetMaxOpenConns(1)
+	synchronousMode := "NORMAL"
+	if overflow == BlockWhenFull {
+		synchronousMode = "FULL"
+	}
 	for _, pragma := range []string{
 		`PRAGMA journal_mode=WAL`,
-		`PRAGMA synchronous=NORMAL`,
+		`PRAGMA synchronous=` + synchronousMode,
 		`PRAGMA busy_timeout=5000`,
 	} {
 		if _, err := db.Exec(pragma); err != nil {
@@ -79,7 +110,10 @@ func Open(path string, capacity int) (*Buffer, error) {
 		db.Close() //nolint:errcheck
 		return nil, err
 	}
-	return &Buffer{db: db, capacity: capacity, drifts: make(map[string]int64), notify: make(chan struct{}, 1)}, nil
+	return &Buffer{
+		db: db, capacity: capacity, overflow: overflow, drifts: make(map[string]int64),
+		notify: make(chan struct{}, 1), space: make(chan struct{}, 1),
+	}, nil
 }
 
 // WriteNotify returns a channel signaled (coalesced to one pending slot) after
@@ -87,37 +121,144 @@ func Open(path string, capacity int) (*Buffer, error) {
 // promptly; missed signals are covered by the consumer's own backstop tick.
 func (b *Buffer) WriteNotify() <-chan struct{} { return b.notify }
 
+// SpaceNotify is signaled after committed rows are removed in blocking mode.
+func (b *Buffer) SpaceNotify() <-chan struct{} { return b.space }
+
 // Close closes the underlying database.
 func (b *Buffer) Close() error {
 	return b.db.Close()
 }
 
+// PrepareDTDPF backfills legacy uncommitted rows once so replay keeps a stable ID and body.
+func (b *Buffer) PrepareDTDPF(resolver DTDPFMetadataResolver) (int, error) {
+	if resolver == nil {
+		return 0, errors.New("prepare DTDPF requires a metadata resolver")
+	}
+	tx, err := b.db.Begin()
+	if err != nil {
+		return 0, err
+	}
+	defer tx.Rollback() //nolint:errcheck
+
+	rows, err := tx.Query(`
+		SELECT seq, event_id, point_id
+		FROM frames
+		WHERE seq > COALESCE((SELECT seq FROM cursor WHERE id = 1), 0)
+		  AND (event_id = '' OR dtdpf_root_id IS NULL OR dtdpf_dt_id IS NULL OR dtdpf_topic IS NULL)
+		ORDER BY seq ASC`)
+	if err != nil {
+		return 0, err
+	}
+	type legacyRow struct {
+		seq              int64
+		eventID, pointID string
+	}
+	var pending []legacyRow
+	for rows.Next() {
+		var row legacyRow
+		if err := rows.Scan(&row.seq, &row.eventID, &row.pointID); err != nil {
+			rows.Close()
+			return 0, err
+		}
+		pending = append(pending, row)
+	}
+	if err := rows.Close(); err != nil {
+		return 0, err
+	}
+
+	for _, row := range pending {
+		metadata, ok := resolver.ResolvePoint(row.pointID)
+		if !ok {
+			return 0, fmt.Errorf("legacy outbox point %q has no DTDPF metadata", row.pointID)
+		}
+		eventID := row.eventID
+		if eventID == "" {
+			eventID = uuid.NewString()
+		}
+		var pointType any
+		if metadata.Type != nil {
+			pointType = *metadata.Type
+		}
+		if _, err := tx.Exec(`
+			UPDATE frames SET event_id = ?, dtdpf_root_id = ?, dtdpf_dt_id = ?,
+				dtdpf_topic = ?, dtdpf_type = ?, dtdpf_protocol = ?
+			WHERE seq = ?`,
+			eventID, metadata.RootID, metadata.DTID, metadata.Topic, pointType, metadata.Protocol, row.seq,
+		); err != nil {
+			return 0, err
+		}
+	}
+	if err := tx.Commit(); err != nil {
+		return 0, err
+	}
+	return len(pending), nil
+}
+
 // Write appends a frame. If the buffer is at capacity, the oldest row is deleted first.
 func (b *Buffer) Write(f *pb.TelemetryFrame) error {
+	return b.WriteRecord(telemetry.FromProto(f))
+}
+
+// WriteRecord appends a sink-independent telemetry record to the durable outbox.
+func (b *Buffer) WriteRecord(record *telemetry.Record) error {
+	if record == nil {
+		return errors.New("write nil telemetry record")
+	}
+	attributes, err := json.Marshal(record.Attributes)
+	if err != nil {
+		return fmt.Errorf("marshal telemetry attributes: %w", err)
+	}
+	var rootID, dtdpfType any
+	var dtID, topic, protocol any
+	if record.DTDPF != nil {
+		rootID = record.DTDPF.RootID
+		dtID = record.DTDPF.DTID
+		topic = record.DTDPF.Topic
+		protocol = record.DTDPF.Protocol
+		if record.DTDPF.Type != nil {
+			dtdpfType = *record.DTDPF.Type
+		}
+	}
+
 	tx, err := b.db.Begin()
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback() //nolint:errcheck
+	if b.overflow == BlockWhenFull {
+		var count int
+		if err := tx.QueryRow(`SELECT COUNT(*) FROM frames`).Scan(&count); err != nil {
+			return err
+		}
+		if count >= b.capacity {
+			return ErrBufferFull
+		}
+	}
 
 	_, err = tx.Exec(
-		`INSERT INTO frames (gateway_id, point_id, value, timestamp) VALUES (?, ?, ?, ?)`,
-		f.GatewayId, f.PointId, f.Value, f.Timestamp,
+		`INSERT INTO frames (
+			event_id, gateway_id, point_id, value, timestamp, attributes_json,
+			dtdpf_root_id, dtdpf_dt_id, dtdpf_topic, dtdpf_type, dtdpf_protocol
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		record.EventID, record.GatewayID, record.PointID, record.Value, record.Timestamp, string(attributes),
+		rootID, dtID, topic, dtdpfType, protocol,
 	)
 	if err != nil {
 		return err
 	}
 
-	// Drop oldest if over capacity
-	res, err := tx.Exec(`
-		DELETE FROM frames
-		WHERE seq IN (
-			SELECT seq FROM frames ORDER BY seq ASC LIMIT MAX(0, (SELECT COUNT(*) FROM frames) - ?)
-		)`, b.capacity)
-	if err != nil {
-		return err
+	var evicted int64
+	if b.overflow == DropOldest {
+		res, err := tx.Exec(`
+			DELETE FROM frames
+			WHERE seq IN (
+				SELECT seq FROM frames ORDER BY seq ASC LIMIT MAX(0, (SELECT COUNT(*) FROM frames) - ?)
+			)`, b.capacity)
+		if err != nil {
+			return err
+		}
+		evicted, _ = res.RowsAffected()
 	}
-	evicted, _ := res.RowsAffected()
 
 	if err := tx.Commit(); err != nil {
 		return err
@@ -162,7 +303,9 @@ func (b *Buffer) SendErrors() int64 { return b.sendErrors.Load() }
 // ReadBatch returns up to limit frames with seq > afterSeq, in ascending order.
 func (b *Buffer) ReadBatch(afterSeq int64, limit int) ([]StoredFrame, error) {
 	rows, err := b.db.Query(
-		`SELECT seq, gateway_id, point_id, value, timestamp FROM frames WHERE seq > ? ORDER BY seq ASC LIMIT ?`,
+		`SELECT seq, event_id, gateway_id, point_id, value, timestamp, attributes_json,
+			dtdpf_root_id, dtdpf_dt_id, dtdpf_topic, dtdpf_type, dtdpf_protocol
+		 FROM frames WHERE seq > ? ORDER BY seq ASC LIMIT ?`,
 		afterSeq, limit,
 	)
 	if err != nil {
@@ -173,10 +316,34 @@ func (b *Buffer) ReadBatch(afterSeq int64, limit int) ([]StoredFrame, error) {
 	var batch []StoredFrame
 	for rows.Next() {
 		var sf StoredFrame
-		sf.Frame = &pb.TelemetryFrame{}
-		if err := rows.Scan(&sf.Seq, &sf.Frame.GatewayId, &sf.Frame.PointId, &sf.Frame.Value, &sf.Frame.Timestamp); err != nil {
+		var attributesJSON string
+		var rootID, dtdpfType sql.NullInt64
+		var dtID, topic, protocol sql.NullString
+		sf.Record = &telemetry.Record{}
+		if err := rows.Scan(
+			&sf.Seq, &sf.Record.EventID, &sf.Record.GatewayID, &sf.Record.PointID,
+			&sf.Record.Value, &sf.Record.Timestamp, &attributesJSON,
+			&rootID, &dtID, &topic, &dtdpfType, &protocol,
+		); err != nil {
 			return nil, err
 		}
+		if err := json.Unmarshal([]byte(attributesJSON), &sf.Record.Attributes); err != nil {
+			return nil, fmt.Errorf("decode telemetry attributes at seq %d: %w", sf.Seq, err)
+		}
+		if rootID.Valid {
+			eventID, err := uuid.Parse(sf.Record.EventID)
+			if err != nil || eventID.Version() != 4 {
+				return nil, fmt.Errorf("invalid DTDPF event id at seq %d", sf.Seq)
+			}
+			sf.Record.DTDPF = &telemetry.DTDPFMetadata{
+				RootID: rootID.Int64, DTID: dtID.String, Topic: topic.String, Protocol: protocol.String,
+			}
+			if dtdpfType.Valid {
+				pointType := int(dtdpfType.Int64)
+				sf.Record.DTDPF.Type = &pointType
+			}
+		}
+		sf.Frame = sf.Record.ToProto()
 		batch = append(batch, sf)
 	}
 	return batch, rows.Err()
@@ -184,8 +351,29 @@ func (b *Buffer) ReadBatch(afterSeq int64, limit int) ([]StoredFrame, error) {
 
 // Advance persists the cursor to seq. Future ReadBatch calls with afterSeq=cursor skip delivered frames.
 func (b *Buffer) Advance(seq int64) error {
-	_, err := b.db.Exec(`INSERT OR REPLACE INTO cursor (id, seq) VALUES (1, ?)`, seq)
-	return err
+	tx, err := b.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback() //nolint:errcheck
+	if _, err := tx.Exec(`INSERT OR REPLACE INTO cursor (id, seq) VALUES (1, ?)`, seq); err != nil {
+		return err
+	}
+	if b.overflow == BlockWhenFull {
+		if _, err := tx.Exec(`DELETE FROM frames WHERE seq <= ?`, seq); err != nil {
+			return err
+		}
+	}
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+	if b.overflow == BlockWhenFull {
+		select {
+		case b.space <- struct{}{}:
+		default:
+		}
+	}
+	return nil
 }
 
 // Cursor returns the current persisted cursor (last acked seq).
@@ -231,18 +419,71 @@ func (b *Buffer) Drifts() map[string]int64 {
 }
 
 func migrate(db *sql.DB) error {
-	_, err := db.Exec(`
+	if _, err := db.Exec(`
 		CREATE TABLE IF NOT EXISTS frames (
 			seq        INTEGER PRIMARY KEY AUTOINCREMENT,
+			event_id   TEXT NOT NULL DEFAULT '',
 			gateway_id TEXT NOT NULL DEFAULT '',
 			point_id   TEXT NOT NULL,
 			value      REAL NOT NULL,
-			timestamp  TEXT NOT NULL
+			timestamp  TEXT NOT NULL,
+			attributes_json TEXT NOT NULL DEFAULT '{}',
+			dtdpf_root_id INTEGER,
+			dtdpf_dt_id TEXT,
+			dtdpf_topic TEXT,
+			dtdpf_type INTEGER,
+			dtdpf_protocol TEXT
 		);
 		CREATE TABLE IF NOT EXISTS cursor (
 			id  INTEGER PRIMARY KEY CHECK (id = 1),
 			seq INTEGER NOT NULL DEFAULT 0
 		);
-	`)
-	return err
+	`); err != nil {
+		return err
+	}
+
+	columns := []struct {
+		name       string
+		definition string
+	}{
+		{"event_id", "TEXT NOT NULL DEFAULT ''"},
+		{"attributes_json", "TEXT NOT NULL DEFAULT '{}'"},
+		{"dtdpf_root_id", "INTEGER"},
+		{"dtdpf_dt_id", "TEXT"},
+		{"dtdpf_topic", "TEXT"},
+		{"dtdpf_type", "INTEGER"},
+		{"dtdpf_protocol", "TEXT"},
+	}
+	for _, column := range columns {
+		exists, err := columnExists(db, "frames", column.name)
+		if err != nil {
+			return err
+		}
+		if !exists {
+			if _, err := db.Exec(fmt.Sprintf("ALTER TABLE frames ADD COLUMN %s %s", column.name, column.definition)); err != nil {
+				return fmt.Errorf("add frames.%s: %w", column.name, err)
+			}
+		}
+	}
+	return nil
+}
+
+func columnExists(db *sql.DB, table, column string) (bool, error) {
+	rows, err := db.Query("PRAGMA table_info(" + table + ")")
+	if err != nil {
+		return false, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var cid, notNull, primaryKey int
+		var name, columnType string
+		var defaultValue any
+		if err := rows.Scan(&cid, &name, &columnType, &notNull, &defaultValue, &primaryKey); err != nil {
+			return false, err
+		}
+		if name == column {
+			return true, nil
+		}
+	}
+	return false, rows.Err()
 }

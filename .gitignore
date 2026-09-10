@@ -1,6 +1,9 @@
 *.exe
 *.test
 *.out
+.env
+.env.*
+!.env.example
 /tmp/
 nats-data/
 # Store-and-Forward SQLite DB + runtime point-list (created by the gateway/container)

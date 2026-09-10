@@ -14,8 +14,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	pb "nexus-gateway/gen"
 	"nexus-gateway/internal/storeforward"
+	"nexus-gateway/internal/telemetry"
 	"nexus-gateway/internal/uplink"
 )
 
@@ -23,14 +23,14 @@ import (
 // and returns a configurable accepted-count (and optional errors) on Checkpoint.
 type fakeSink struct {
 	mu        sync.Mutex
-	sent      []*pb.TelemetryFrame
+	sent      []*telemetry.Record
 	accepted  int64
 	sendErr   error
 	ckptErr   error
 	ckptCalls int
 }
 
-func (s *fakeSink) Send(_ context.Context, frame *pb.TelemetryFrame) error {
+func (s *fakeSink) Send(_ context.Context, frame *telemetry.Record) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if s.sendErr != nil {
@@ -67,7 +67,7 @@ func newBuf(t *testing.T) *storeforward.Buffer {
 func writeFrames(t *testing.T, buf *storeforward.Buffer, pointIDs ...string) {
 	t.Helper()
 	for _, pid := range pointIDs {
-		require.NoError(t, buf.Write(&pb.TelemetryFrame{GatewayId: "gw-1", PointId: pid, Value: 1.0, Timestamp: "2026-01-01T00:00:00Z"}))
+		require.NoError(t, buf.WriteRecord(&telemetry.Record{GatewayID: "gw-1", PointID: pid, Value: 1.0, Timestamp: "2026-01-01T00:00:00Z"}))
 	}
 }
 

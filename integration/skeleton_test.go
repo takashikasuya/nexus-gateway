@@ -76,7 +76,7 @@ func TestE2E_SimConnectorFrameArrivesAtBOS(t *testing.T) {
 	buf, err := storeforward.Open(t.TempDir()+"/sf.db", 1000)
 	require.NoError(t, err)
 	t.Cleanup(func() { buf.Close() })
-	go storeforward.Pump(ctx, norm.Frames(), buf)
+	go storeforward.Pump(ctx, norm.Records(), buf)
 
 	ul, err := uplink.NewIngress(ctx, mockBOS.addr, "gw-001", buf, uplink.Config{CheckpointSize: 1000, CheckpointAge: 100 * time.Millisecond}, insecureCreds())
 	require.NoError(t, err)

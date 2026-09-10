@@ -27,6 +27,7 @@ import (
 	"nexus-gateway/internal/adminapi"
 	"nexus-gateway/internal/catalog"
 	"nexus-gateway/internal/dispatch"
+	"nexus-gateway/internal/dtdpf"
 	"nexus-gateway/internal/egress"
 	"nexus-gateway/internal/lifecycle"
 	"nexus-gateway/internal/normalizer"
@@ -73,9 +74,23 @@ func main() {
 	cosignKey := flag.String("cosign-key", envOrDefault("COSIGN_KEY_FILE", ""), "Path to cosign public key for signature verification (ADR-0006); empty = keyless")
 	cosignIdentity := flag.String("cosign-identity", envOrDefault("COSIGN_IDENTITY", ""), "Expected certificate identity for keyless cosign verification (ADR-0006)")
 	cosignOIDCIssuer := flag.String("cosign-oidc-issuer", envOrDefault("COSIGN_OIDC_ISSUER", ""), "Expected OIDC issuer for keyless cosign verification (ADR-0006)")
+	telemetrySink := flag.String("telemetry-sink", envOrDefault("TELEMETRY_SINK", "bos"), "Telemetry sink: bos or dtdpf")
+	dtdpfPointConfig := flag.String("dtdpf-point-config", envOrDefault("DTDPF_POINT_CONFIG_FILE", ""), "DTDPF pointConfig.json path (required for dtdpf sink)")
+	// Secret, not a flag: avoids leaking the SAS connection string via process
+	// listings or shell history.
+	dtdpfConnectionString := os.Getenv("DTDPF_EVENTHUB_CONNECTION_STRING")
+	dtdpfEventHub := flag.String("dtdpf-eventhub-name", envOrDefault("DTDPF_EVENTHUB_NAME", "telemetry"), "Azure Event Hub name")
+	dtdpfTransport := flag.String("dtdpf-eventhub-transport", envOrDefault("DTDPF_EVENTHUB_TRANSPORT", string(dtdpf.TransportAMQPTCP)), "Event Hubs transport: amqp-tcp or websocket")
 	flag.Parse()
 	*bosIngressAddr = resolveBOSAddr(*bosAddr, *bosIngressAddr)
 	*bosEgressAddr = resolveBOSAddr(*bosAddr, *bosEgressAddr)
+	if err := validateTelemetrySinkConfig(telemetryConfig{
+		Sink: *telemetrySink, PointConfigFile: *dtdpfPointConfig,
+		ConnectionString: dtdpfConnectionString, EventHub: *dtdpfEventHub, Transport: *dtdpfTransport,
+	}); err != nil {
+		slog.Error("invalid telemetry sink configuration", "err", err)
+		os.Exit(1)
+	}
 
 	// Resolve the protocol→connectorID map for the HTTP provisioning path.
 	// Falls back to {"bacnet": provConnID} when CONNECTOR_MAP is unset for backward compatibility.
@@ -174,8 +189,19 @@ func main() {
 	}
 	resolver := plService.Resolver()
 
+	var metadataResolver normalizer.MetadataResolver
+	var dtdpfConfig *dtdpf.PointConfig
+	if *telemetrySink == "dtdpf" {
+		dtdpfConfig, err = dtdpf.LoadPointConfigFile(*dtdpfPointConfig)
+		if err != nil {
+			slog.Error("DTDPF point config load failed", "err", err)
+			os.Exit(1)
+		}
+		metadataResolver = dtdpfConfig
+	}
+
 	// Start Normalizer
-	norm, err := normalizer.New(ctx, js, resolver, *gatewayID)
+	norm, err := normalizer.NewWithMetadata(ctx, js, resolver, metadataResolver, *gatewayID)
 	if err != nil {
 		slog.Error("normalizer init failed", "err", err)
 		os.Exit(1)
@@ -186,25 +212,48 @@ func main() {
 		slog.Error("storeforward dir create failed", "err", err)
 		os.Exit(1)
 	}
-	buf, err := storeforward.Open(*sfDB, *sfCap)
+	overflowPolicy := storeforward.DropOldest
+	if *telemetrySink == "dtdpf" {
+		overflowPolicy = storeforward.BlockWhenFull
+	}
+	buf, err := storeforward.OpenWithPolicy(*sfDB, *sfCap, overflowPolicy)
 	if err != nil {
 		slog.Error("storeforward open failed", "err", err)
 		os.Exit(1)
+	}
+	if dtdpfConfig != nil {
+		backfilled, err := buf.PrepareDTDPF(dtdpfConfig)
+		if err != nil {
+			slog.Error("DTDPF outbox preparation failed", "err", err)
+			os.Exit(1)
+		}
+		if backfilled > 0 {
+			slog.Info("DTDPF legacy outbox rows prepared", "count", backfilled)
+		}
 	}
 	var pumpWg sync.WaitGroup
 	pumpWg.Add(1)
 	go func() {
 		defer pumpWg.Done()
-		storeforward.Pump(ctx, norm.Frames(), buf)
+		storeforward.Pump(ctx, norm.Records(), buf)
 	}()
 
-	// Start Ingress uplink
-	ul, err := uplink.NewIngress(ctx, *bosIngressAddr, *gatewayID, buf, uplink.DefaultConfig, bosCreds)
-	if err != nil {
-		slog.Error("uplink init failed", "err", err)
-		os.Exit(1)
+	// Start the selected telemetry uplink. Control remains on the Building OS egress path.
+	if *telemetrySink == "dtdpf" {
+		dtdpfUplink, err := dtdpf.NewUplink(dtdpfConnectionString, *dtdpfEventHub, dtdpf.EventHubsTransport(*dtdpfTransport), buf, uplink.DefaultConfig)
+		if err != nil {
+			slog.Error("DTDPF uplink init failed", "err", err)
+			os.Exit(1)
+		}
+		go dtdpfUplink.Run(ctx)
+	} else {
+		bosUplink, err := uplink.NewIngress(ctx, *bosIngressAddr, *gatewayID, buf, uplink.DefaultConfig, bosCreds)
+		if err != nil {
+			slog.Error("Building OS uplink init failed", "err", err)
+			os.Exit(1)
+		}
+		go bosUplink.Run(ctx)
 	}
-	go ul.Run(ctx)
 
 	// Start Egress agent (control path, ADR-0004); also signals revalidatePL on PointListUpdate.
 	d := dispatch.New(nc, resolver, 5*time.Second)
@@ -298,7 +347,7 @@ func main() {
 		startDevSim(ctx, js, connRegistry, *devSimInterval)
 	}
 
-	slog.Info("gateway started", "gateway_id", *gatewayID, "nats", *natsURL, "bos-ingress", *bosIngressAddr, "bos-egress", *bosEgressAddr)
+	slog.Info("gateway started", "gateway_id", *gatewayID, "nats", *natsURL, "telemetry_sink", *telemetrySink, "bos-egress", *bosEgressAddr)
 
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)
@@ -315,6 +364,37 @@ func main() {
 	}
 	pumpWg.Wait()
 	buf.Close()
+}
+
+type telemetryConfig struct {
+	Sink             string
+	PointConfigFile  string
+	ConnectionString string
+	EventHub         string
+	Transport        string
+}
+
+func validateTelemetrySinkConfig(config telemetryConfig) error {
+	switch config.Sink {
+	case "bos":
+		return nil
+	case "dtdpf":
+		if strings.TrimSpace(config.PointConfigFile) == "" {
+			return fmt.Errorf("DTDPF_POINT_CONFIG_FILE is required when TELEMETRY_SINK=dtdpf")
+		}
+		if strings.TrimSpace(config.ConnectionString) == "" {
+			return fmt.Errorf("DTDPF_EVENTHUB_CONNECTION_STRING is required when TELEMETRY_SINK=dtdpf")
+		}
+		if strings.TrimSpace(config.EventHub) == "" {
+			return fmt.Errorf("DTDPF_EVENTHUB_NAME is required when TELEMETRY_SINK=dtdpf")
+		}
+		if config.Transport != string(dtdpf.TransportAMQPTCP) && config.Transport != string(dtdpf.TransportWebSocket) {
+			return fmt.Errorf("DTDPF_EVENTHUB_TRANSPORT must be amqp-tcp or websocket")
+		}
+		return nil
+	default:
+		return fmt.Errorf("unsupported TELEMETRY_SINK %q (want bos or dtdpf)", config.Sink)
+	}
 }
 
 // startDevSim registers and runs the in-process sim connector (dev/smoke only).

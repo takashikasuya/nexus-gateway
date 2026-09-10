@@ -1,0 +1,23 @@
+{
+  "updateDatetime": "2026-09-09T00:00:00Z",
+  "correlationId": "local-dtdpf-fixture",
+  "pointDataUpdateDatetime": "2026-09-09T00:00:00Z",
+  "pointData": {
+    "5": [
+      {
+        "dtId": "supply_air_temp",
+        "topic": "sim://ahu-01/supply_air_temp",
+        "typeId": 1,
+        "type": 2,
+        "protocol": "sim"
+      },
+      {
+        "dtId": "fan_run",
+        "topic": "sim://ahu-01/fan_run",
+        "typeId": 1,
+        "type": 3,
+        "protocol": "sim"
+      }
+    ]
+  }
+}

@@ -62,7 +62,7 @@ func TestSF_OutageSurvival(t *testing.T) {
 	t.Cleanup(func() { buf.Close() })
 
 	// Pump normalizer → buffer
-	go storeforward.Pump(ctx, norm.Frames(), buf)
+	go storeforward.Pump(ctx, norm.Records(), buf)
 
 	// Start mock BOS — initially up
 	received := make(chan *pb.TelemetryFrame, 100)
@@ -148,7 +148,7 @@ func TestSF_ImmediateSend(t *testing.T) {
 	buf, err := storeforward.Open(t.TempDir()+"/sf.db", 100)
 	require.NoError(t, err)
 	t.Cleanup(func() { buf.Close() })
-	go storeforward.Pump(ctx, norm.Frames(), buf)
+	go storeforward.Pump(ctx, norm.Records(), buf)
 
 	received := make(chan *pb.TelemetryFrame, 10)
 	var acc atomic.Int64
@@ -199,7 +199,7 @@ func TestSF_DriftCounterRises(t *testing.T) {
 	buf, err := storeforward.Open(t.TempDir()+"/sf.db", 100)
 	require.NoError(t, err)
 	t.Cleanup(func() { buf.Close() })
-	go storeforward.Pump(ctx, norm.Frames(), buf)
+	go storeforward.Pump(ctx, norm.Records(), buf)
 
 	// Mock BOS that reports accepted=0 (rejects everything)
 	received2 := make(chan *pb.TelemetryFrame, 10)

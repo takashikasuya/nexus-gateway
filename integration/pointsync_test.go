@@ -63,7 +63,7 @@ func TestPointSync_LiveRemap(t *testing.T) {
 	buf, err := storeforward.Open(t.TempDir()+"/sf.db", 1000)
 	require.NoError(t, err)
 	t.Cleanup(func() { buf.Close() })
-	go storeforward.Pump(ctx, norm.Frames(), buf)
+	go storeforward.Pump(ctx, norm.Records(), buf)
 
 	received := make(chan *pb.TelemetryFrame, 20)
 	var acc atomic.Int64
@@ -140,7 +140,7 @@ func TestPointSync_RemovalSkipsFrames(t *testing.T) {
 	buf, err := storeforward.Open(t.TempDir()+"/sf.db", 100)
 	require.NoError(t, err)
 	t.Cleanup(func() { buf.Close() })
-	go storeforward.Pump(ctx, norm.Frames(), buf)
+	go storeforward.Pump(ctx, norm.Records(), buf)
 
 	received := make(chan *pb.TelemetryFrame, 10)
 	var acc atomic.Int64

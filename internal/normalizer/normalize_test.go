@@ -15,6 +15,7 @@ import (
 	"nexus-gateway/internal/common"
 	"nexus-gateway/internal/normalizer"
 	"nexus-gateway/internal/pointlist"
+	"nexus-gateway/internal/telemetry"
 )
 
 // These tests exercise normalizer.Normalize directly, with no NATS/JetStream.
@@ -101,4 +102,32 @@ func TestNormalize_TimestampPreserved(t *testing.T) {
 	require.NotNil(t, frame)
 	assert.True(t, strings.Contains(frame.Timestamp, "09:00") || frame.Timestamp == ts,
 		"event timestamp must be passed through: got %q", frame.Timestamp)
+}
+
+type metadataResolver struct {
+	metadata *telemetry.DTDPFMetadata
+}
+
+func (r metadataResolver) Resolve(_, _ string) (*telemetry.DTDPFMetadata, bool) {
+	return r.metadata, r.metadata != nil
+}
+
+func TestNormalizeRecordGeneratesStablePayloadMetadata(t *testing.T) {
+	pointType := 2
+	resolver := pointlist.NewFixture([]pointlist.Entry{
+		{ConnectorID: "c1", LocalID: "l1", PointID: "R90_000001"},
+	})
+	metadata := &telemetry.DTDPFMetadata{
+		RootID: 5, DTID: "R90_000001", Topic: "takenaka.co.jp/R90/temp", Type: &pointType, Protocol: "bacnet",
+	}
+	event, err := json.Marshal(common.Event{
+		ConnectorID: "c1", Protocol: "bacnet", LocalID: "l1", Value: 42.5, Timestamp: "2025-01-01T00:00:00Z",
+	})
+	require.NoError(t, err)
+
+	record, outcome := normalizer.NormalizeRecord(event, resolver, metadataResolver{metadata: metadata}, "gw-x")
+	require.Equal(t, normalizer.OutcomeOK, outcome)
+	require.NotNil(t, record)
+	assert.Regexp(t, `^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$`, record.EventID)
+	assert.Equal(t, metadata, record.DTDPF)
 }

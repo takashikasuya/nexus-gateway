@@ -89,7 +89,7 @@ func TestE2E_DualBOSAddr(t *testing.T) {
 	// ── Normalizer ────────────────────────────────────────────────────────────
 	norm, err := normalizer.New(ctx, js, resolver, "gw-dual")
 	require.NoError(t, err)
-	go storeforward.Pump(ctx, norm.Frames(), buf)
+	go storeforward.Pump(ctx, norm.Records(), buf)
 
 	// ── Ingress uplink → ingressHandle.addr ──────────────────────────────────
 	ul, err := uplink.NewIngress(ctx, ingressHandle.addr, "gw-dual", buf,

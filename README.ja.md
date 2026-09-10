@@ -167,6 +167,32 @@ go run ./cmd/gateway --dev-sim   # 設備不要の smoke 実行用に in-process
 | `--admin-jwks-url` | `KEYCLOAK_JWKS_URL` | – | Keycloak JWKS(空 = Admin API 認証無効) |
 | `--dev-sim` | `DEV_SIM` | `false` | in-process sim コネクタを起動(非本番) |
 | `--dev-sim-interval` | – | `60s` | `--dev-sim` の発行間隔。ローカルで素早く確認したい場合は `5s` 等に下げる |
+| `--telemetry-sink` | `TELEMETRY_SINK` | `bos` | テレメトリ送信先: `bos` または `dtdpf` |
+| `--dtdpf-point-config` | `DTDPF_POINT_CONFIG_FILE` | – | DTDPF `pointConfig.json`。`dtdpf` 選択時は必須 |
+| – | `DTDPF_EVENTHUB_CONNECTION_STRING` | – | Event Hubs SAS 接続文字列。`dtdpf` 選択時は必須。環境変数のみ(CLIフラグなし、プロセス一覧/シェル履歴への漏洩を避けるため) |
+| `--dtdpf-eventhub-name` | `DTDPF_EVENTHUB_NAME` | `telemetry` | Event Hub 名 |
+| `--dtdpf-eventhub-transport` | `DTDPF_EVENTHUB_TRANSPORT` | `amqp-tcp` | Event Hubs接続: `amqp-tcp`（5671）または`websocket`（443） |
+
+### DTDPF Event Hubs テレメトリ
+
+DTDPF は Building OS ingress との同時送信ではなく、択一のテレメトリ
+Sink です。既存 Point List で物理アドレスを `point_id` へ解決し、その
+`point_id` を `dtId` として DTDPF `pointConfig.json` から `rootId`、
+`topic`、`type` を補完します。
+
+```bash
+DTDPF_EVENTHUB_CONNECTION_STRING='Endpoint=sb://...;SharedAccessKeyName=...;SharedAccessKey=...' \
+docker compose -f docker-compose.yml -f docker-compose.dtdpf.yml up --build
+```
+
+接続文字列は環境変数からのみ注入します。Event Hubsへは`rootId`を
+Partition Keyとしてバッチ送信し、再送時も同じUUIDを使用します。
+クラウド側はBodyの`id`で重複排除してください。初期対応にはルール
+Property、ファイル添付、IoT Hub Direct Method、GW連携API設定同期を含みません。
+
+送信元ネットワークで5671番ポートのAMQP/TLSが遮断される場合は、
+`DTDPF_EVENTHUB_TRANSPORT=websocket`を指定して443番ポートのAMQP over
+WebSocketsを使用します。既定値は`amqp-tcp`です。
 
 ### 本番: Building OS への TLS/mTLS(ADR-0007)
 
