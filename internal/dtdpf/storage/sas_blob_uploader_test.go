@@ -146,16 +146,16 @@ func TestSASBlobUploader_PerAttemptTimeoutIsRetryable(t *testing.T) {
 	var calls atomic.Int32
 	server, _ := newFakeServer(t, func(w http.ResponseWriter, r *http.Request, seen *requestRecord) {
 		if calls.Add(1) == 1 {
-			time.Sleep(50 * time.Millisecond) // exceeds the configured per-attempt timeout
+			time.Sleep(300 * time.Millisecond) // well beyond the configured per-attempt timeout
 			return
 		}
 		w.WriteHeader(http.StatusCreated)
 	})
 
 	uploader, err := storage.NewSASBlobUploader(server.URL+"/container?sig=x",
-		storage.WithTimeout(5*time.Millisecond),
+		storage.WithTimeout(50*time.Millisecond),
 		storage.WithMaxAttempts(2),
-		storage.WithBackoff(retry.Backoff{Min: time.Millisecond, Max: time.Millisecond, Factor: 1}),
+		storage.WithBackoff(retry.Backoff{Min: 5 * time.Millisecond, Max: 5 * time.Millisecond, Factor: 1}),
 	)
 	require.NoError(t, err)
 

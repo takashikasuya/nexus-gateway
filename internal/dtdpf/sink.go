@@ -35,11 +35,28 @@ type eventProducer interface {
 	Close(ctx context.Context) error
 }
 
+// AttachmentResolver decides whether a record's Values payload must be
+// durably uploaded before its Event Hubs notification is sent (DTDPF
+// contract ④, FEAT-050), returning the reference properties to attach once
+// upload succeeds. It returns (nil, nil) when no attachment applies (absent,
+// under threshold, or over the 10 MiB limit).
+type AttachmentResolver interface {
+	Resolve(ctx context.Context, record *telemetry.Record) (*Attachment, error)
+}
+
 // EventHubsSink batches DTDPF events by rootId and sends them in source order.
 type EventHubsSink struct {
-	producer eventProducer
-	groups   map[string][]*azeventhubs.EventData
-	keyOrder []string
+	producer    eventProducer
+	groups      map[string][]*azeventhubs.EventData
+	keyOrder    []string
+	attachments AttachmentResolver
+}
+
+// WithAttachments enables DTDPF contract ④ attachment orchestration for this
+// sink; call once after construction, before the first Send.
+func (s *EventHubsSink) WithAttachments(resolver AttachmentResolver) *EventHubsSink {
+	s.attachments = resolver
+	return s
 }
 
 // NewEventHubsSink creates a DTDPF sink using an Event Hubs SAS connection string.
@@ -107,8 +124,16 @@ func newEventHubsSink(producer eventProducer) *EventHubsSink {
 }
 
 // Send prepares an event for the next checkpoint without performing network I/O.
-func (s *EventHubsSink) Send(_ context.Context, record *telemetry.Record) error {
-	encoded, err := EncodeEvent(record)
+func (s *EventHubsSink) Send(ctx context.Context, record *telemetry.Record) error {
+	var attachment *Attachment
+	if s.attachments != nil {
+		var err error
+		attachment, err = s.attachments.Resolve(ctx, record)
+		if err != nil {
+			return fmt.Errorf("resolve DTDPF attachment: %w", err)
+		}
+	}
+	encoded, err := EncodeEvent(record, attachment)
 	if err != nil {
 		return err
 	}

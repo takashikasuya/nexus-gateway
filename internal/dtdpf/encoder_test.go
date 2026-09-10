@@ -24,7 +24,7 @@ func TestEncodeEventMatchesDTDPFContract(t *testing.T) {
 		},
 	}
 
-	event, err := dtdpf.EncodeEvent(record)
+	event, err := dtdpf.EncodeEvent(record, nil)
 	require.NoError(t, err)
 	assert.Equal(t, "application/json", event.ContentType)
 	assert.Equal(t, record.EventID, event.CorrelationID)
@@ -50,7 +50,7 @@ func TestEncodeEventOmitsUnsetType(t *testing.T) {
 		Timestamp: "2021-07-01T01:23:45Z",
 		DTDPF:     &telemetry.DTDPFMetadata{RootID: 5, DTID: "R90_000001", Topic: "topic"},
 	}
-	event, err := dtdpf.EncodeEvent(record)
+	event, err := dtdpf.EncodeEvent(record, nil)
 	require.NoError(t, err)
 	var body map[string]any
 	require.NoError(t, json.Unmarshal(event.Body, &body))
@@ -58,7 +58,7 @@ func TestEncodeEventOmitsUnsetType(t *testing.T) {
 }
 
 func TestEncodeEventRejectsNonDurableIdentity(t *testing.T) {
-	_, err := dtdpf.EncodeEvent(&telemetry.Record{})
+	_, err := dtdpf.EncodeEvent(&telemetry.Record{}, nil)
 	require.Error(t, err)
 }
 
@@ -68,8 +68,44 @@ func TestEncodeEventCanonicalizesUUIDToLowercase(t *testing.T) {
 		Timestamp: "2021-07-01T01:23:45Z",
 		DTDPF:     &telemetry.DTDPFMetadata{RootID: 5, DTID: "R90_000001", Topic: "topic"},
 	}
-	event, err := dtdpf.EncodeEvent(record)
+	event, err := dtdpf.EncodeEvent(record, nil)
 	require.NoError(t, err)
 	assert.Equal(t, "43217568-443d-4b24-96d1-59887fdd1628", event.CorrelationID)
 	assert.Contains(t, string(event.Body), `"id":"43217568-443d-4b24-96d1-59887fdd1628"`)
+}
+
+func TestEncodeEventAddsFileUploadPropertiesWhenAttached(t *testing.T) {
+	record := &telemetry.Record{
+		EventID: "43217568-443d-4b24-96d1-59887fdd1628", PointID: "R90_000001", Value: 256.3,
+		Timestamp: "2021-07-01T01:23:45Z",
+		DTDPF:     &telemetry.DTDPFMetadata{RootID: 5, DTID: "R90_000001", Topic: "topic"},
+	}
+
+	event, err := dtdpf.EncodeEvent(record, &dtdpf.Attachment{
+		FileName: "43217568-443d-4b24-96d1-59887fdd1628.json",
+		FileHash: "deadbeef",
+	})
+	require.NoError(t, err)
+	assert.Equal(t, "1", event.Properties["fileUpload"])
+	assert.Equal(t, "43217568-443d-4b24-96d1-59887fdd1628.json", event.Properties["fileName"])
+	assert.Equal(t, "deadbeef", event.Properties["fileHash"])
+
+	var body map[string]any
+	require.NoError(t, json.Unmarshal(event.Body, &body))
+	assert.Equal(t, map[string]any{"value": "256.3"}, body["values"],
+		"the body must still carry the scalar summary regardless of the attachment")
+}
+
+func TestEncodeEventOmitsFileUploadPropertiesWhenNoAttachment(t *testing.T) {
+	record := &telemetry.Record{
+		EventID: "43217568-443d-4b24-96d1-59887fdd1628", PointID: "R90_000001", Value: 1,
+		Timestamp: "2021-07-01T01:23:45Z",
+		DTDPF:     &telemetry.DTDPFMetadata{RootID: 5, DTID: "R90_000001", Topic: "topic"},
+	}
+
+	event, err := dtdpf.EncodeEvent(record, nil)
+	require.NoError(t, err)
+	assert.NotContains(t, event.Properties, "fileUpload")
+	assert.NotContains(t, event.Properties, "fileName")
+	assert.NotContains(t, event.Properties, "fileHash")
 }

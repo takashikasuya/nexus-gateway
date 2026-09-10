@@ -109,3 +109,54 @@ func TestEventHubSDKArgument(t *testing.T) {
 	_, err = eventHubSDKArgument(withEntityPath, "different-hub")
 	assert.Error(t, err)
 }
+
+type fakeAttachmentResolver struct {
+	attachment *Attachment
+	err        error
+}
+
+func (r fakeAttachmentResolver) Resolve(context.Context, *telemetry.Record) (*Attachment, error) {
+	return r.attachment, r.err
+}
+
+func TestEventHubsSinkSendUsesAttachmentResolver(t *testing.T) {
+	producer := &fakeProducer{}
+	sink := newEventHubsSink(producer)
+	sink.WithAttachments(fakeAttachmentResolver{attachment: &Attachment{FileName: "id.json", FileHash: "deadbeef"}})
+
+	require.NoError(t, sink.Send(context.Background(), sinkRecord("43217568-443d-4b24-96d1-59887fdd1628", 5, "p1")))
+	_, err := sink.Checkpoint(context.Background())
+	require.NoError(t, err)
+
+	require.Len(t, producer.sent, 1)
+	require.Len(t, producer.sent[0], 1)
+	assert.Equal(t, "1", producer.sent[0][0].Properties["fileUpload"])
+	assert.Equal(t, "id.json", producer.sent[0][0].Properties["fileName"])
+	assert.Equal(t, "deadbeef", producer.sent[0][0].Properties["fileHash"])
+}
+
+func TestEventHubsSinkSendPropagatesAttachmentResolverError(t *testing.T) {
+	producer := &fakeProducer{}
+	sink := newEventHubsSink(producer)
+	sink.WithAttachments(fakeAttachmentResolver{err: errors.New("upload failed")})
+
+	err := sink.Send(context.Background(), sinkRecord("43217568-443d-4b24-96d1-59887fdd1628", 5, "p1"))
+	require.Error(t, err, "a failed attachment resolution must not enqueue the notification")
+
+	accepted, err := sink.Checkpoint(context.Background())
+	require.NoError(t, err)
+	assert.Zero(t, accepted, "nothing should have been queued after the resolver error")
+}
+
+func TestEventHubsSinkSendWithoutAttachmentResolverOmitsFileProperties(t *testing.T) {
+	producer := &fakeProducer{}
+	sink := newEventHubsSink(producer)
+
+	require.NoError(t, sink.Send(context.Background(), sinkRecord("43217568-443d-4b24-96d1-59887fdd1628", 5, "p1")))
+	_, err := sink.Checkpoint(context.Background())
+	require.NoError(t, err)
+
+	require.Len(t, producer.sent, 1)
+	require.Len(t, producer.sent[0], 1)
+	assert.NotContains(t, producer.sent[0][0].Properties, "fileUpload")
+}

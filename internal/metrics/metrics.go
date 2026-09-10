@@ -9,8 +9,9 @@ package metrics
 import "sync/atomic"
 
 var (
-	normalizerInvalid    atomic.Int64
-	normalizerUnresolved atomic.Int64
+	normalizerInvalid       atomic.Int64
+	normalizerUnresolved    atomic.Int64
+	dtdpfAttachmentOversize atomic.Int64
 )
 
 // IncNormalizerInvalid counts a Common Event the Normalizer could not parse
@@ -21,8 +22,16 @@ func IncNormalizerInvalid() { normalizerInvalid.Add(1) }
 // the Point List (point-list miss) and was terminated.
 func IncNormalizerUnresolved() { normalizerUnresolved.Add(1) }
 
+// IncDTDPFAttachmentOversized counts a telemetry values payload that exceeded
+// the DTDPF contract ④ 10 MiB attachment limit ([C4-07]); it is sent as a
+// summary-only event with no fileUpload properties, never chunked.
+func IncDTDPFAttachmentOversized() { dtdpfAttachmentOversize.Add(1) }
+
 // NormalizerInvalid returns the current poison count.
 func NormalizerInvalid() int64 { return normalizerInvalid.Load() }
 
 // NormalizerUnresolved returns the current point-list-miss count.
 func NormalizerUnresolved() int64 { return normalizerUnresolved.Load() }
+
+// DTDPFAttachmentOversized returns the current oversized-attachment count.
+func DTDPFAttachmentOversized() int64 { return dtdpfAttachmentOversize.Load() }

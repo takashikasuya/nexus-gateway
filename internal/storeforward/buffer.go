@@ -309,6 +309,36 @@ func (b *Buffer) Checkpoints() int64 { return b.checkpoints.Load() }
 // SendErrors returns the total uplink send/checkpoint failures.
 func (b *Buffer) SendErrors() int64 { return b.sendErrors.Load() }
 
+// AttachmentState returns the persisted DTDPF contract ④ upload state for a
+// record's stable event ID (FEAT-050): state is one of "none", "pending", or
+// "uploaded". An eventID with no matching row (not yet written, or a
+// different buffer) returns "none" with no error — the caller should treat
+// that identically to a fresh, never-uploaded record.
+func (b *Buffer) AttachmentState(eventID string) (state, fileName, fileHash string, err error) {
+	err = b.db.QueryRow(
+		`SELECT attachment_state, COALESCE(attachment_file_name, ''), COALESCE(attachment_file_hash, '')
+		 FROM frames WHERE event_id = ?`, eventID,
+	).Scan(&state, &fileName, &fileHash)
+	if errors.Is(err, sql.ErrNoRows) {
+		return "none", "", "", nil
+	}
+	if err != nil {
+		return "", "", "", err
+	}
+	return state, fileName, fileHash, nil
+}
+
+// MarkAttachmentUploaded records that eventID's oversized Values payload has
+// been durably uploaded as fileName with the given content hash, so a
+// restart or retry does not re-upload it (FEAT-050). Idempotent: calling it
+// again with the same eventID/fileName/fileHash is a harmless no-op.
+func (b *Buffer) MarkAttachmentUploaded(eventID, fileName, fileHash string) error {
+	_, err := b.db.Exec(
+		`UPDATE frames SET attachment_state = 'uploaded', attachment_file_name = ?, attachment_file_hash = ?
+		 WHERE event_id = ?`, fileName, fileHash, eventID)
+	return err
+}
+
 // ReadBatch returns up to limit frames with seq > afterSeq, in ascending order.
 func (b *Buffer) ReadBatch(afterSeq int64, limit int) ([]StoredFrame, error) {
 	rows, err := b.db.Query(
@@ -466,6 +496,9 @@ func migrate(db *sql.DB) error {
 		{"dtdpf_type", "INTEGER"},
 		{"dtdpf_protocol", "TEXT"},
 		{"values_json", "TEXT"},
+		{"attachment_state", "TEXT NOT NULL DEFAULT 'none'"},
+		{"attachment_file_name", "TEXT"},
+		{"attachment_file_hash", "TEXT"},
 	}
 	for _, column := range columns {
 		exists, err := columnExists(db, "frames", column.name)
@@ -477,6 +510,9 @@ func migrate(db *sql.DB) error {
 				return fmt.Errorf("add frames.%s: %w", column.name, err)
 			}
 		}
+	}
+	if _, err := db.Exec(`CREATE INDEX IF NOT EXISTS idx_frames_event_id ON frames(event_id)`); err != nil {
+		return fmt.Errorf("create frames.event_id index: %w", err)
 	}
 	return nil
 }
