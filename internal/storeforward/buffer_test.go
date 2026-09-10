@@ -4,6 +4,7 @@
 package storeforward_test
 
 import (
+	"encoding/json"
 	"fmt"
 	"sync"
 	"sync/atomic"
@@ -86,6 +87,40 @@ func TestBuffer_RecordRoundTripPreservesDTDPFMetadata(t *testing.T) {
 	require.Len(t, batch, 1)
 	assert.Equal(t, record, batch[0].Record)
 	assert.Equal(t, record.PointID, batch[0].Frame.PointId, "legacy protobuf projection remains available")
+}
+
+func TestBuffer_RecordRoundTripPreservesValuesJSON(t *testing.T) {
+	buf, err := storeforward.Open(t.TempDir()+"/sf.db", 100)
+	require.NoError(t, err)
+	defer buf.Close()
+
+	record := &telemetry.Record{
+		EventID: "43217568-443d-4b24-96d1-59887fdd1628", GatewayID: "gw-1", PointID: "p1",
+		Value: 1.0, Timestamp: "2026-09-10T00:00:00Z",
+		Values: json.RawMessage(`{"b": 2, "a": 1}`),
+	}
+	require.NoError(t, buf.WriteRecord(record))
+
+	batch, err := buf.ReadBatch(0, 1)
+	require.NoError(t, err)
+	require.Len(t, batch, 1)
+	assert.JSONEq(t, `{"a":1,"b":2}`, string(batch[0].Record.Values))
+}
+
+func TestBuffer_RecordWithoutValuesRoundTripsNil(t *testing.T) {
+	buf, err := storeforward.Open(t.TempDir()+"/sf.db", 100)
+	require.NoError(t, err)
+	defer buf.Close()
+
+	require.NoError(t, buf.WriteRecord(&telemetry.Record{
+		EventID: "43217568-443d-4b24-96d1-59887fdd1628", GatewayID: "gw-1", PointID: "p1",
+		Value: 1.0, Timestamp: "2026-09-10T00:00:00Z",
+	}))
+
+	batch, err := buf.ReadBatch(0, 1)
+	require.NoError(t, err)
+	require.Len(t, batch, 1)
+	assert.Nil(t, batch[0].Record.Values, "legacy/scalar-only rows must not synthesize a Values object")
 }
 
 type metadataResolver map[string]telemetry.DTDPFMetadata

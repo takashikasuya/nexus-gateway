@@ -131,3 +131,29 @@ func TestNormalizeRecordGeneratesStablePayloadMetadata(t *testing.T) {
 	assert.Regexp(t, `^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$`, record.EventID)
 	assert.Equal(t, metadata, record.DTDPF)
 }
+
+func TestNormalizeRecordCopiesStructuredValues(t *testing.T) {
+	resolver := pointlist.NewFixture([]pointlist.Entry{
+		{ConnectorID: "c1", LocalID: "l1", PointID: "p1"},
+	})
+	event, err := json.Marshal(common.Event{
+		ConnectorID: "c1", LocalID: "l1", Value: 1.0, Timestamp: "2025-01-01T00:00:00Z",
+		Values: json.RawMessage(`{"a":1}`),
+	})
+	require.NoError(t, err)
+
+	record, outcome := normalizer.NormalizeRecord(event, resolver, nil, "gw-x")
+	require.Equal(t, normalizer.OutcomeOK, outcome)
+	require.NotNil(t, record)
+	assert.JSONEq(t, `{"a":1}`, string(record.Values))
+}
+
+func TestNormalizeRecordScalarOnlyEventHasNilValues(t *testing.T) {
+	resolver := pointlist.NewFixture([]pointlist.Entry{
+		{ConnectorID: "c1", LocalID: "l1", PointID: "p1"},
+	})
+	record, outcome := normalizer.NormalizeRecord(makeEvent("c1", "l1", 1.0), resolver, nil, "gw-x")
+	require.Equal(t, normalizer.OutcomeOK, outcome)
+	require.NotNil(t, record)
+	assert.Nil(t, record.Values, "scalar-only events must not synthesize a Values object")
+}

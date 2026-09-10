@@ -4,6 +4,7 @@
 package storeforward
 
 import (
+	"bytes"
 	"database/sql"
 	"encoding/json"
 	"errors"
@@ -219,6 +220,14 @@ func (b *Buffer) WriteRecord(record *telemetry.Record) error {
 			dtdpfType = *record.DTDPF.Type
 		}
 	}
+	var valuesJSON any
+	if record.Values != nil {
+		compacted, err := compactJSON(record.Values)
+		if err != nil {
+			return fmt.Errorf("compact telemetry values: %w", err)
+		}
+		valuesJSON = string(compacted)
+	}
 
 	tx, err := b.db.Begin()
 	if err != nil {
@@ -238,10 +247,10 @@ func (b *Buffer) WriteRecord(record *telemetry.Record) error {
 	_, err = tx.Exec(
 		`INSERT INTO frames (
 			event_id, gateway_id, point_id, value, timestamp, attributes_json,
-			dtdpf_root_id, dtdpf_dt_id, dtdpf_topic, dtdpf_type, dtdpf_protocol
-		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+			dtdpf_root_id, dtdpf_dt_id, dtdpf_topic, dtdpf_type, dtdpf_protocol, values_json
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		record.EventID, record.GatewayID, record.PointID, record.Value, record.Timestamp, string(attributes),
-		rootID, dtID, topic, dtdpfType, protocol,
+		rootID, dtID, topic, dtdpfType, protocol, valuesJSON,
 	)
 	if err != nil {
 		return err
@@ -304,7 +313,7 @@ func (b *Buffer) SendErrors() int64 { return b.sendErrors.Load() }
 func (b *Buffer) ReadBatch(afterSeq int64, limit int) ([]StoredFrame, error) {
 	rows, err := b.db.Query(
 		`SELECT seq, event_id, gateway_id, point_id, value, timestamp, attributes_json,
-			dtdpf_root_id, dtdpf_dt_id, dtdpf_topic, dtdpf_type, dtdpf_protocol
+			dtdpf_root_id, dtdpf_dt_id, dtdpf_topic, dtdpf_type, dtdpf_protocol, values_json
 		 FROM frames WHERE seq > ? ORDER BY seq ASC LIMIT ?`,
 		afterSeq, limit,
 	)
@@ -318,14 +327,17 @@ func (b *Buffer) ReadBatch(afterSeq int64, limit int) ([]StoredFrame, error) {
 		var sf StoredFrame
 		var attributesJSON string
 		var rootID, dtdpfType sql.NullInt64
-		var dtID, topic, protocol sql.NullString
+		var dtID, topic, protocol, valuesJSON sql.NullString
 		sf.Record = &telemetry.Record{}
 		if err := rows.Scan(
 			&sf.Seq, &sf.Record.EventID, &sf.Record.GatewayID, &sf.Record.PointID,
 			&sf.Record.Value, &sf.Record.Timestamp, &attributesJSON,
-			&rootID, &dtID, &topic, &dtdpfType, &protocol,
+			&rootID, &dtID, &topic, &dtdpfType, &protocol, &valuesJSON,
 		); err != nil {
 			return nil, err
+		}
+		if valuesJSON.Valid {
+			sf.Record.Values = json.RawMessage(valuesJSON.String)
 		}
 		if err := json.Unmarshal([]byte(attributesJSON), &sf.Record.Attributes); err != nil {
 			return nil, fmt.Errorf("decode telemetry attributes at seq %d: %w", sf.Seq, err)
@@ -453,6 +465,7 @@ func migrate(db *sql.DB) error {
 		{"dtdpf_topic", "TEXT"},
 		{"dtdpf_type", "INTEGER"},
 		{"dtdpf_protocol", "TEXT"},
+		{"values_json", "TEXT"},
 	}
 	for _, column := range columns {
 		exists, err := columnExists(db, "frames", column.name)
@@ -466,6 +479,17 @@ func migrate(db *sql.DB) error {
 		}
 	}
 	return nil
+}
+
+// compactJSON returns the compact (no whitespace) encoding of a JSON value.
+// Persisted values_json therefore normalizes away the caller's original
+// whitespace/formatting; it is not a byte-for-byte copy of the input.
+func compactJSON(raw json.RawMessage) ([]byte, error) {
+	var buf bytes.Buffer
+	if err := json.Compact(&buf, raw); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
 }
 
 func columnExists(db *sql.DB, table, column string) (bool, error) {

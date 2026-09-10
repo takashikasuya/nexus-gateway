@@ -31,3 +31,16 @@ func TestRecordProtoRoundTrip(t *testing.T) {
 	assert.Equal(t, record.Timestamp, record.ToProto().Timestamp)
 	assert.Equal(t, "changed", record.ToProto().Attributes["quality"])
 }
+
+func TestRecordValuesDoesNotAffectProtoProjection(t *testing.T) {
+	record := &telemetry.Record{
+		GatewayID: "gw-1", PointID: "p1", Value: 1.5, Timestamp: "2026-09-10T00:00:00Z",
+		Values: []byte(`{"a":1,"b":"text"}`),
+	}
+
+	frame := record.ToProto()
+
+	assert.Equal(t, 1.5, frame.Value, "scalar path is unaffected by an optional Values object")
+	assert.Equal(t, `{"a":1,"b":"text"}`, string(record.Values))
+}
+
