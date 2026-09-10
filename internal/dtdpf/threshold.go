@@ -28,7 +28,7 @@ func CompactValues(record *telemetry.Record) ([]byte, error) {
 	}
 	var buf bytes.Buffer
 	if err := json.Compact(&buf, record.Values); err != nil {
-		return nil, fmt.Errorf("compact telemetry values for attachment threshold: %w", err)
+		return nil, fmt.Errorf("compact telemetry values: %w", err)
 	}
 	return buf.Bytes(), nil
 }
