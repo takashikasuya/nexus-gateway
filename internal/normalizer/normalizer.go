@@ -203,6 +203,7 @@ func NormalizeRecord(data []byte, resolver pointlist.Resolver, metadata Metadata
 		PointID:   pointID,
 		Value:     evt.Value,
 		Timestamp: ts,
+		Values:    evt.Values,
 	}
 	if metadata != nil {
 		dtdpfMetadata, ok := metadata.Resolve(pointID, evt.Protocol)

@@ -3,7 +3,11 @@
 
 package telemetry
 
-import pb "nexus-gateway/gen"
+import (
+	"encoding/json"
+
+	pb "nexus-gateway/gen"
+)
 
 // DTDPFMetadata carries the DTDPF routing data resolved from pointConfig.json.
 type DTDPFMetadata struct {
@@ -23,6 +27,11 @@ type Record struct {
 	Timestamp  string
 	Attributes map[string]string
 	DTDPF      *DTDPFMetadata
+	// Values optionally carries a compact-JSON typed object alongside the
+	// scalar Value (DTDPF contract ④, FEAT-048). It is nil for the
+	// scalar-only path; the Building OS protobuf projection (ToProto/
+	// FromProto) is unaffected and never carries it.
+	Values json.RawMessage
 }
 
 // PendingRecord keeps the source acknowledgment attached until the record is durable.
