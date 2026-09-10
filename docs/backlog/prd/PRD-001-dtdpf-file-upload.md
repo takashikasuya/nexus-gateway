@@ -29,7 +29,7 @@ changes to actually *emit* large payloads from the field — see
    breaking the existing scalar `value` path or the Building OS protobuf
    projection (FEAT-048).
 2. A tested, swappable storage-client seam can PUT bytes to GW Upload Storage
-   using a SAS URI, with retry, timeout, and a SHA-256 content hash (FEAT-049).
+   using a SAS URL, with retry, timeout, and a SHA-256 content hash (FEAT-049).
 3. Attachment upload is durable and ordered before the Event Hubs
    notification; a crash between upload and notification does not duplicate
    the object or lose the notification; oversized (>10 MiB) payloads are
@@ -44,13 +44,13 @@ changes to actually *emit* large payloads from the field — see
 - IoT Edge Binding A (local Blob auto-sync) — Binding B (direct PUT) only,
   per EP-012 non-goals.
 - The GW連携API-driven SAS provisioning/refresh flow (FEAT-051) — this PRD
-  takes the SAS URI from environment/secret configuration, static for the
+  takes the SAS URL from environment/secret configuration, static for the
   deployment, consistent with how `DTDPF_EVENTHUB_CONNECTION_STRING` is
   injected today.
 - Entra ID credential support — the seam is interface-based so it can be
-  added later without a caller-visible change; only SAS URI is implemented
-  now (mirrors ADR-0008's existing SAS-based Event Hubs auth for consistency).
-  See [Non-Goals](#non-goals) below for the full list this PRD excludes.
+  added later without a caller-visible change; only SAS URL auth is
+  implemented now (mirrors ADR-0008's existing SAS-based Event Hubs auth for
+  consistency).
 - Rule evaluation, IoT Hub Direct Methods — unchanged EP-012 non-goals.
 
 ## Design
@@ -73,7 +73,8 @@ changes to actually *emit* large payloads from the field — see
 - `internal/normalizer.NormalizeRecord` copies `evt.Values` onto the record
   when present.
 - `internal/dtdpf.EncodeEvent` computes the attachment threshold from
-  `len(compact JSON of values)` per [C4-05] and continues to emit
+  `len(compact JSON of values)` per [C4-05] (see the normative reference,
+  `docs/DTDPF_GW設計要件書_v2_基盤非依存版.md`) and continues to emit
   `values.value` as the summary regardless (FEAT-050 adds the upload branch).
 
 ### FEAT-049: GW Upload Storage client
@@ -87,7 +88,7 @@ changes to actually *emit* large payloads from the field — see
   ```
 - `SASBlobUploader` implements `Uploader` using the Azure Blob SDK
   (`github.com/Azure/azure-sdk-for-go/sdk/storage/azblob`) against a
-  container SAS URI (`DTDPF_UPLOAD_SAS_URL`), with:
+  SAS URL (`DTDPF_UPLOAD_SAS_URL`), with:
   - a bounded timeout per attempt (`DTDPF_UPLOAD_TIMEOUT`, default e.g. 30s),
   - retry with backoff on transient failures (reuse the existing
     `internal/retry` package if its policy shape fits),
