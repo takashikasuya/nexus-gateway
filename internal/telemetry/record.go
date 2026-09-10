@@ -28,9 +28,11 @@ type Record struct {
 	Attributes map[string]string
 	DTDPF      *DTDPFMetadata
 	// Values optionally carries a typed JSON object alongside the scalar
-	// Value (DTDPF contract ④, FEAT-048). It is copied through as received
-	// (not guaranteed compact) and nil for the scalar-only path; the
-	// Building OS protobuf projection (ToProto/FromProto) never carries it.
+	// Value (DTDPF contract ④, FEAT-048). In-memory it is copied through as
+	// received (not guaranteed compact); storeforward.Buffer compacts it
+	// before persisting, so a durable round-trip normalizes whitespace. It
+	// is nil for the scalar-only path; the Building OS protobuf projection
+	// (ToProto/FromProto) never carries it.
 	Values json.RawMessage
 }
 

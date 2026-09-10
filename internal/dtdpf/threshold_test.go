@@ -51,9 +51,9 @@ func TestExceedsAttachmentThreshold_MeasuresCompactEncodingNotRawWhitespace(t *t
 	// Padded with insignificant whitespace so the raw byte length exceeds the
 	// threshold, but the compact encoding does not — the threshold must be
 	// computed on the compact form per [C4-05], not the raw payload.
-	padding := strings.Repeat(" ", 200)
+	padding := strings.Repeat(" ", dtdpf.AttachmentThreshold)
 	raw := []byte(`{"v": "x"` + padding + `}`)
-	require.Greater(t, len(raw), len(`{"v":"x"}`))
+	require.Greater(t, len(raw), dtdpf.AttachmentThreshold, "raw payload must actually exceed the threshold for this test to be meaningful")
 
 	exceeds, err := dtdpf.ExceedsAttachmentThreshold(&telemetry.Record{Values: raw})
 	require.NoError(t, err)
