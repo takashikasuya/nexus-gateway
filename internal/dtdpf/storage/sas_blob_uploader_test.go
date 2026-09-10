@@ -24,6 +24,7 @@ import (
 type requestRecord struct {
 	method, path, query string
 	blobType, ctype     string
+	apiVersion, msDate  string
 	body                []byte
 }
 
@@ -37,6 +38,7 @@ func newFakeServer(t *testing.T, handler func(w http.ResponseWriter, r *http.Req
 		rec := requestRecord{
 			method: r.Method, path: r.URL.Path, query: r.URL.RawQuery,
 			blobType: r.Header.Get("x-ms-blob-type"), ctype: r.Header.Get("Content-Type"),
+			apiVersion: r.Header.Get("x-ms-version"), msDate: r.Header.Get("x-ms-date"),
 			body: body,
 		}
 		// A client-side per-attempt timeout can leave the previous request's
@@ -68,7 +70,23 @@ func TestSASBlobUploader_PutSendsExpectedRequest(t *testing.T) {
 	assert.Equal(t, "sv=2021&sig=secret", got.query, "the SAS query string is preserved unchanged")
 	assert.Equal(t, "BlockBlob", got.blobType)
 	assert.Equal(t, "application/json", got.ctype)
+	assert.NotEmpty(t, got.apiVersion, "x-ms-version is required by Azure Blob Storage's Put Blob operation")
+	assert.NotEmpty(t, got.msDate, "x-ms-date is required by Azure Blob Storage's Put Blob operation")
 	assert.Equal(t, `{"a":1}`, string(got.body))
+}
+
+func TestSASBlobUploader_WithAPIVersionOverridesDefault(t *testing.T) {
+	server, records := newFakeServer(t, func(w http.ResponseWriter, r *http.Request, seen *requestRecord) {
+		w.WriteHeader(http.StatusCreated)
+	})
+
+	uploader, err := storage.NewSASBlobUploader(server.URL+"/container?sig=x", storage.WithAPIVersion("2020-01-01"))
+	require.NoError(t, err)
+
+	require.NoError(t, uploader.Put(context.Background(), "obj.json", []byte("x")))
+
+	require.Len(t, *records, 1)
+	assert.Equal(t, "2020-01-01", (*records)[0].apiVersion)
 }
 
 func TestSASBlobUploader_RetriesTransient5xxThenSucceeds(t *testing.T) {
@@ -213,6 +231,23 @@ func TestNewSASBlobUploader_RejectsNilHTTPClient(t *testing.T) {
 
 func TestNewSASBlobUploader_RejectsNonPositiveTimeout(t *testing.T) {
 	_, err := storage.NewSASBlobUploader("https://example.blob.core.windows.net/container?sig=x", storage.WithTimeout(0))
+	require.Error(t, err)
+}
+
+func TestNewSASBlobUploader_RejectsEmptyAPIVersion(t *testing.T) {
+	_, err := storage.NewSASBlobUploader("https://example.blob.core.windows.net/container?sig=x", storage.WithAPIVersion(""))
+	require.Error(t, err)
+}
+
+func TestNewSASBlobUploaderFromEnv_ReadsConfiguredVariable(t *testing.T) {
+	t.Setenv("DTDPF_UPLOAD_SAS_URL_TEST", "https://example.blob.core.windows.net/container?sig=x")
+	uploader, err := storage.NewSASBlobUploaderFromEnv("DTDPF_UPLOAD_SAS_URL_TEST")
+	require.NoError(t, err)
+	assert.NotNil(t, uploader)
+}
+
+func TestNewSASBlobUploaderFromEnv_RejectsMissingVariable(t *testing.T) {
+	_, err := storage.NewSASBlobUploaderFromEnv("DTDPF_UPLOAD_SAS_URL_DOES_NOT_EXIST")
 	require.Error(t, err)
 }
 

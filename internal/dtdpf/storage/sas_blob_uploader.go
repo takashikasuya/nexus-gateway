@@ -11,12 +11,18 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"strconv"
 	"strings"
 	"time"
 
 	"nexus-gateway/internal/retry"
 )
+
+// defaultAPIVersion is the Azure Storage REST API version sent as
+// x-ms-version on every request. Azure Blob Storage's Put Blob operation
+// rejects requests missing this header even when the SAS token is valid.
+const defaultAPIVersion = "2023-11-03"
 
 // SASBlobUploader implements Uploader with a direct PUT to a container SAS
 // URL (DTDPF contract ④ Binding B). It retries transient (network-level or
@@ -28,6 +34,7 @@ type SASBlobUploader struct {
 	timeout     time.Duration
 	maxAttempts int
 	backoff     retry.Backoff
+	apiVersion  string
 }
 
 // Option configures a SASBlobUploader.
@@ -52,6 +59,12 @@ func WithMaxAttempts(n int) Option {
 // WithBackoff overrides the retry backoff policy (default 200ms-5s, factor 2).
 func WithBackoff(b retry.Backoff) Option {
 	return func(u *SASBlobUploader) { u.backoff = b }
+}
+
+// WithAPIVersion overrides the Azure Storage REST API version sent as
+// x-ms-version (default defaultAPIVersion).
+func WithAPIVersion(v string) Option {
+	return func(u *SASBlobUploader) { u.apiVersion = v }
 }
 
 // NewSASBlobUploader builds an Uploader that PUTs directly to sasURL, a
@@ -81,6 +94,7 @@ func NewSASBlobUploader(sasURL string, opts ...Option) (*SASBlobUploader, error)
 		timeout:     30 * time.Second,
 		maxAttempts: 3,
 		backoff:     retry.Backoff{Min: 200 * time.Millisecond, Max: 5 * time.Second, Factor: 2},
+		apiVersion:  defaultAPIVersion,
 	}
 	for _, opt := range opts {
 		opt(u)
@@ -94,7 +108,22 @@ func NewSASBlobUploader(sasURL string, opts ...Option) (*SASBlobUploader, error)
 	if u.timeout <= 0 {
 		return nil, fmt.Errorf("DTDPF upload timeout must be positive, got %s", u.timeout)
 	}
+	if strings.TrimSpace(u.apiVersion) == "" {
+		return nil, errors.New("DTDPF upload API version must not be empty")
+	}
 	return u, nil
+}
+
+// NewSASBlobUploaderFromEnv builds an Uploader whose SAS URL is read from the
+// named environment variable only (e.g. "DTDPF_UPLOAD_SAS_URL") — never from
+// a CLI flag — so it cannot leak via process listings or shell history,
+// matching the precedent set for DTDPF_EVENTHUB_CONNECTION_STRING.
+func NewSASBlobUploaderFromEnv(envVar string, opts ...Option) (*SASBlobUploader, error) {
+	sasURL := os.Getenv(envVar)
+	if sasURL == "" {
+		return nil, fmt.Errorf("environment variable %s is required for the DTDPF upload SAS URL", envVar)
+	}
+	return NewSASBlobUploader(sasURL, opts...)
 }
 
 // Put uploads body as a block blob named objectName, retrying transient
@@ -145,6 +174,8 @@ func (u *SASBlobUploader) putOnce(ctx context.Context, objectURL string, body []
 		return err
 	}
 	req.Header.Set("x-ms-blob-type", "BlockBlob")
+	req.Header.Set("x-ms-version", u.apiVersion)
+	req.Header.Set("x-ms-date", time.Now().UTC().Format(http.TimeFormat))
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Content-Length", strconv.Itoa(len(body)))
 
