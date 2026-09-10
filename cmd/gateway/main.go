@@ -77,7 +77,7 @@ func main() {
 	telemetrySink := flag.String("telemetry-sink", envOrDefault("TELEMETRY_SINK", "bos"), "Telemetry sink: bos or dtdpf")
 	dtdpfPointConfig := flag.String("dtdpf-point-config", envOrDefault("DTDPF_POINT_CONFIG_FILE", ""), "DTDPF pointConfig.json path (required for dtdpf sink)")
 	// Secret, not a flag: avoids leaking the SAS connection string via process
-	// listings or shell history (Copilot review, PR #168).
+	// listings or shell history.
 	dtdpfConnectionString := os.Getenv("DTDPF_EVENTHUB_CONNECTION_STRING")
 	dtdpfEventHub := flag.String("dtdpf-eventhub-name", envOrDefault("DTDPF_EVENTHUB_NAME", "telemetry"), "Azure Event Hub name")
 	dtdpfTransport := flag.String("dtdpf-eventhub-transport", envOrDefault("DTDPF_EVENTHUB_TRANSPORT", string(dtdpf.TransportAMQPTCP)), "Event Hubs transport: amqp-tcp or websocket")

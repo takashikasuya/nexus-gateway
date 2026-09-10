@@ -133,7 +133,7 @@ func (n *Normalizer) consume(ctx context.Context, src EventSource, resolver poin
 				case <-ticker.C:
 					// The downstream pump can block for a long time under DTDPF's
 					// BlockWhenFull backpressure; keep the JetStream ack deadline
-					// alive instead of risking redelivery (Copilot review, PR #168).
+					// alive instead of risking redelivery.
 					_ = msg.InProgress()
 				case <-ctx.Done():
 					_ = msg.Nak()
