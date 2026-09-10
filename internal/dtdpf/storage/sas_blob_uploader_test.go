@@ -160,6 +160,47 @@ func TestSASBlobUploader_ObjectNameIsPathEscaped(t *testing.T) {
 		"the server-observed decoded path must match the literal object name")
 }
 
+func TestSASBlobUploader_ObjectNameSlashCannotEscapeContainerPrefix(t *testing.T) {
+	// A decoded r.URL.Path can't distinguish "/" sent literally on the wire
+	// from a "%2F" sent and then decoded by the HTTP stack — both look
+	// identical once parsed. Inspect the literal, still-escaped request
+	// target instead, which is what actually travels over the wire and is
+	// what a naive server-side router could misinterpret as a path
+	// separator if it weren't escaped.
+	var escapedTarget string
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		escapedTarget = r.URL.EscapedPath()
+		w.WriteHeader(http.StatusCreated)
+	}))
+	t.Cleanup(server.Close)
+
+	uploader, err := storage.NewSASBlobUploader(server.URL + "/container?sig=x")
+	require.NoError(t, err)
+
+	require.NoError(t, uploader.Put(context.Background(), "../escaped/obj.json", []byte("x")))
+
+	assert.Equal(t, "/container/..%2Fescaped%2Fobj.json", escapedTarget,
+		"'/' inside objectName must be percent-encoded on the wire so it stays "+
+			"within the object-name segment instead of acting as a path separator")
+}
+
+func TestNewSASBlobUploader_RejectsNonAbsoluteURL(t *testing.T) {
+	_, err := storage.NewSASBlobUploader("/container?sig=x")
+	require.Error(t, err)
+}
+
+func TestSASBlobUploader_TransportErrorRedactsSASQuery(t *testing.T) {
+	uploader, err := storage.NewSASBlobUploader("https://127.0.0.1:0/container?sig=super-secret-value",
+		storage.WithMaxAttempts(1),
+	)
+	require.NoError(t, err)
+
+	err = uploader.Put(context.Background(), "obj.json", []byte("x"))
+	require.Error(t, err)
+	assert.NotContains(t, err.Error(), "super-secret-value",
+		"a transport-level error must not leak the SAS signature from the request URL")
+}
+
 func TestNewSASBlobUploader_RejectsNonPositiveMaxAttempts(t *testing.T) {
 	_, err := storage.NewSASBlobUploader("https://example.blob.core.windows.net/container?sig=x", storage.WithMaxAttempts(0))
 	require.Error(t, err)

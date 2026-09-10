@@ -72,6 +72,9 @@ func NewSASBlobUploader(sasURL string, opts ...Option) (*SASBlobUploader, error)
 		}
 		return nil, errors.New("parse DTDPF upload SAS URL: invalid URL")
 	}
+	if !parsed.IsAbs() || parsed.Host == "" {
+		return nil, errors.New("DTDPF upload SAS URL must be an absolute URL with a scheme and host")
+	}
 	u := &SASBlobUploader{
 		baseURL:     parsed,
 		httpClient:  http.DefaultClient,
@@ -121,7 +124,16 @@ func (u *SASBlobUploader) Put(ctx context.Context, objectName string, body []byt
 }
 
 func (u *SASBlobUploader) objectURL(objectName string) string {
-	return u.baseURL.JoinPath(objectName).String()
+	// PathEscape treats objectName as one opaque path segment, percent-encoding
+	// '/' (and other reserved characters) so it cannot be misread as a path
+	// separator and escape the configured container prefix.
+	escapedName := url.PathEscape(objectName)
+	ref := *u.baseURL
+	basePath := strings.TrimSuffix(ref.Path, "/")
+	baseEscapedPath := strings.TrimSuffix(ref.EscapedPath(), "/") // read before mutating ref.Path below
+	ref.Path = basePath + "/" + objectName
+	ref.RawPath = baseEscapedPath + "/" + escapedName
+	return ref.String()
 }
 
 func (u *SASBlobUploader) putOnce(ctx context.Context, objectURL string, body []byte) error {
@@ -138,7 +150,7 @@ func (u *SASBlobUploader) putOnce(ctx context.Context, objectURL string, body []
 
 	resp, err := u.httpClient.Do(req)
 	if err != nil {
-		return &retryableError{err: err}
+		return &retryableError{err: redactSASQuery(err)}
 	}
 	defer func() {
 		_, _ = io.Copy(io.Discard, resp.Body)
@@ -165,4 +177,19 @@ func (e *retryableError) Unwrap() error { return e.err }
 func isRetryable(err error) bool {
 	var re *retryableError
 	return errors.As(err, &re)
+}
+
+// redactSASQuery strips the query string (which carries the SAS signature)
+// out of a *url.Error's embedded URL before it can reach a log line, while
+// preserving the rest of the error chain via %w.
+func redactSASQuery(err error) error {
+	var urlErr *url.Error
+	if !errors.As(err, &urlErr) {
+		return err
+	}
+	redactedURL := urlErr.URL
+	if i := strings.IndexByte(redactedURL, '?'); i >= 0 {
+		redactedURL = redactedURL[:i] + "?<redacted>"
+	}
+	return fmt.Errorf("%s %s: %w", urlErr.Op, redactedURL, urlErr.Err)
 }
