@@ -198,12 +198,13 @@ func NormalizeRecord(data []byte, resolver pointlist.Resolver, metadata Metadata
 		ts = time.Now().UTC().Format(time.RFC3339)
 	}
 	record := &telemetry.Record{
-		EventID:   uuid.NewString(),
-		GatewayID: gatewayID,
-		PointID:   pointID,
-		Value:     evt.Value,
-		Timestamp: ts,
-		Values:    evt.Values,
+		EventID:            uuid.NewString(),
+		GatewayID:          gatewayID,
+		PointID:            pointID,
+		Value:              evt.Value,
+		Timestamp:          ts,
+		Values:             evt.Values,
+		AttachmentEligible: evt.AttachmentEligible,
 	}
 	if metadata != nil {
 		dtdpfMetadata, ok := metadata.Resolve(pointID, evt.Protocol)

@@ -21,4 +21,9 @@ type Event struct {
 	// scalar Value (DTDPF contract ④, FEAT-048). Absent for the scalar-only
 	// path used by today's connectors.
 	Values json.RawMessage `json:"values,omitempty"`
+	// AttachmentEligible opts this event into DTDPF file-upload consideration
+	// (contract ④); false for ordinary metric telemetry regardless of Values
+	// size. Only an explicit queued/compressed telemetry sender or a UI
+	// upload endpoint should ever set this to true.
+	AttachmentEligible bool `json:"attachment_eligible,omitempty"`
 }
