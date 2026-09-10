@@ -6,6 +6,7 @@ package dtdpf
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 
 	"nexus-gateway/internal/telemetry"
 )
@@ -23,7 +24,7 @@ func ExceedsAttachmentThreshold(record *telemetry.Record) (bool, error) {
 	}
 	var buf bytes.Buffer
 	if err := json.Compact(&buf, record.Values); err != nil {
-		return false, err
+		return false, fmt.Errorf("compact telemetry values for attachment threshold: %w", err)
 	}
 	return buf.Len() > AttachmentThreshold, nil
 }

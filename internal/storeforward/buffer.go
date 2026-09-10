@@ -481,9 +481,9 @@ func migrate(db *sql.DB) error {
 	return nil
 }
 
-// compactJSON returns the compact (no whitespace) encoding of a JSON value,
-// so persisted values_json round-trips byte-for-byte regardless of the
-// caller's original formatting.
+// compactJSON returns the compact (no whitespace) encoding of a JSON value.
+// Persisted values_json therefore normalizes away the caller's original
+// whitespace/formatting; it is not a byte-for-byte copy of the input.
 func compactJSON(raw json.RawMessage) ([]byte, error) {
 	var buf bytes.Buffer
 	if err := json.Compact(&buf, raw); err != nil {
