@@ -95,25 +95,19 @@ device registry or metadata authority to the gateway.
 
 ## Child Features
 
-- [x] **FEAT-046: Selectable DTDPF Event Hubs sink (local, uncommitted).**
-  Internal telemetry record, stable UUID, DTDPF encoder, Azure SDK v2 producer,
-  `rootId` batching, AMQP/WebSocket transport, reconnecting uplink, secure env
-  configuration, Compose override, and contract tests.
+- [x] **FEAT-046: Selectable DTDPF Event Hubs sink.** Internal telemetry
+  record, stable UUID, DTDPF encoder, Azure SDK v2 producer, `rootId`
+  batching, AMQP/WebSocket transport, reconnecting uplink, secure env
+  configuration, Compose override, and contract tests. Landed via PR #168.
 - [ ] **FEAT-047: Production DTDPF point mapping.** Replace the simulation
   fixture with approved mappings. Existing Point List
   `(connector_id, local_id) → point_id` remains authoritative for native
   resolution; `point_id` must equal DTDPF `dtId`. Validate exact protocol names
   and run a real connector-to-cloud test.
-- [ ] **FEAT-048: Structured telemetry values.** Extend Common Event and the
-  durable record to preserve arbitrary typed `values` JSON while retaining
-  scalar compatibility. Define connector SDK compatibility for Go, Python, and
-  Java before changing wire data.
-- [ ] **FEAT-049: GW Upload Storage client.** Implement direct PUT with the
-  agreed credential model, timeout/retry policy, content hash, object naming,
-  and a testable storage-client seam.
-- [ ] **FEAT-050: Durable attachment orchestration.** Persist attachment state,
-  upload before notification, add Event Hubs file properties, handle restart
-  and partial completion idempotently, enforce size limits, and expose metrics.
+- [ ] **FEAT-048/049/050: File upload (contract ④).** Scoped in
+  [PRD-001](../prd/PRD-001-dtdpf-file-upload.md): structured telemetry
+  values, a GW Upload Storage client, and durable attachment orchestration so
+  a `values` payload > 1 KiB is uploaded and referenced instead of inlined.
 - [ ] **FEAT-051: DTDPF configuration lifecycle.** Replace static local
   `pointConfig.json` with generation-based atomic reload and, when its external
   contract is approved, GW integration API synchronization. Rules and telemetry
