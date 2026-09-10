@@ -75,8 +75,17 @@ func (s *fakeAttachmentStore) MarkAttachmentUploaded(eventID, fileName, fileHash
 	return nil
 }
 
+// recordWithValues builds a record already opted into attachment
+// consideration (AttachmentEligible: true), matching an explicit
+// queued/compressed telemetry sender or a UI upload — the only two
+// intended callers of that flag. Size-gating tests below layer on top of
+// this baseline; TestAttachmentOrchestrator_SkipsWhenNotAttachmentEligible*
+// covers the flag itself.
 func recordWithValues(eventID string, values []byte) *telemetry.Record {
-	return &telemetry.Record{EventID: eventID, PointID: "p1", Timestamp: "2026-09-10T00:00:00Z", Values: values}
+	return &telemetry.Record{
+		EventID: eventID, PointID: "p1", Timestamp: "2026-09-10T00:00:00Z",
+		Values: values, AttachmentEligible: true,
+	}
 }
 
 func largeValues(n int) []byte {
@@ -105,6 +114,42 @@ func TestAttachmentOrchestrator_ResolveNoAttachmentWhenValuesAbsent(t *testing.T
 	attachment, err := orch.Resolve(context.Background(), &telemetry.Record{EventID: "id-1"})
 	require.NoError(t, err)
 	assert.Nil(t, attachment)
+}
+
+func TestAttachmentOrchestrator_SkipsWhenNotAttachmentEligibleRegardlessOfSize(t *testing.T) {
+	uploader := &fakeUploader{}
+	store := newFakeAttachmentStore()
+	orch, err := dtdpf.NewAttachmentOrchestrator(uploader, store)
+	require.NoError(t, err)
+
+	record := &telemetry.Record{
+		EventID: "43217568-443d-4b24-96d1-59887fdd1628", PointID: "p1", Timestamp: "2026-09-10T00:00:00Z",
+		Values: largeValues(dtdpf.MaxAttachmentBytes + 1), // well above every threshold
+		// AttachmentEligible left at its zero value (false): ordinary metric
+		// telemetry, even with an oversized Values object, must never upload.
+	}
+
+	attachment, err := orch.Resolve(context.Background(), record)
+	require.NoError(t, err)
+	assert.Nil(t, attachment)
+	assert.Equal(t, 0, uploader.callCount(), "an ineligible record must never be uploaded regardless of size")
+
+	state, _, _, err := store.AttachmentState(record.EventID)
+	require.NoError(t, err)
+	assert.Equal(t, "none", state, "the store must not be touched for an ineligible record")
+}
+
+func TestAttachmentOrchestrator_EligibleButUnderThresholdStillSkips(t *testing.T) {
+	uploader := &fakeUploader{}
+	store := newFakeAttachmentStore()
+	orch, err := dtdpf.NewAttachmentOrchestrator(uploader, store)
+	require.NoError(t, err)
+
+	// AttachmentEligible alone is not sufficient — size still gates it.
+	attachment, err := orch.Resolve(context.Background(), recordWithValues("id-1", []byte(`{"a":1}`)))
+	require.NoError(t, err)
+	assert.Nil(t, attachment)
+	assert.Equal(t, 0, uploader.callCount())
 }
 
 func TestAttachmentOrchestrator_UploadsBeforeReturningAttachment(t *testing.T) {

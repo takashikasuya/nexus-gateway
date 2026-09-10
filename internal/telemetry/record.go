@@ -34,6 +34,11 @@ type Record struct {
 	// is nil for the scalar-only path; the Building OS protobuf projection
 	// (ToProto/FromProto) never carries it.
 	Values json.RawMessage
+	// AttachmentEligible opts this record into DTDPF file-upload consideration
+	// (contract ④); false for ordinary metric telemetry regardless of Values
+	// size, even above the 1KB threshold. Only an explicit queued/compressed
+	// telemetry sender or a UI upload endpoint should ever set this to true.
+	AttachmentEligible bool
 }
 
 // PendingRecord keeps the source acknowledgment attached until the record is durable.

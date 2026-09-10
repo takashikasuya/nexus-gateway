@@ -228,6 +228,10 @@ func (b *Buffer) WriteRecord(record *telemetry.Record) error {
 		}
 		valuesJSON = string(compacted)
 	}
+	attachmentEligible := 0
+	if record.AttachmentEligible {
+		attachmentEligible = 1
+	}
 
 	tx, err := b.db.Begin()
 	if err != nil {
@@ -247,10 +251,10 @@ func (b *Buffer) WriteRecord(record *telemetry.Record) error {
 	_, err = tx.Exec(
 		`INSERT INTO frames (
 			event_id, gateway_id, point_id, value, timestamp, attributes_json,
-			dtdpf_root_id, dtdpf_dt_id, dtdpf_topic, dtdpf_type, dtdpf_protocol, values_json
-		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+			dtdpf_root_id, dtdpf_dt_id, dtdpf_topic, dtdpf_type, dtdpf_protocol, values_json, attachment_eligible
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		record.EventID, record.GatewayID, record.PointID, record.Value, record.Timestamp, string(attributes),
-		rootID, dtID, topic, dtdpfType, protocol, valuesJSON,
+		rootID, dtID, topic, dtdpfType, protocol, valuesJSON, attachmentEligible,
 	)
 	if err != nil {
 		return err
@@ -355,7 +359,7 @@ func (b *Buffer) MarkAttachmentUploaded(eventID, fileName, fileHash string) erro
 func (b *Buffer) ReadBatch(afterSeq int64, limit int) ([]StoredFrame, error) {
 	rows, err := b.db.Query(
 		`SELECT seq, event_id, gateway_id, point_id, value, timestamp, attributes_json,
-			dtdpf_root_id, dtdpf_dt_id, dtdpf_topic, dtdpf_type, dtdpf_protocol, values_json
+			dtdpf_root_id, dtdpf_dt_id, dtdpf_topic, dtdpf_type, dtdpf_protocol, values_json, attachment_eligible
 		 FROM frames WHERE seq > ? ORDER BY seq ASC LIMIT ?`,
 		afterSeq, limit,
 	)
@@ -370,14 +374,16 @@ func (b *Buffer) ReadBatch(afterSeq int64, limit int) ([]StoredFrame, error) {
 		var attributesJSON string
 		var rootID, dtdpfType sql.NullInt64
 		var dtID, topic, protocol, valuesJSON sql.NullString
+		var attachmentEligible int
 		sf.Record = &telemetry.Record{}
 		if err := rows.Scan(
 			&sf.Seq, &sf.Record.EventID, &sf.Record.GatewayID, &sf.Record.PointID,
 			&sf.Record.Value, &sf.Record.Timestamp, &attributesJSON,
-			&rootID, &dtID, &topic, &dtdpfType, &protocol, &valuesJSON,
+			&rootID, &dtID, &topic, &dtdpfType, &protocol, &valuesJSON, &attachmentEligible,
 		); err != nil {
 			return nil, err
 		}
+		sf.Record.AttachmentEligible = attachmentEligible != 0
 		if valuesJSON.Valid {
 			sf.Record.Values = json.RawMessage(valuesJSON.String)
 		}
@@ -511,6 +517,7 @@ func migrate(db *sql.DB) error {
 		{"attachment_state", "TEXT NOT NULL DEFAULT 'none'"},
 		{"attachment_file_name", "TEXT"},
 		{"attachment_file_hash", "TEXT"},
+		{"attachment_eligible", "INTEGER NOT NULL DEFAULT 0"},
 	}
 	for _, column := range columns {
 		exists, err := columnExists(db, "frames", column.name)

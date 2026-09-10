@@ -33,6 +33,8 @@ type AttachmentStore interface {
 // record's Values payload must be uploaded, uploads it durably before
 // returning (so the caller can only send the Event Hubs notification
 // afterward), and is idempotent across crash/restart via AttachmentStore.
+// Only records with AttachmentEligible set are ever considered, regardless
+// of Values size — ordinary metric telemetry must never trigger an upload.
 type AttachmentOrchestrator struct {
 	uploader  storage.Uploader
 	store     AttachmentStore
@@ -53,6 +55,9 @@ func NewAttachmentOrchestrator(uploader storage.Uploader, store AttachmentStore)
 
 // Resolve implements AttachmentResolver.
 func (o *AttachmentOrchestrator) Resolve(ctx context.Context, record *telemetry.Record) (*Attachment, error) {
+	if record == nil || !record.AttachmentEligible {
+		return nil, nil
+	}
 	compact, err := CompactValues(record)
 	if err != nil {
 		return nil, err
